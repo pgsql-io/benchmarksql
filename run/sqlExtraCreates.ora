@@ -4,7 +4,7 @@
 
 -- ----
 -- history.hist_id
--- 
+--
 --	This is an extra column not present in the TPC-C
 --	specs. It is useful for replication systems like
 --	Bucardo and Slony-I, which like to have a primary
