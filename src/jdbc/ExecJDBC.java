@@ -3,6 +3,7 @@
  *             a text input file, to any JDBC Data Source
  *
  * Copyright (C) 2004-2014, Denis Lussier
+ * Copyright (C) 2016, Jan Wieck
  *
  */
 

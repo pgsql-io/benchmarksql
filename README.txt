@@ -1,6 +1,21 @@
 *********************************************************************
 Change Log:
 
+Version 4.1.1 2016-01-31 jannicash
+   - Changed the status line to update only once per second. The previous
+     implementation was getting rather noisy at high throughput.
+   - Fixed two preparedStatement() leaks that could cause ORA-01000 errors
+     on longer runs with high throughput.
+   - Fixed  a problem in the calculation of sleep time between
+     transactions when using limitTxnsPerMin that could cause the test
+     to hang at the end.
+   - Added support for escaping ; as \; in SQL files to be able to load
+     functions and execute anonymous PL blocks (needed for next item).
+   - Changed the definition of history.hist_id into a plain integer with
+     no special functionality. Two new database vendor specific SQL
+     scripts allow to enable the column after data load as an auto
+     incrementing primary key. See HOW-TO-RUN.txt for details.
+
 Version 4.1.0 2014-03-13 lussman
    - Upgrade to using JDK 7
    - Upgrade to PostgreSQL JDBC 4.1 version 1101 driver

@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2014, Denis Lussier
+ * Copyright (C) 2016, Jan Wieck
  *
  */
 
@@ -10,7 +11,7 @@ import java.text.*;
 
 public interface jTPCCConfig
 {
-    public final static String JTPCCVERSION = "4.1";
+    public final static String JTPCCVERSION = "4.1.1";
 
     public final static int NEW_ORDER = 1, PAYMENT = 2, ORDER_STATUS = 3, DELIVERY = 4, STOCK_LEVEL = 5;
 

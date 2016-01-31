@@ -22,7 +22,7 @@ begin
     select max(hist_id) into n from benchmarksql.history\;
     i := 0\;
     while i <= n loop
-    	select benchmarksql.hist_id_seq.nextval into dummy from dual\;
+	select benchmarksql.hist_id_seq.nextval into dummy from dual\;
 	i := i + 30000\;
     end loop\;
 end\;
