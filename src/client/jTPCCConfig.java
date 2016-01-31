@@ -2,7 +2,7 @@
  * jTPCCConfig - Basic configuration parameters for jTPCC
  *
  * Copyright (C) 2003, Raul Barbosa
- * Copyright (C) 2004-2014, Denis Lussier
+ * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
  */

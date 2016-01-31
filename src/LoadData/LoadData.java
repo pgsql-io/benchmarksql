@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2014, Denis Lussier
+ * Copyright (C) 2004-2016, Denis Lussier
  *
  * LoadData - Load Sample Data directly into database tables or create CSV files for
  *            each table that can then be bulk loaded (again & again & again ...)  :-)
