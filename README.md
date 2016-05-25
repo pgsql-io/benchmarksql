@@ -4,7 +4,7 @@ BENCHMARKSQL README
 CHANGE LOG:
 -----------
 
-Version 5.0 TBD lussman & jannicash:
+Version 5.0 lussman & jannicash:
 --------------------------------------
   +  Upgrade to PostgreSQL 9.3 JDBC 4.1 version 1102 driver
   +  Improve support for Oracle
