@@ -379,8 +379,6 @@ public class jTPCC implements jTPCCConfig
 		try
 		{
 		    numTerminals = Integer.parseInt(iTerminals);
-		    if(numTerminals <= 0 || numTerminals > 10*numWarehouses)
-			throw new NumberFormatException();
 		}
 		catch(NumberFormatException e1)
 		{
@@ -482,24 +480,12 @@ public class jTPCC implements jTPCCConfig
 		terminalsStarted = numTerminals;
 		try
 		{
-		    int[][] usedTerminals = new int[numWarehouses][10];
-		    for(int i = 0; i < numWarehouses; i++)
-			for(int j = 0; j < 10; j++)
-			    usedTerminals[i][j] = 0;
+		    int terminalWarehouseID = 1;
+		    int terminalDistrictID = 1;
 
 		    for(int i = 0; i < numTerminals; i++)
 		    {
-			int terminalWarehouseID;
-			int terminalDistrictID;
-			do
-			{
-			    terminalWarehouseID = rnd.nextInt(1, numWarehouses);
-			    terminalDistrictID = rnd.nextInt(1, 10);
-			}
-			while(usedTerminals[terminalWarehouseID-1][terminalDistrictID-1] == 1);
-			usedTerminals[terminalWarehouseID-1][terminalDistrictID-1] = 1;
-
-			String terminalName = "Term-" + (i>=9 ? ""+(i+1) : "0"+(i+1));
+			String terminalName = "Term-" + ""+(i+1);
 
 			jTPCCTerminal terminal = new jTPCCTerminal
 			(terminalName, terminalWarehouseID, terminalDistrictID,
@@ -512,6 +498,15 @@ public class jTPCC implements jTPCCConfig
 			terminals[i] = terminal;
 			terminalNames[i] = terminalName;
 			printMessage(terminalName + "\t" + terminalWarehouseID);
+
+			terminalWarehouseID++;
+			if (terminalWarehouseID > numWarehouses)
+			{
+			    terminalWarehouseID = 1;
+			    terminalDistrictID++;
+			    if (terminalDistrictID > 10)
+				terminalDistrictID = 1;
+			}
 		    }
 
 		    sessionEndTargetTime = executionTimeMillis;
