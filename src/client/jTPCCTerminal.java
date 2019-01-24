@@ -20,12 +20,16 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
     private static org.apache.log4j.Logger log = Logger.getLogger(jTPCCTerminal.class);
 
     private String terminalName;
+    private String iConn;
+    private String iUser;
+    private String iPassword;
     private Connection conn = null;
     private Statement stmt = null;
     private Statement stmt1 = null;
     private ResultSet rs = null;
     private int terminalWarehouseID, terminalDistrictID;
     private boolean terminalWarehouseFixed;
+    private double rampupDelay;
     private boolean useStoredProcedures;
     private double paymentWeight;
     private double orderStatusWeight;
@@ -52,26 +56,23 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
 
     public jTPCCTerminal
       (String terminalName, int terminalWarehouseID, int terminalDistrictID,
-       Connection conn, int dbType,
+       String iConn, String iUser, String iPassword, int dbType,
        int numTransactions, boolean terminalWarehouseFixed,
-       boolean useStoredProcedures,
+       double rampupDelay, boolean useStoredProcedures,
        double paymentWeight, double orderStatusWeight,
        double deliveryWeight, double stockLevelWeight,
        int numWarehouses, int limPerMin_Terminal, jTPCC parent) throws SQLException
     {
 	this.terminalName = terminalName;
-	this.conn = conn;
+	this.iConn = iConn;
+	this.iUser = iUser;
+	this.iPassword = iPassword;
 	this.dbType = dbType;
-	this.stmt = conn.createStatement();
-	this.stmt.setMaxRows(200);
-	this.stmt.setFetchSize(100);
-
-	this.stmt1 = conn.createStatement();
-	this.stmt1.setMaxRows(1);
 
 	this.terminalWarehouseID = terminalWarehouseID;
 	this.terminalDistrictID = terminalDistrictID;
 	this.terminalWarehouseFixed = terminalWarehouseFixed;
+	this.rampupDelay = rampupDelay;
 	this.useStoredProcedures = useStoredProcedures;
 	this.parent = parent;
 	this.rnd = parent.getRnd().newRandom();
@@ -84,8 +85,6 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
 	this.newOrderCounter = 0;
 	this.limPerMin_Terminal = limPerMin_Terminal;
 
-	this.db = new jTPCCConnection(conn, dbType);
-
 	terminalMessage("");
 	terminalMessage("Terminal \'" + terminalName + "\' has WarehouseID=" + terminalWarehouseID + " and DistrictID=" + terminalDistrictID + ".");
 	terminalStartTime = System.currentTimeMillis();
@@ -93,9 +92,56 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
 
     public void run()
     {
-	executeTransactions(numTransactions);
+	try{
+	    long sleepTime = (long)(rampupDelay * 1000.0);
+	    Thread.sleep((sleepTime));
+	}
+	catch(Exception e){
+	}
+
+	Properties dbProps = new Properties();
+	dbProps.setProperty("user", this.iUser);
+	dbProps.setProperty("password", this.iPassword);
+
+	/*
+	 * Fine tuning of database conneciton parameters if needed.
+	 */
+	switch (dbType)
+	{
+	    case DB_FIREBIRD:
+		/*
+		 * Firebird needs no_rec_version for our load
+		 * to work. Even with that some "deadlocks"
+		 * occur. Note that the message "deadlock" in
+		 * Firebird can mean something completely different,
+		 * namely that there was a conflicting write to
+		 * a row that could not be resolved.
+		 */
+		dbProps.setProperty("TRANSACTION_READ_COMMITTED",
+			"isc_tpb_read_committed," +
+			"isc_tpb_no_rec_version," +
+			"isc_tpb_write," +
+			"isc_tpb_wait");
+		break;
+
+	    default:
+		    break;
+	}
+
 	try
 	{
+	    this.conn = DriverManager.getConnection(this.iConn, dbProps);
+	    this.conn.setAutoCommit(false);
+
+	    this.stmt = conn.createStatement();
+	    this.stmt.setMaxRows(200);
+	    this.stmt.setFetchSize(100);
+	    this.stmt1 = conn.createStatement();
+	    this.stmt1.setMaxRows(1);
+	    this.db = new jTPCCConnection(conn, dbType);
+
+	    executeTransactions(numTransactions);
+
 	    printMessage("");
 	    printMessage("Closing statement and connection...");
 
@@ -104,8 +150,8 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
 	}
 	catch(Exception e)
 	{
-	    printMessage("");
-	    printMessage("An error occurred!");
+	    errorMessage("");
+	    errorMessage("An error occurred!");
 	    logException(e);
 	}
 
@@ -343,6 +389,11 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable
 
     private void printMessage(String message) {
 	log.trace(terminalName + ", " + message);
+    }
+
+
+    private void errorMessage(String message) {
+	log.error(terminalName + ", " + message);
     }
 
 

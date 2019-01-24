@@ -97,6 +97,7 @@ public class jTPCC implements jTPCCConfig
 	log.info("Term-00, ");
 	String  iWarehouses         = getProp(ini,"warehouses");
 	String  iTerminals          = getProp(ini,"terminals");
+	String	iRampupDelay	    = getProp(ini,"rampupDelay", "0.0");
 
 	String  iRunTxnsPerTerminal =  ini.getProperty("runTxnsPerTerminal");
 	String iRunMins  =  ini.getProperty("runMins");
@@ -279,6 +280,7 @@ public class jTPCC implements jTPCCConfig
 		int transactionsPerTerminal = -1;
 		int numWarehouses = -1;
 		int loadWarehouses = -1;
+		double rampupDelay = 0.0;
 		double newOrderWeightValue = 43.47826;
 		double paymentWeightValue = 43.47826;
 		double orderStatusWeightValue = 4.347827;
@@ -386,6 +388,16 @@ public class jTPCC implements jTPCCConfig
 		    throw new Exception();
 		}
 
+		try
+		{
+		    rampupDelay = Double.parseDouble(iRampupDelay);
+		}
+		catch(NumberFormatException e1)
+		{
+		    errorMessage("Invalid number in rampupDelay!");
+		    throw new Exception();
+		}
+
 
 
 		if(Long.parseLong(iRunMins) != 0 && Integer.parseInt(iRunTxnsPerTerminal) == 0)
@@ -470,10 +482,6 @@ public class jTPCC implements jTPCCConfig
 		terminalsStarted = numTerminals;
 		try
 		{
-		    String database = iConn;
-		    String username = iUser;
-		    String password = iPassword;
-
 		    int[][] usedTerminals = new int[numWarehouses][10];
 		    for(int i = 0; i < numWarehouses; i++)
 			for(int j = 0; j < 10; j++)
@@ -492,16 +500,12 @@ public class jTPCC implements jTPCCConfig
 			usedTerminals[terminalWarehouseID-1][terminalDistrictID-1] = 1;
 
 			String terminalName = "Term-" + (i>=9 ? ""+(i+1) : "0"+(i+1));
-			Connection conn = null;
-			printMessage("Creating database connection for " + terminalName + "...");
-			conn = DriverManager.getConnection(database, dbProps);
-			conn.setAutoCommit(false);
 
 			jTPCCTerminal terminal = new jTPCCTerminal
 			(terminalName, terminalWarehouseID, terminalDistrictID,
-			 conn, dbType,
+			 iConn, iUser, iPassword, dbType,
 			 transactionsPerTerminal, terminalWarehouseFixed,
-			 useStoredProcedures,
+			 rampupDelay * i, useStoredProcedures,
 			 paymentWeightValue, orderStatusWeightValue,
 			 deliveryWeightValue, stockLevelWeightValue, numWarehouses, limPerMin_Terminal, this);
 
@@ -575,6 +579,13 @@ public class jTPCC implements jTPCCConfig
 		catch(Exception e1)
 		{
 		    errorMessage("This session ended with errors!");
+
+		    StringWriter stringWriter = new StringWriter();
+		    PrintWriter printWriter = new PrintWriter(stringWriter);
+		    e1.printStackTrace(printWriter);
+		    printWriter.close();
+		    log.error(stringWriter.toString());
+
 		    printStreamReport.close();
 		    fileOutputStream.close();
 
