@@ -89,10 +89,10 @@ public class jTPCCResult
 	}
 
 	/*
-	 * TODO: If there is an actual error message, CSV escape it
-	 * and add it to the result line.
+	 * Send the per transaction CSV entry to the result.csv
 	 */
 	jTPCC.csv_result_write(
+	    jTPCC.runID + "," +
 	    jTPCCTData.trans_type_names[tdata.trans_type] + "," +
 	    new java.sql.Timestamp(tdata.trans_due) + "," +
 	    new java.sql.Timestamp(tdata.trans_end) + "," +
@@ -101,9 +101,7 @@ public class jTPCCResult
 	    (tdata.trans_start - tdata.trans_due) + "," +
 	    (tdata.trans_end - tdata.trans_due) + "," +
 	    ((tdata.trans_rbk) ? "1," : "0,") +
-	    ((tdata.trans_error) ? "1," : "0,") +
-	    "" +
-	    "\n");
+	    ((tdata.trans_error) ? "1\n" : "0\n"));
     }
 
     public void aggregate(jTPCCResult into)
