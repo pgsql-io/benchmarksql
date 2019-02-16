@@ -96,7 +96,7 @@ legend ("topleft",
 	c("% User", "% System", "% IOWait"),
 	fill=c("blue3", "cyan3", "red3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "CPU Utilization"
     ))
 grid()

@@ -98,7 +98,7 @@ legend ("topleft",
 	c("tpmTOTAL", "tpmC (NewOrder only)"),
 	fill=c("blue3", "red3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "Transactions per Minute"
     ))
 grid()

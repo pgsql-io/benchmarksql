@@ -152,7 +152,7 @@ legend ("topleft",
 	c("NEW_ORDER", "PAYMENT", "ORDER_STATUS", "STOCK_LEVEL", "DELIVERY"),
 	fill=c("red3", "magenta3", "green3", "gray70", "blue3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "Transaction Latency"
     ))
 grid()
