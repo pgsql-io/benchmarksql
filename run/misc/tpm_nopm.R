@@ -12,7 +12,7 @@ runInfo <- read.csv("data/runInfo.csv", head=TRUE)
 # run duration.
 # ----
 xmin <- @SKIP@
-xmax <- runInfo$runMins
+xmax <- runInfo$runMins + runInfo$rampupMins
 for (interval in c(1, 2, 5, 10, 20, 60, 120, 300, 600)) {
     if ((xmax * 60) / interval <= 1000) {
         break
@@ -26,17 +26,20 @@ skip <- xmin * 60000
 # for != DELIVERY_BG and == NEW_ORDER transactions.
 # ----
 data1 <- read.csv("data/result.csv", head=TRUE)
-data1 <- data1[data1$elapsed >= skip, ]
+data1 <- data1[data1$startms >= skip, ]
 total1 <- data1[data1$ttype != 'DELIVERY_BG', ]
 neworder1 <- data1[data1$ttype == 'NEW_ORDER', ]
 
 # ----
 # Aggregate the counts of both data sets grouped by second.
 # ----
-countTotal <- setNames(aggregate(total1$latency, list(elapsed=trunc(total1$elapsed / idiv) * idiv), NROW),
+countTotal <- setNames(aggregate(total1$latency, list(elapsed=trunc(total1$startms / idiv) * idiv), NROW),
 		   c('elapsed', 'count'));
-countNewOrder <- setNames(aggregate(neworder1$latency, list(elapsed=trunc(neworder1$elapsed / idiv) * idiv), NROW),
+countNewOrder <- setNames(aggregate(neworder1$latency, list(elapsed=trunc(neworder1$startms / idiv) * idiv), NROW),
 		   c('elapsed', 'count'));
+
+countTotal
+countNewOrder
 
 # ----
 # Determine the ymax by increasing in sqrt(2) steps until the
