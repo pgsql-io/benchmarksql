@@ -12,7 +12,7 @@ runInfo <- read.csv("data/runInfo.csv", head=TRUE)
 # run duration.
 # ----
 xmin <- @SKIP@
-xmax <- runInfo$runMins
+xmax <- runInfo$runMins + runInfo$rampupMins
 for (interval in c(1, 2, 5, 10, 20, 60, 120, 300, 600)) {
     if ((xmax * 60) / interval <= 1000) {
         break
@@ -26,7 +26,7 @@ skip <- xmin * 60000
 # by transaction type
 # ----
 rawData <- read.csv("data/result.csv", head=TRUE)
-rawData <- rawData[rawData$elapsed >= skip, ]
+rawData <- rawData[rawData$startms >= skip, ]
 noBGData <- rawData[rawData$ttype != 'DELIVERY_BG', ]
 newOrder <- rawData[rawData$ttype == 'NEW_ORDER', ]
 payment <- rawData[rawData$ttype == 'PAYMENT', ]
@@ -38,16 +38,18 @@ deliveryBG <- rawData[rawData$ttype == 'DELIVERY_BG', ]
 # ----
 # Aggregate the latency grouped by interval.
 # ----
-aggNewOrder <- setNames(aggregate(newOrder$latency, list(elapsed=trunc(newOrder$elapsed / idiv) * idiv), mean),
+aggNewOrder <- setNames(aggregate(newOrder$latency, list(elapsed=trunc(newOrder$startms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggPayment <- setNames(aggregate(payment$latency, list(elapsed=trunc(payment$elapsed / idiv) * idiv), mean),
+aggPayment <- setNames(aggregate(payment$latency, list(elapsed=trunc(payment$startms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggOrderStatus <- setNames(aggregate(orderStatus$latency, list(elapsed=trunc(orderStatus$elapsed / idiv) * idiv), mean),
+aggOrderStatus <- setNames(aggregate(orderStatus$latency, list(elapsed=trunc(orderStatus$startms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggStockLevel <- setNames(aggregate(stockLevel$latency, list(elapsed=trunc(stockLevel$elapsed / idiv) * idiv), mean),
+aggStockLevel <- setNames(aggregate(stockLevel$latency, list(elapsed=trunc(stockLevel$startms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggDelivery <- setNames(aggregate(delivery$latency, list(elapsed=trunc(delivery$elapsed / idiv) * idiv), mean),
+aggDelivery <- setNames(aggregate(delivery$latency, list(elapsed=trunc(delivery$startms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
+
+noBGData
 
 # ----
 # Determine the ymax by increasing in sqrt(2) steps until 98%
