@@ -1,52 +1,71 @@
 /*
- * jTPCC - Open Source Java implementation of a TPC-C like benchmark
- *
- * Copyright (C) 2003, Raul Barbosa
- * Copyright (C) 2004-2016, Denis Lussier
- * Copyright (C) 2016, Jan Wieck
+ * jTPCC - BenchmarkSQL main class
  *
  */
-
 import org.apache.log4j.*;
 
 import java.io.*;
 import java.sql.*;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.text.*;
+import java.util.regex.Pattern;
+import java.lang.Integer;
+import java.lang.Double;
+import java.lang.Boolean;
 
-
-public class jTPCC implements jTPCCConfig
+public class jTPCC
 {
     private static org.apache.log4j.Logger log = Logger.getLogger(jTPCC.class);
-    private static String               resultDirName = null;
-    private static BufferedWriter       resultCSV = null;
-    private static BufferedWriter       runInfoCSV = null;
-    private static int                  runID = 0;
 
-    private int dbType = DB_UNKNOWN;
-    private int currentlyDisplayedTerminal;
+    private long		now;
 
-    private jTPCCTerminal[] terminals;
-    private String[] terminalNames;
-    private boolean terminalsBlockingExit = false;
-    private long terminalsStarted = 0, sessionCount = 0, transactionCount = 0;
-    private Object counterLock = new Object();
+    public  jTPCCRandom		rnd;
+    public  String		applicationName;
+    public  String		iDBType;
+    public  String		iConn;
+    public  String		iUser;
+    public  String		iPassword;
 
-    private long newOrderCounter = 0, sessionStartTimestamp, sessionEndTimestamp, sessionNextTimestamp=0, sessionNextKounter=0;
-    private long sessionEndTargetTime = -1, fastNewOrderCounter, recentTpmC=0, recentTpmTotal=0;
-    private boolean signalTerminalsRequestEndSent = false, databaseDriverLoaded = false;
+    public  static int		loadWarehouses;
+    public  static int		loadNuRandCLast;
+    public  static int		loadNuRandCC_ID;
+    public  static int		loadNuRandCI_ID;
 
-    private FileOutputStream fileOutputStream;
-    private PrintStream printStreamReport;
-    private String sessionStart, sessionEnd;
-    private int limPerMin_Terminal;
+    public  static int		dbType;
+    public  static int		numWarehouses;
+    public  static int		numMonkeys;
+    public  static int		numSUTThreads;
+    public  static int		runMins;
+    public  static int		rampupMins;
+    public  static int		sutThreadDelay;
+    public  static int		terminalDelay;
+    public  static double	keyingTimeMultiplier;
+    public  static double	thinkTimeMultiplier;
+    public  static boolean	traceTerminalIO = false;
 
-    private double tpmC;
-    private jTPCCRandom rnd;
-    private OSCollector osCollector = null;
+    public  static double	newOrderWeight;
+    public  static double	paymentWeight;
+    public  static double	orderStatusWeight;
+    public  static double	deliveryWeight;
+    public  static double	stockLevelWeight;
+
+    private OSCollector		osCollector = null;
+    private jTPCCTData		terminal_data[];
+    private Thread		scheduler_thread;
+    public  jTPCCScheduler	scheduler;
+    public  jTPCCSUT		systemUnderTest;
+    public  jTPCCMonkey		monkeys;
+
+    public  static String		resultDirectory = null;
+    public  static String		osCollectorScript = null;
+    private static String		resultDirName = null;
+    private static BufferedWriter	resultCSV = null;
+    private static BufferedWriter	runInfoCSV = null;
+    private static int			runID = 0;
+    public  static long			csv_begin;
 
     public static void main(String args[])
+	throws FileNotFoundException
     {
 	PropertyConfigurator.configure("log4j.properties");
 	new jTPCC();
@@ -55,115 +74,173 @@ public class jTPCC implements jTPCCConfig
     private String getProp (Properties p, String pName)
     {
 	String prop =  p.getProperty(pName);
-	log.info("Term-00, " + pName + "=" + prop);
-	return(prop);
-    }
-
-    private String getProp (Properties p, String pName, String defVal)
-    {
-	String prop =  p.getProperty(pName);
-	if (prop == null)
-	    prop = defVal;
-	log.info("Term-00, " + pName + "=" + prop);
+	log_info("" + pName + "=" + prop);
 	return(prop);
     }
 
     public jTPCC()
+	throws FileNotFoundException
     {
+	StringBuilder	sb = new StringBuilder();
+	Formatter	fmt = new Formatter(sb);
 
 	// load the ini file
 	Properties ini = new Properties();
 	try {
-	  ini.load( new FileInputStream(System.getProperty("prop")));
+	    ini.load( new FileInputStream(System.getProperty("prop")));
 	} catch (IOException e) {
-	  errorMessage("Term-00, could not load properties file");
+	    log_error("could not load properties file");
 	}
 
-	log.info("Term-00, ");
-	log.info("Term-00, +-------------------------------------------------------------+");
-	log.info("Term-00,      BenchmarkSQL v" + JTPCCVERSION);
-	log.info("Term-00, +-------------------------------------------------------------+");
-	log.info("Term-00,  (c) 2003, Raul Barbosa");
-	log.info("Term-00,  (c) 2004-2016, Denis Lussier");
-	log.info("Term-00,  (c) 2016, Jan Wieck");
-	log.info("Term-00, +-------------------------------------------------------------+");
-	log.info("Term-00, ");
-	String  iDB                 = getProp(ini,"db");
-	String  iDriver             = getProp(ini,"driver");
-	String  iConn               = getProp(ini,"conn");
-	String  iUser               = getProp(ini,"user");
-	String  iPassword           = ini.getProperty("password");
+	/*
+	 * Get all the configuration settings
+	 */
+	log_info("");
+	log_info("+-------------------------------------------------------------+");
+	log_info("     BenchmarkSQL v" + jTPCCConfig.JTPCCVERSION);
+	log_info("+-------------------------------------------------------------+");
+	log_info(" (c) 2003, Raul Barbosa");
+	log_info(" (c) 2004-2014, Denis Lussier");
+	log_info(" (c) 2016-2019, Jan Wieck");
+	log_info("+-------------------------------------------------------------+");
+	log_info("");
+	String  iDBType		= getProp(ini,"db");
+	String	iDriver		= getProp(ini,"driver");
+	applicationName		= getProp(ini,"application");
+	iConn			= getProp(ini,"conn");
+	iUser			= getProp(ini,"user");
+	iPassword		= ini.getProperty("password");
 
-	log.info("Term-00, ");
-	String  iWarehouses         = getProp(ini,"warehouses");
-	String  iTerminals          = getProp(ini,"terminals");
-	String	iRampupDelay	    = getProp(ini,"rampupDelay", "0.0");
+	log_info("");
+	numWarehouses		= Integer.parseInt(getProp(ini, "warehouses"));
+	numMonkeys		= Integer.parseInt(getProp(ini, "monkeys"));
+	numSUTThreads		= Integer.parseInt(getProp(ini, "sutThreads"));
+	rampupMins		= Integer.parseInt(getProp(ini, "rampupMins"));
+	runMins			= Integer.parseInt(getProp(ini, "runMins"));
+	sutThreadDelay		= Integer.parseInt(getProp(ini, "sutThreadDelay"));
+	terminalDelay		= Integer.parseInt(getProp(ini, "terminalDelay"));
+	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
+	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
+	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
+	log_info("");
+	paymentWeight		= Double.parseDouble(getProp(ini, "paymentWeight"));
+	orderStatusWeight	= Double.parseDouble(getProp(ini, "orderStatusWeight"));
+	deliveryWeight		= Double.parseDouble(getProp(ini, "deliveryWeight"));
+	stockLevelWeight	= Double.parseDouble(getProp(ini, "stockLevelWeight"));
+	newOrderWeight		= 100.0 - paymentWeight - orderStatusWeight -
+				  deliveryWeight - stockLevelWeight;
+	if (newOrderWeight < 0.0)
+	{
+	    log_error("newOrderWeight is below zero");
+	    return;
+	}
+	fmt.format("newOrderWeight=%.3f", newOrderWeight);
+	log_info(sb.toString());
+	log_info("");
 
-	String  iRunTxnsPerTerminal =  ini.getProperty("runTxnsPerTerminal");
-	String iRunMins  =  ini.getProperty("runMins");
-	if (Integer.parseInt(iRunTxnsPerTerminal) ==0 && Integer.parseInt(iRunMins)!=0){
-	    log.info("Term-00, runMins" + "=" + iRunMins);
-	}else if(Integer.parseInt(iRunTxnsPerTerminal) !=0 && Integer.parseInt(iRunMins)==0){
-	    log.info("Term-00, runTxnsPerTerminal" + "=" + iRunTxnsPerTerminal);
-	}else{
-	    errorMessage("Term-00, Must indicate either transactions per terminal or number of run minutes!");
-	};
-	String  limPerMin           = getProp(ini,"limitTxnsPerMin");
-	String  iTermWhseFixed      = getProp(ini,"terminalWarehouseFixed");
-	String  iUseStoredProcs     = getProp(ini,"useStoredProcedures");
-	log.info("Term-00, ");
-
-	String  iNewOrderWeight     = getProp(ini,"newOrderWeight", "43.47826");
-	String  iPaymentWeight      = getProp(ini,"paymentWeight", "43.47826");
-	String  iOrderStatusWeight  = getProp(ini,"orderStatusWeight", "4.347827");
-	String  iDeliveryWeight     = getProp(ini,"deliveryWeight", "4.347826");
-	String  iStockLevelWeight   = getProp(ini,"stockLevelWeight", "4.347827");
-
-	log.info("Term-00, ");
-	String  resultDirectory     = getProp(ini, "resultDirectory");
-	String	osCollectorScript   = getProp(ini, "osCollectorScript");
-
-	log.info("Term-00, ");
-
-	if (iDB.equals("firebird"))
-	    dbType = DB_FIREBIRD;
-	else if (iDB.equals("oracle"))
-	    dbType = DB_ORACLE;
-	else if (iDB.equals("postgres"))
-	    dbType = DB_POSTGRES;
+	if (iDBType.equals("oracle"))
+	    dbType = jTPCCConfig.DB_ORACLE;
+	else if (iDBType.equals("postgres"))
+	    dbType = jTPCCConfig.DB_POSTGRES;
 	else
 	{
-	    log.error("unknown database type '" + iDB + "'");
+	    log.error("unknown database type '" + iDBType + "'");
 	    return;
 	}
 
-	if(Integer.parseInt(limPerMin) !=0){
-	    limPerMin_Terminal = Integer.parseInt(limPerMin)/Integer.parseInt(iTerminals);
-	}
-	else{
-	    limPerMin_Terminal = -1;
-	}
 
-
-	boolean iRunMinsBool=false;
-
+	/*
+	 * Load the requested JDBC driver
+	 */
 	try
 	{
-	    String driver = iDriver;
-	    printMessage("Loading database driver: \'" + driver + "\'...");
+	    String		driver = iDriver;
+
+	    log_info("Loading database driver: \'" + driver + "\'...");
 	    Class.forName(iDriver);
-	    databaseDriverLoaded = true;
 	}
 	catch(Exception ex)
 	{
-	    errorMessage("Unable to load the database driver!");
-	    databaseDriverLoaded = false;
+	    log_error("Unable to load the database driver!");
+	    log_error(ex.toString());
+	    return;
 	}
 
-	if (databaseDriverLoaded && resultDirectory != null)
+	/*
+	 * Get the load configuration from the database
+	 */
+	try
 	{
-	    StringBuffer        sb = new StringBuffer();
-	    Formatter           fmt = new Formatter(sb);
+	    Connection		dbConn;
+	    Properties		dbProps;
+	    ResultSet		rs;
+	    PreparedStatement	cfgStmt;
+
+	    dbProps = new Properties();
+	    dbProps.setProperty("user", iUser);
+	    dbProps.setProperty("password", iPassword);
+	    dbConn = DriverManager.getConnection(iConn, dbProps);
+	    dbConn.setAutoCommit(false);
+
+	    cfgStmt = dbConn.prepareStatement("SELECT cfg_value FROM bmsql_config WHERE cfg_name = ?");
+
+	    cfgStmt.setString(1, "warehouses");
+	    rs = cfgStmt.executeQuery();
+	    rs.next();
+	    loadWarehouses = Integer.parseInt(rs.getString("cfg_value"));
+
+	    cfgStmt.setString(1, "nURandCLast");
+	    rs = cfgStmt.executeQuery();
+	    rs.next();
+	    loadNuRandCLast = Integer.parseInt(rs.getString("cfg_value"));
+
+	    cfgStmt.setString(1, "nURandCC_ID");
+	    rs = cfgStmt.executeQuery();
+	    rs.next();
+	    loadNuRandCC_ID = Integer.parseInt(rs.getString("cfg_value"));
+
+	    cfgStmt.setString(1, "nURandCI_ID");
+	    rs = cfgStmt.executeQuery();
+	    rs.next();
+	    loadNuRandCI_ID = Integer.parseInt(rs.getString("cfg_value"));
+
+	    cfgStmt.close();
+	    dbConn.rollback();
+	    dbConn.close();
+	}
+	catch(Exception ex)
+	{
+	    log_error("Unable to read load configuration");
+	    log_error(ex.toString());
+	    return;
+	}
+
+	/*
+	 * Check that we support the requested application implementation
+	 */
+	if (!applicationName.equals("generic"))
+	{
+	    log.error("Unknown application name '"+applicationName+"'");
+	    return;
+	}
+
+	now = System.currentTimeMillis();
+
+	String  resultDirectory     = getProp(ini, "resultDirectory");
+	String  osCollectorScript   = getProp(ini, "osCollectorScript");
+	/*
+	if (true)
+	{
+	    String csv_fname = "result.csv";
+	    csv_result = new PrintWriter(new FileOutputStream(csv_fname));
+	    csv_result.println("type,startts,endts,startms,endms," +
+			       "delayms,latencyms,rbk,error,message");
+	}
+	*/
+	if (resultDirectory != null)
+	{
+	    StringBuffer        sbRes = new StringBuffer();
+	    Formatter           fmtRes = new Formatter(sbRes);
 	    Pattern             p = Pattern.compile("%t");
 	    Calendar            cal = Calendar.getInstance();
 
@@ -184,13 +261,13 @@ public class jTPCC implements jTPCCConfig
 	     * date in the directory name.
 	     */
 	    String[] parts = p.split(resultDirectory, -1);
-	    sb.append(parts[0]);
+	    sbRes.append(parts[0]);
 	    for (int i = 1; i < parts.length; i++)
 	    {
-		fmt.format("%t" + parts[i].substring(0, 1), cal);
-		sb.append(parts[i].substring(1));
+		fmtRes.format("%t" + parts[i].substring(0, 1), cal);
+		sbRes.append(parts[i].substring(1));
 	    }
-	    resultDirName = sb.toString();
+	    resultDirName = sbRes.toString();
 	    File resultDir = new File(resultDirName);
 	    File resultDataDir = new File(resultDir, "data");
 
@@ -219,7 +296,7 @@ public class jTPCC implements jTPCCConfig
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("Term-00, copied " + System.getProperty("prop") +
+	    log.info("main, copied " + System.getProperty("prop") +
 		     " to " + new File(resultDir, "run.properties").getPath());
 
 	    // Create the runInfo.csv file.
@@ -228,18 +305,28 @@ public class jTPCC implements jTPCCConfig
 	    {
 		runInfoCSV = new BufferedWriter(
 			    new FileWriter(runInfoCSVName));
-		runInfoCSV.write("run,driver,driverVersion,db,sessionStart," +
-				 "runMins," +
+		runInfoCSV.write("runID,dbType,jTPCCVersion,application," +
+				 "rampupMins,runMins," +
 				 "loadWarehouses,runWarehouses,numSUTThreads," +
-				 "limitTxnsPerMin," +
 				 "thinkTimeMultiplier,keyingTimeMultiplier\n");
+		runInfoCSV.write(runID + "," +
+				 iDBType + "," +
+				 jTPCCConfig.JTPCCVERSION + "," +
+				 applicationName + "," +
+				 rampupMins + "," +
+				 runMins + "," +
+				 loadWarehouses + "," +
+				 numSUTThreads + "," +
+				 thinkTimeMultiplier + "," +
+				 keyingTimeMultiplier + "\n");
+		runInfoCSV.close();
 	    }
 	    catch (IOException e)
 	    {
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("Term-00, created " + runInfoCSVName + " for runID " +
+	    log.info("main, created " + runInfoCSVName + " for runID " +
 		     runID);
 
 	    // Open the per transaction result.csv file.
@@ -247,15 +334,15 @@ public class jTPCC implements jTPCCConfig
 	    try
 	    {
 		resultCSV = new BufferedWriter(new FileWriter(resultCSVName));
-		resultCSV.write("run,elapsed,latency,dblatency," +
-				"ttype,rbk,dskipped,error\n");
+		resultCSV.write("ttype,startts,endts,startms,endms,delayms," +
+				"latencyms,rbk,error,message\n");
 	    }
 	    catch (IOException e)
 	    {
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("Term-00, writing per transaction results to " +
+	    log.info("main, writing per transaction results to " +
 		     resultCSVName);
 
 	    if (osCollectorScript != null)
@@ -268,465 +355,177 @@ public class jTPCC implements jTPCCConfig
 				resultDataDir, log);
 	    }
 
-	    log.info("Term-00,");
+	    log.info("main,");
 	}
 
-	if(databaseDriverLoaded)
+	/* Initialize the random number generator and report C values. */
+	rnd = new jTPCCRandom(loadNuRandCLast);
+	log_info("");
+	log_info("C value for nURandCLast at load: " + loadNuRandCLast);
+	log_info("C value for nURandCLast this run: " + rnd.getNURandCLast());
+	log_info("");
+
+	terminal_data = new jTPCCTData[numWarehouses * 10];
+
+	/* Create the scheduler. */
+	scheduler = new jTPCCScheduler(this);
+	scheduler_thread = new Thread(this.scheduler);
+	scheduler_thread.start();
+
+	/*
+	 * Create the SUT and schedule the launch of the SUT threads.
+	 */
+	systemUnderTest = new jTPCCSUT(this);
+	for (int t = 0; t < numSUTThreads; t++)
 	{
-	    try
-	    {
-		boolean limitIsTime = iRunMinsBool;
-		int numTerminals = -1;
-		int transactionsPerTerminal = -1;
-		int numWarehouses = -1;
-		int loadWarehouses = -1;
-		double rampupDelay = 0.0;
-		double newOrderWeightValue = 43.47826;
-		double paymentWeightValue = 43.47826;
-		double orderStatusWeightValue = 4.347827;
-		double deliveryWeightValue = 4.347826;
-		double stockLevelWeightValue = 4.347827;
-		long executionTimeMillis = -1;
-		boolean terminalWarehouseFixed = true;
-		boolean useStoredProcedures = false;
-		long CLoad;
+	    jTPCCTData	    sut_launch_tdata;
+	    sut_launch_tdata = new jTPCCTData();
 
-		Properties dbProps = new Properties();
-		dbProps.setProperty("user", iUser);
-		dbProps.setProperty("password", iPassword);
+	    /*
+	     * We abuse the term_w_id to communicate which of the
+	     * SUT threads to start.
+	     */
+	    sut_launch_tdata.term_w_id = t;
+	    scheduler.at(now + t * sutThreadDelay,
+			 jTPCCScheduler.SCHED_SUT_LAUNCH,
+			 sut_launch_tdata);
+	}
 
-		/*
-		 * Fine tuning of database conneciton parameters if needed.
-		 */
-		switch (dbType)
-		{
-		    case DB_FIREBIRD:
-			/*
-			 * Firebird needs no_rec_version for our load
-			 * to work. Even with that some "deadlocks"
-			 * occur. Note that the message "deadlock" in
-			 * Firebird can mean something completely different,
-			 * namely that there was a conflicting write to
-			 * a row that could not be resolved.
-			 */
-			dbProps.setProperty("TRANSACTION_READ_COMMITTED",
-				"isc_tpb_read_committed," +
-				"isc_tpb_no_rec_version," +
-				"isc_tpb_write," +
-				"isc_tpb_wait");
-			break;
+	/*
+	 * Launch the threads that generate the terminal input data.
+	 */
+	monkeys = new jTPCCMonkey(this);
 
-		    default:
-			    break;
-		}
+	/*
+	 * Create all the Terminal data sets and schedule their
+	 * launch. We only assign their fixed TERM_W_ID is
+	 * TERM_D_ID (for stock level transactions) here. Once the
+	 * scheduler is actually launching them according to their
+	 * delay, the trained monkeys will fill in real data, send
+	 * them back into the scheduler queue to the flow to the
+	 * client threads performing the real DB work.
+	 */
+	for (int t = 0; t < numWarehouses * 10; t++)
+	{
+	    terminal_data[t] = new jTPCCTData();
+	    terminal_data[t].term_w_id = (t / 10) + 1;
+	    terminal_data[t].term_d_id = (t % 10) + 1;
+	    terminal_data[t].trans_type = jTPCCTData.TT_NONE;
+	    terminal_data[t].trans_due = now + t * terminalDelay;
+	    terminal_data[t].trans_start = terminal_data[t].trans_due;
+	    terminal_data[t].trans_end = terminal_data[t].trans_due;
+	    terminal_data[t].trans_error = false;
 
-		try {
-		    loadWarehouses = Integer.parseInt(jTPCCUtil.getConfig(iConn,
-				    dbProps, "warehouses"));
-		    CLoad = Long.parseLong(jTPCCUtil.getConfig(iConn,
-				    dbProps, "nURandCLast"));
-		} catch (Exception e) {
-		    errorMessage(e.getMessage());
-		    throw e;
-		}
-		this.rnd = new jTPCCRandom(CLoad);
-		log.info("Term-00, C value for C_LAST during load: " + CLoad);
-		log.info("Term-00, C value for C_LAST this run:    " + rnd.getNURandCLast());
-		log.info("Term-00, ");
+	    scheduler.at(terminal_data[t].trans_due,
+			 jTPCCScheduler.SCHED_TERM_LAUNCH,
+			 terminal_data[t]);
+	}
 
-		fastNewOrderCounter = 0;
-		updateStatusLine();
+	/*
+	 * Schedule the special events to begin measurement (end of
+	 * rampup time), to shut down the system and to print messages
+	 * when the terminals and SUT threads have all been started.
+	 */
+	csv_begin = now + rampupMins * 60000;
+	this.scheduler.at(now + rampupMins * 60000,
+			  jTPCCScheduler.SCHED_BEGIN,
+			  new jTPCCTData());
+	this.scheduler.at(now + (rampupMins + runMins) * 60000,
+			  jTPCCScheduler.SCHED_DONE,
+			  new jTPCCTData());
+	this.scheduler.at(now + (numWarehouses * 10) * terminalDelay,
+			  jTPCCScheduler.SCHED_TERM_LAUNCH_DONE,
+			  new jTPCCTData());
+	this.scheduler.at(now + numSUTThreads * sutThreadDelay,
+			  jTPCCScheduler.SCHED_SUT_LAUNCH_DONE,
+			  new jTPCCTData());
 
-		try
-		{
-		    if (Integer.parseInt(iRunMins) != 0 && Integer.parseInt(iRunTxnsPerTerminal) ==0)
-		    {
-			iRunMinsBool = true;
-		    }
-		    else if (Integer.parseInt(iRunMins) == 0 && Integer.parseInt(iRunTxnsPerTerminal) !=0)
-		    {
-			iRunMinsBool = false;
-		    }
-		    else
-		    {
-			throw new NumberFormatException();
-		    }
-		}
-		catch(NumberFormatException e1)
-		{
-		    errorMessage("Must indicate either transactions per terminal or number of run minutes!");
-		    throw new Exception();
-		}
+	try {
+	    scheduler_thread.join();
+	    log_info("scheduler returned");
+	}
+	catch(InterruptedException e)
+	{
+	    log_error("InterruptedException: " + e.getMessage());
+	}
 
-		try
-		{
-		    numWarehouses = Integer.parseInt(iWarehouses);
-		    if(numWarehouses <= 0)
-			throw new NumberFormatException();
-		}
-		catch(NumberFormatException e1)
-		{
-		    errorMessage("Invalid number of warehouses!");
-		    throw new Exception();
-		}
-		if(numWarehouses > loadWarehouses)
-		{
-		    errorMessage("numWarehouses cannot be greater " +
-				 "than the warehouses loaded in the database");
-		    throw new Exception();
-		}
+	/*
+	 * Time to stop input data generation.
+	 */
+	monkeys.terminate();
+	log_info("all simulated terminals ended");
 
-		try
-		{
-		    numTerminals = Integer.parseInt(iTerminals);
-		}
-		catch(NumberFormatException e1)
-		{
-		    errorMessage("Invalid number of terminals!");
-		    throw new Exception();
-		}
+	/*
+	 * Stop the SUT.
+	 */
+	systemUnderTest.terminate();
+	log_info("all SUT threads ended");
 
-		try
-		{
-		    rampupDelay = Double.parseDouble(iRampupDelay);
-		}
-		catch(NumberFormatException e1)
-		{
-		    errorMessage("Invalid number in rampupDelay!");
-		    throw new Exception();
-		}
+	/*
+	 * Report final transaction statistics.
+	 */
+	monkeys.reportStatistics();
 
-
-
-		if(Long.parseLong(iRunMins) != 0 && Integer.parseInt(iRunTxnsPerTerminal) == 0)
-		{
-		    try
-		    {
-			executionTimeMillis = Long.parseLong(iRunMins) * 60000;
-			if(executionTimeMillis <= 0)
-			    throw new NumberFormatException();
-		    }
-		    catch(NumberFormatException e1)
-		    {
-			errorMessage("Invalid number of minutes!");
-			throw new Exception();
-		    }
-		}
-		else
-		{
-		    try
-		    {
-			transactionsPerTerminal = Integer.parseInt(iRunTxnsPerTerminal);
-			if(transactionsPerTerminal <= 0)
-			    throw new NumberFormatException();
-		    }
-		    catch(NumberFormatException e1)
-		    {
-			errorMessage("Invalid number of transactions per terminal!");
-			throw new Exception();
-		    }
-		}
-
-		terminalWarehouseFixed = Boolean.parseBoolean(iTermWhseFixed);
-		useStoredProcedures = Boolean.parseBoolean(iUseStoredProcs);
-
-		try
-		{
-		    newOrderWeightValue = Double.parseDouble(iNewOrderWeight);
-		    paymentWeightValue = Double.parseDouble(iPaymentWeight);
-		    orderStatusWeightValue = Double.parseDouble(iOrderStatusWeight);
-		    deliveryWeightValue = Double.parseDouble(iDeliveryWeight);
-		    stockLevelWeightValue = Double.parseDouble(iStockLevelWeight);
-
-		    if(newOrderWeightValue < 0 ||paymentWeightValue < 0 || orderStatusWeightValue < 0 || deliveryWeightValue < 0 || stockLevelWeightValue < 0)
-			throw new NumberFormatException();
-		    else if(newOrderWeightValue == 0 && paymentWeightValue == 0 && orderStatusWeightValue == 0 && deliveryWeightValue == 0 && stockLevelWeightValue == 0)
-			throw new NumberFormatException();
-		}
-		catch(NumberFormatException e1)
-		{
-		    errorMessage("Invalid number in mix percentage!");
-		    throw new Exception();
-		}
-
-		double sumWeight = newOrderWeightValue + paymentWeightValue + orderStatusWeightValue + deliveryWeightValue + stockLevelWeightValue;
-		sumWeight = Math.round(sumWeight * 100.0) / 100.0;
-		if(sumWeight != 100.0)
-		{
-		    errorMessage("Sum of mix percentage parameters must equal 100%! Have %f" + sumWeight);
-		    throw new Exception();
-		}
-
-		newOrderCounter = 0;
-		printMessage("Session started!");
-		if(!limitIsTime)
-		    printMessage("Creating " + numTerminals + " terminal(s) with " + transactionsPerTerminal + " transaction(s) per terminal...");
-		else
-		    printMessage("Creating " + numTerminals + " terminal(s) with " + (executionTimeMillis/60000) + " minute(s) of execution...");
-		if (terminalWarehouseFixed)
-		    printMessage("Terminal Warehouse is fixed");
-		else
-		    printMessage("Terminal Warehouse is NOT fixed");
-		if (useStoredProcedures)
-		    printMessage("Using Stored Procedures");
-		else
-		    printMessage("NOT using Stored Procedures");
-		printMessage("Transaction Weights: " + newOrderWeightValue + "% New-Order, " + paymentWeightValue + "% Payment, " + orderStatusWeightValue + "% Order-Status, " + deliveryWeightValue + "% Delivery, " + stockLevelWeightValue + "% Stock-Level");
-
-		printMessage("Number of Terminals\t" + numTerminals);
-
-		terminals = new jTPCCTerminal[numTerminals];
-		terminalNames = new String[numTerminals];
-		terminalsStarted = numTerminals;
-		try
-		{
-		    int terminalWarehouseID = 1;
-		    int terminalDistrictID = 1;
-
-		    for(int i = 0; i < numTerminals; i++)
-		    {
-			String terminalName = "Term-" + ""+(i+1);
-
-			jTPCCTerminal terminal = new jTPCCTerminal
-			(terminalName, terminalWarehouseID, terminalDistrictID,
-			 iConn, iUser, iPassword, dbType,
-			 transactionsPerTerminal, terminalWarehouseFixed,
-			 rampupDelay * i, useStoredProcedures,
-			 paymentWeightValue, orderStatusWeightValue,
-			 deliveryWeightValue, stockLevelWeightValue, numWarehouses, limPerMin_Terminal, this);
-
-			terminals[i] = terminal;
-			terminalNames[i] = terminalName;
-			printMessage(terminalName + "\t" + terminalWarehouseID);
-
-			terminalWarehouseID++;
-			if (terminalWarehouseID > numWarehouses)
-			{
-			    terminalWarehouseID = 1;
-			    terminalDistrictID++;
-			    if (terminalDistrictID > 10)
-				terminalDistrictID = 1;
-			}
-		    }
-
-		    sessionEndTargetTime = executionTimeMillis;
-		    signalTerminalsRequestEndSent = false;
-
-
-		    printMessage("Transaction\tWeight");
-		    printMessage("% New-Order\t" + newOrderWeightValue);
-		    printMessage("% Payment\t" + paymentWeightValue);
-		    printMessage("% Order-Status\t" + orderStatusWeightValue);
-		    printMessage("% Delivery\t" + deliveryWeightValue);
-		    printMessage("% Stock-Level\t" + stockLevelWeightValue);
-
-		    printMessage("Transaction Number\tTerminal\tType\tExecution Time (ms)\t\tComment");
-
-		    printMessage("Created " + numTerminals + " terminal(s) successfully!");
-		    boolean dummvar = true;
-
-
-
-		    // Create Terminals, Start Transactions
-		    sessionStart = getCurrentTime();
-		    sessionStartTimestamp = System.currentTimeMillis();
-		    sessionNextTimestamp = sessionStartTimestamp;
-		    if(sessionEndTargetTime != -1)
-			sessionEndTargetTime += sessionStartTimestamp;
-
-		    // Record run parameters in runInfo.csv
-		    if (runInfoCSV != null)
-		    {
-			try
-			{
-			    StringBuffer infoSB = new StringBuffer();
-			    Formatter infoFmt = new Formatter(infoSB);
-			    infoFmt.format("%d,simple,%s,%s,%s,%s,%d,%d,%d,%d,1.0,1.0\n",
-					runID, JTPCCVERSION, iDB,
-					new java.sql.Timestamp(sessionStartTimestamp).toString(),
-					iRunMins,
-					loadWarehouses,
-					numWarehouses,
-					numTerminals,
-					Integer.parseInt(limPerMin));
-			    runInfoCSV.write(infoSB.toString());
-			    runInfoCSV.close();
-			}
-			catch (Exception e)
-			{
-			    log.error(e.getMessage());
-			    System.exit(1);
-			}
-		    }
-
-		    synchronized(terminals)
-		    {
-			printMessage("Starting all terminals...");
-			transactionCount = 1;
-			for(int i = 0; i < terminals.length; i++)
-			    (new Thread(terminals[i])).start();
-
-		    }
-
-		    printMessage("All terminals started executing " + sessionStart);
-		}
-
-		catch(Exception e1)
-		{
-		    errorMessage("This session ended with errors!");
-
-		    StringWriter stringWriter = new StringWriter();
-		    PrintWriter printWriter = new PrintWriter(stringWriter);
-		    e1.printStackTrace(printWriter);
-		    printWriter.close();
-		    log.error(stringWriter.toString());
-
-		    printStreamReport.close();
-		    fileOutputStream.close();
-
-		    throw new Exception();
-		}
-
+	/*
+	 * Close the per transaction CSV result
+	 */
+	if (resultCSV != null)
+	{
+	    try {
+		log_info("per transaction result file finished");
+		resultCSV.close();
 	    }
-	    catch(Exception ex)
+	    catch (Exception e)
 	    {
+		log.error(e.getMessage());
 	    }
 	}
-	updateStatusLine();
+
+	/*
+	 * Stop the OS stats collector
+	 */
+	if (osCollector != null)
+	{
+	    osCollector.stop();
+	    osCollector = null;
+	    log_info("OS Collector stopped");
+	}
     }
 
-    private void signalTerminalsRequestEnd(boolean timeTriggered)
+    public jTPCCApplication getApplication()
     {
-	synchronized(terminals)
-	{
-	    if(!signalTerminalsRequestEndSent)
-	    {
-		if(timeTriggered)
-		    printMessage("The time limit has been reached.");
-		printMessage("Signalling all terminals to stop...");
-		signalTerminalsRequestEndSent = true;
+	if (applicationName.equals("generic"))
+	    return new AppGeneric();
 
-		for(int i = 0; i < terminals.length; i++)
-		    if(terminals[i] != null)
-			terminals[i].stopRunningWhenPossible();
-
-		printMessage("Waiting for all active transactions to end...");
-	    }
-	}
+	return new jTPCCApplication();
     }
 
-    public void signalTerminalEnded(jTPCCTerminal terminal, long countNewOrdersExecuted)
-    {
-	synchronized(terminals)
-	{
-	    boolean found = false;
-	    terminalsStarted--;
-	    for(int i = 0; i < terminals.length && !found; i++)
-	    {
-		if(terminals[i] == terminal)
-		{
-		    terminals[i] = null;
-		    terminalNames[i] = "(" + terminalNames[i] + ")";
-		    newOrderCounter += countNewOrdersExecuted;
-		    found = true;
-		}
-	    }
-	}
-
-	if(terminalsStarted == 0)
-	{
-	    sessionEnd = getCurrentTime();
-	    sessionEndTimestamp = System.currentTimeMillis();
-	    sessionEndTargetTime = -1;
-	    printMessage("All terminals finished executing " + sessionEnd);
-	    endReport();
-	    terminalsBlockingExit = false;
-	    printMessage("Session finished!");
-
-	    // If we opened a per transaction result file, close it.
-	    if (resultCSV != null)
-	    {
-		try {
-		    resultCSV.close();
-		} catch (IOException e) {
-		    log.error(e.getMessage());
-		};
-	    }
-
-	    // Stop the OSCollector, if it is active.
-	    if (osCollector != null)
-	    {
-	    	osCollector.stop();
-		osCollector = null;
-	    }
-	}
-    }
-
-    public void signalTerminalEndedTransaction(String terminalName, String transactionType, long executionTime, String comment, int newOrder)
-    {
-	synchronized (counterLock)
-	{
-	    transactionCount++;
-	    fastNewOrderCounter += newOrder;
-	}
-
-	if(sessionEndTargetTime != -1 && System.currentTimeMillis() > sessionEndTargetTime)
-	{
-	    signalTerminalsRequestEnd(true);
-	}
-
-       updateStatusLine();
-
-    }
-
-    public jTPCCRandom getRnd()
-    {
-	return rnd;
-    }
-
-    public void resultAppend(jTPCCTData term)
+    public static void csv_result_write(String line)
     {
 	if (resultCSV != null)
 	{
-	    try
-	    {
-		resultCSV.write(runID + "," +
-				term.resultLine(sessionStartTimestamp));
+	    try {
+		resultCSV.write(line);
 	    }
-	    catch (IOException e)
+	    catch (Exception e)
 	    {
-		log.error("Term-00, " + e.getMessage());
 	    }
 	}
     }
 
-    private void endReport()
+    private void log_trace(String message)
     {
-	long currTimeMillis = System.currentTimeMillis();
-	long freeMem = Runtime.getRuntime().freeMemory() / (1024*1024);
-	long totalMem = Runtime.getRuntime().totalMemory() / (1024*1024);
-	double tpmC = (6000000*fastNewOrderCounter/(currTimeMillis - sessionStartTimestamp))/100.0;
-	double tpmTotal = (6000000*transactionCount/(currTimeMillis - sessionStartTimestamp))/100.0;
-
-	System.out.println("");
-	log.info("Term-00, ");
-	log.info("Term-00, ");
-	log.info("Term-00, Measured tpmC (NewOrders) = " + tpmC);
-	log.info("Term-00, Measured tpmTOTAL = " + tpmTotal);
-	log.info("Term-00, Session Start     = " + sessionStart );
-	log.info("Term-00, Session End       = " + sessionEnd);
-	log.info("Term-00, Transaction Count = " + (transactionCount-1));
-
+	log.trace("main, " + message);
     }
 
-    private void printMessage(String message)
+    private void log_info(String message)
     {
-	log.trace("Term-00, " + message);
+	log.info("main, " + message);
     }
 
-    private void errorMessage(String message)
+    private void log_error(String message)
     {
-	log.error("Term-00, "+ message);
+	log.error("main, "+ message);
     }
 
     private void exit()
@@ -736,44 +535,13 @@ public class jTPCC implements jTPCCConfig
 
     private String getCurrentTime()
     {
-	return dateFormat.format(new java.util.Date());
+	return jTPCCConfig.dateFormat.format(new java.util.Date());
     }
 
     private String getFileNameSuffix()
     {
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 	return dateFormat.format(new java.util.Date());
-    }
-
-    synchronized private void updateStatusLine()
-    {
-	long currTimeMillis = System.currentTimeMillis();
-
-	if(currTimeMillis > sessionNextTimestamp)
-	{
-	    StringBuilder informativeText = new StringBuilder("");
-	    Formatter fmt = new Formatter(informativeText);
-	    double tpmC = (6000000*fastNewOrderCounter/(currTimeMillis - sessionStartTimestamp))/100.0;
-	    double tpmTotal = (6000000*transactionCount/(currTimeMillis - sessionStartTimestamp))/100.0;
-
-	    sessionNextTimestamp += 1000;  /* update this every seconds */
-
-	    fmt.format("Term-00, Running Average tpmTOTAL: %.2f", tpmTotal);
-
-	    /* XXX What is the meaning of these numbers? */
-	    recentTpmC = (fastNewOrderCounter - sessionNextKounter) * 12;
-	    recentTpmTotal= (transactionCount-sessionNextKounter)*12;
-	    sessionNextKounter = fastNewOrderCounter;
-	    fmt.format("    Current tpmTOTAL: %d", recentTpmTotal);
-
-	    long freeMem = Runtime.getRuntime().freeMemory() / (1024*1024);
-	    long totalMem = Runtime.getRuntime().totalMemory() / (1024*1024);
-	    fmt.format("    Memory Usage: %dMB / %dMB          ", (totalMem - freeMem), totalMem);
-
-	    System.out.print(informativeText);
-	    for (int count = 0; count < informativeText.length(); count++)
-		System.out.print("\b");
-	}
     }
 
     private void copyFile(File in, File out)

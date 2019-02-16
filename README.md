@@ -8,6 +8,10 @@ BenchmarkSQL is Open Source, distributed under the GNU General Public License ve
 CHANGE LOG:
 -----------
 
+Version 6.0
+-----------
+  +  Complete rewrite of the benchmark driver into a scheduler based system that can measure end user (terminal) experienced response times.
+
 Version 5.1 lussman & jannicash:
 --------------------------------
   +  Clarify License

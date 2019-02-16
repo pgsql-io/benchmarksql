@@ -1,6 +1,5 @@
 /*
- * jTPCCUtil - utility functions for the Open Source Java implementation of
- *    the TPC-C benchmark
+ * jTPCCRandom - Random functions for TPC-C
  *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2016, Denis Lussier

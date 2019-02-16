@@ -47,7 +47,7 @@ public class ExecJDBC {
 
       // Open inputFile
       BufferedReader in = new BufferedReader
-        (new FileReader(jTPCCUtil.getSysProp("commandFile",null)));
+        (new FileReader(getSysProp("commandFile",null)));
 
       // loop thru input file and concatenate SQL statement fragments
       while((rLine = in.readLine()) != null) {
@@ -159,5 +159,19 @@ public class ExecJDBC {
     } // end try
 
   } // end execJDBCCommand
+
+  public static String getSysProp(String inSysProperty, String defaultValue) {
+
+    String outPropertyValue = null;
+
+    try {
+      outPropertyValue = System.getProperty(inSysProperty, defaultValue);
+    } catch (Exception e) {
+      System.err.println("Error Reading Required System Property '" + inSysProperty + "'");
+    }
+
+    return(outPropertyValue);
+
+  } // end getSysProp
 
 } // end ExecJDBC Class
