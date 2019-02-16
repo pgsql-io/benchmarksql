@@ -27,6 +27,7 @@ skip <- xmin * 60000
 # ----
 rawData <- read.csv("data/result.csv", head=TRUE)
 rawData <- rawData[rawData$startms >= skip, ]
+rawData <- rawData[0:(nrow(rawData) - 1), ]
 noBGData <- rawData[rawData$ttype != 'DELIVERY_BG', ]
 newOrder <- rawData[rawData$ttype == 'NEW_ORDER', ]
 payment <- rawData[rawData$ttype == 'PAYMENT', ]
