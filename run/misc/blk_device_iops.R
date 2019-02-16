@@ -95,7 +95,7 @@ legend ("topleft",
 	c("Read Operations on @DEVICE@", "Write Operations on @DEVICE@"),
 	fill=c("blue3", "red3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "Block Device @DEVICE@ IOPS"
     ))
 grid()

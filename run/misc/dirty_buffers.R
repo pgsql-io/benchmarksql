@@ -70,7 +70,7 @@ legend ("topleft",
 	c("vmstat nr_dirty"),
 	fill=c("red3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "Dirty Kernel Buffers"
     ))
 grid()

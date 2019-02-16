@@ -92,7 +92,7 @@ legend ("topleft",
 	c("RX Packets/s on @DEVICE@", "TX Packets/s on @DEVICE@"),
 	fill=c("blue3", "red3"))
 title (main=c(
-    paste0("Run #", runInfo$run, " of BenchmarkSQL v", runInfo$driverVersion),
+    paste0("Run #", runInfo$runID, " of BenchmarkSQL v", runInfo$jTPCCVersion),
     "Network Device @DEVICE@ Packets per Second"
     ))
 grid()
