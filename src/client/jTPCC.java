@@ -314,6 +314,7 @@ public class jTPCC
 				 rampupMins + "," +
 				 runMins + "," +
 				 loadWarehouses + "," +
+				 numWarehouses + "," +
 				 numSUTThreads + "," +
 				 thinkTimeMultiplier + "," +
 				 keyingTimeMultiplier + "\n");
