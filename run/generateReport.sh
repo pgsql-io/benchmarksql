@@ -49,7 +49,7 @@ cat >report.html <<_EOF_
 <html>
 <head>
   <title>
-    BenchmarkSQL Run #$(getRunInfo run) started $(getRunInfo sessionStart)
+    BenchmarkSQL Run #$(getRunInfo runID)
   </title>
   <style>
 
@@ -95,12 +95,12 @@ big		{ font-weight: 900;
 </head>
 <body bgcolor="#ffffff">
   <h1>
-    BenchmarkSQL Run #$(getRunInfo run) started $(getRunInfo sessionStart)
+    BenchmarkSQL Run #$(getRunInfo runID)
   </h1>
 
   <p>
-    This TPC-C style benchmark run was performed by the "$(getRunInfo driver)"
-    driver of BenchmarkSQL version $(getRunInfo driverVersion). 
+    This TPC-C style benchmark run was performed using the $(getRunInfo application) Application Module
+    of BenchmarkSQL version $(getRunInfo jTPCCVersion) and the $(getRunInfo dbType) JDBC driver.
   </p>
 _EOF_
 
@@ -134,38 +134,29 @@ cat >>report.html <<_EOF_
   </h2>
 _EOF_
 
-if [ $(getRunInfo driver) == "simple" ] ; then
-    cat >> report.html <<_EOF_
-    <p>
-      Note that the "simple" driver is not a true TPC-C implementation.
-      This driver only measures the database response time, not the
-      response time of a System under Test as it would be experienced
-      by an end-user in a 3-tier test implementation.
-    </p>
-_EOF_
-fi
-
 cat >> report.html <<_EOF_
   <p>
     <table width="${TABLE_WIDTH}" border="2">
     <tr>
-      <th rowspan="2" width="16%"><b>Transaction<br/>Type</b></th>
-      <th colspan="3" width="24%"><b>Latency</b></th>
-      <th rowspan="2" width="12%"><b>Count</b></th>
-      <th rowspan="2" width="12%"><b>Percent</b></th>
-      <th rowspan="2" width="12%"><b>Rollback</b></th>
-      <th rowspan="2" width="12%"><b>Errors</b></th>
-      <th rowspan="2" width="12%"><b>Skipped<br/>Deliveries</b></th>
+      <th rowspan="2" width="20%"><b>Transaction<br/>Type</b></th>
+      <th colspan="5" width="40%"><b>Latency</b></th>
+      <th rowspan="2" width="8%"><b>Count</b></th>
+      <th rowspan="2" width="8%"><b>Percent</b></th>
+      <th rowspan="2" width="8%"><b>Rollback</b></th>
+      <th rowspan="2" width="8%"><b>Errors</b></th>
+      <th rowspan="2" width="8%"><b>Skipped<br/>Deliveries</b></th>
     </tr>
     <tr>
       <th width="8%"><b>90th&nbsp;%</b></th>
+      <th width="8%"><b>95th&nbsp;%</b></th>
+      <th width="8%"><b>98th&nbsp;%</b></th>
       <th width="8%"><b>Avg</b></th>
       <th width="8%"><b>Max</b></th>
     </tr>
 _EOF_
 
 tr ',' ' ' <data/tx_summary.csv | \
-    while read name count percent ninth avg max limit rbk error dskipped ; do
+    while read name count percent ninth n5th n8th avg max limit rbk error dskipped ; do
 	[ ${name} == "tx_name" ] && continue
 	[ ${name} == "tpmC" ] && continue
 	[ ${name} == "tpmTotal" ] && continue
@@ -173,6 +164,8 @@ tr ',' ' ' <data/tx_summary.csv | \
 	echo "    <tr>"
 	echo "      <td align=\"left\">${name}</td>"
 	echo "      <td align=\"right\">${ninth}</td>"
+	echo "      <td align=\"right\">${n5th}</td>"
+	echo "      <td align=\"right\">${n8th}</td>"
 	echo "      <td align=\"right\">${avg}</td>"
 	echo "      <td align=\"right\">${max}</td>"
 	echo "      <td align=\"right\">${count}</td>"

@@ -200,6 +200,22 @@ tx_90th <- c(
 	sprintf("%.3fs", quantile(delivery$latency, probs=0.90) / 1000.0),
 	sprintf("%.3fs", quantile(deliveryBG$latency, probs=0.90) / 1000.0),
 	NA, NA)
+tx_95th <- c(
+	sprintf("%.3fs", quantile(newOrder$latency, probs=0.95) / 1000.0),
+	sprintf("%.3fs", quantile(payment$latency, probs=0.95) / 1000.0),
+	sprintf("%.3fs", quantile(orderStatus$latency, probs=0.95) / 1000.0),
+	sprintf("%.3fs", quantile(stockLevel$latency, probs=0.95) / 1000.0),
+	sprintf("%.3fs", quantile(delivery$latency, probs=0.95) / 1000.0),
+	sprintf("%.3fs", quantile(deliveryBG$latency, probs=0.95) / 1000.0),
+	NA, NA)
+tx_98th <- c(
+	sprintf("%.3fs", quantile(newOrder$latency, probs=0.98) / 1000.0),
+	sprintf("%.3fs", quantile(payment$latency, probs=0.98) / 1000.0),
+	sprintf("%.3fs", quantile(orderStatus$latency, probs=0.98) / 1000.0),
+	sprintf("%.3fs", quantile(stockLevel$latency, probs=0.98) / 1000.0),
+	sprintf("%.3fs", quantile(delivery$latency, probs=0.98) / 1000.0),
+	sprintf("%.3fs", quantile(deliveryBG$latency, probs=0.98) / 1000.0),
+	NA, NA)
 tx_avg <- c(
 	sprintf("%.3fs", mean(newOrder$latency) / 1000.0),
 	sprintf("%.3fs", mean(payment$latency) / 1000.0),
@@ -237,6 +253,8 @@ tx_info <- data.frame(
 	tx_count,
 	tx_percent,
 	tx_90th,
+	tx_95th,
+	tx_98th,
 	tx_avg,
 	tx_max,
 	tx_limit,
