@@ -12,7 +12,7 @@ runInfo <- read.csv("data/runInfo.csv", head=TRUE)
 # run duration.
 # ----
 xmin <- @SKIP@
-xmax <- runInfo$runMins
+xmax <- runInfo$runMins + runInfo$rampupMins
 for (interval in c(1, 2, 5, 10, 20, 60, 120, 300, 600)) {
     if ((xmax * 60) / interval <= 1000) {
         break
