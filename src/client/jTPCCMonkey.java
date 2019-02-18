@@ -335,7 +335,12 @@ public class jTPCCMonkey
 			break;
 		}
 
-		/* Calculate keying time according to 5.2.5.4 */
+		/*
+		 * Calculate keying time according to 5.2.5.4, then
+		 * apply our non-standard multiplier that allows us
+		 * to drive a higher rate of transactions without
+		 * scaling to more warehouses.
+		 */
 		double r = randomDouble();
 		if (r < 0.000045)
 		    key_time = key_mean * 10.0;
