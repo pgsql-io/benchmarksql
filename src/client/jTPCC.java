@@ -220,7 +220,8 @@ public class jTPCC
 	/*
 	 * Check that we support the requested application implementation
 	 */
-	if (!applicationName.equals("generic"))
+	if (!applicationName.equals("Generic") &&
+	    !applicationName.equals("PostgreSQLStoredProc"))
 	{
 	    log.error("Unknown application name '"+applicationName+"'");
 	    return;
@@ -496,8 +497,10 @@ public class jTPCC
 
     public jTPCCApplication getApplication()
     {
-	if (applicationName.equals("generic"))
+	if (applicationName.equals("Generic"))
 	    return new AppGeneric();
+	if (applicationName.equals("PostgreSQLStoredProc"))
+	    return new AppPostgreSQLStoredProc();
 
 	return new jTPCCApplication();
     }
