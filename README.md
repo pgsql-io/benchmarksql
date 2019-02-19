@@ -10,7 +10,8 @@ CHANGE LOG:
 
 Version 6.0
 -----------
-  +  Complete rewrite of the benchmark driver into a scheduler based system that can measure end user (terminal) experienced response times.
+  +  Complete rewrite of the benchmark driver into a scheduler based system that can measure end user (terminal) experienced response times. The transaction exeuting Java/JDBC code is the same and the same NOPM/TPM numbers as for v5.x can be obtained if the keying/thinking multipliers are set to 0.0. 
+  +  Make the report generator work properly when no osCollector data is available.
 
 Version 5.1 lussman & jannicash:
 --------------------------------
