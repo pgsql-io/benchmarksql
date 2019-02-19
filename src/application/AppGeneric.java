@@ -1,6 +1,6 @@
 /*
  * AppGeneric - TPC-C Transaction Implementation for using
- * 		   Generic with plain JDBC PreparedStatements.
+ *		Generic with plain JDBC PreparedStatements.
  *
  */
 import org.apache.log4j.*;

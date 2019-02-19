@@ -204,7 +204,7 @@ public class jTPCCSUT
 		}
 		catch (Exception e)
 		{
-		    log_error("Exception: " + e.getMessage());
+		    log_error("Exception: " + e.getMessage() + " ttype=" + tdata.trans_type);
 		    tdata.trans_error = true;
 		    tdata.trans_error_reason = new String(e.getMessage());
 		}

@@ -81,6 +81,10 @@ public class jTPCCMonkey
 	    total_count += (double)(sumStats.counters[tt].numTrans);
 	}
 
+	log.info("result, NOTE: The following result data are estimates based on run-time statistics.");
+	log.info("result,       Please generate a report for more accurate numbers.");
+	log.info("result,");
+
 	log.info("result,                                           _____ latency (seconds) _____");
 	log.info("result,   TransType              count |   mix % |    mean       max     90th% |    rbk%          errors");
 	log.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
