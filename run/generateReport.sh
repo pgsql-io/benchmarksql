@@ -230,6 +230,11 @@ cat >>report.html <<_EOF_
 _EOF_
 
 # ----
+# All the rest is only available if the osCollector was running.
+#----
+if [ -f ./data/sys_info.csv ] ; then
+
+# ----
 # Add all the System Resource graphs. First the CPU and dirty buffers.
 # ----
 cat >>report.html <<_EOF_
@@ -328,6 +333,8 @@ for devdata in data/net_*.csv ; do
     </p>
 _EOF_
 done
+
+fi ; # End of osCollector dependent code
 
 # ----
 # Finish the document.
