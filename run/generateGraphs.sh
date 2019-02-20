@@ -25,9 +25,9 @@ resdir="$1"
 cd "${resdir}" || exit 1
 
 if [ -f ./data/sys_info.csv ] ; then
-    SIMPLE_GRAPHS="tpm_nopm latency cpu_utilization dirty_buffers"
+    SIMPLE_GRAPHS="tpm_nopm latency latency_new_order cpu_utilization dirty_buffers"
 else
-    SIMPLE_GRAPHS="tpm_nopm latency"
+    SIMPLE_GRAPHS="tpm_nopm latency latency_new_order"
 fi
 
 for graph in $SIMPLE_GRAPHS ; do

@@ -64,8 +64,6 @@ aggStockLevel <- setNames(aggregate(stockLevel$latency, list(elapsed=trunc(stock
 aggDelivery <- setNames(aggregate(delivery$latency, list(elapsed=trunc(delivery$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
 
-noBGData
-
 # ----
 # Determine the ymax by increasing in sqrt(2) steps until 98%
 # of ALL latencies fit into the graph. Then multiply with 1.2
