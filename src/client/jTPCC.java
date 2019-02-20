@@ -63,6 +63,8 @@ public class jTPCC
     private static BufferedWriter	runInfoCSV = null;
     public  static int			runID = 0;
     public  static long			csv_begin;
+    public  static long			result_begin;
+    public  static long			result_end;
 
     public static void main(String args[])
 	throws FileNotFoundException
@@ -432,11 +434,17 @@ public class jTPCC
 	 * rampup time), to shut down the system and to print messages
 	 * when the terminals and SUT threads have all been started.
 	 */
-	csv_begin = now;
-	this.scheduler.at(now + rampupMins * 60000,
+	csv_begin	= now;
+	result_begin	= now + rampupMins * 60000;
+	result_end	= result_begin + runMins * 60000;
+
+	this.scheduler.at(result_begin,
 			  jTPCCScheduler.SCHED_BEGIN,
 			  new jTPCCTData());
-	this.scheduler.at(now + (rampupMins + runMins) * 60000,
+	this.scheduler.at(result_end,
+			  jTPCCScheduler.SCHED_END,
+			  new jTPCCTData());
+	this.scheduler.at(result_end + 10000,
 			  jTPCCScheduler.SCHED_DONE,
 			  new jTPCCTData());
 	this.scheduler.at(now + (numWarehouses * 10) * terminalDelay,

@@ -10,7 +10,6 @@ public class jTPCCResult
     public  Counters	counters[];
     private Object	lock;
     public  double	statsDivider;
-    private boolean	enabled;
 
     public  static final int	NUM_BUCKETS = 1000;
     private static final double STATS_CUTOFF = 600.0;
@@ -22,23 +21,6 @@ public class jTPCCResult
 	    counters[i] = new Counters();
 	lock = new Object();
 	statsDivider = Math.log(STATS_CUTOFF * 1000.0) / (double)(NUM_BUCKETS);
-	enabled = false;
-    }
-
-    public void enable()
-    {
-        synchronized(lock)
-	{
-	    enabled = true;
-	}
-    }
-
-    public void disable()
-    {
-        synchronized(lock)
-	{
-	    enabled = false;
-	}
     }
 
     public void collect(jTPCCTData tdata)
@@ -49,6 +31,10 @@ public class jTPCCResult
 
 	if (tdata.trans_type < 0 ||
 	    tdata.trans_type > jTPCCTData.TT_DELIVERY_BG)
+	    return;
+
+	/* Only collect data within the defined measurement window */
+	if (tdata.trans_end < jTPCC.result_begin || tdata.trans_end >= jTPCC.result_end)
 	    return;
 
 	counter = counters[tdata.trans_type];
@@ -63,29 +49,26 @@ public class jTPCCResult
 
 	synchronized(lock)
 	{
-	    if (enabled)
+	    if (counter.numTrans == 0)
 	    {
-		if (counter.numTrans == 0)
-		{
-		    counter.minMS = latency;
-		    counter.maxMS = latency;
-		}
-		else
-		{
-		    if (counter.minMS > latency)
-			counter.minMS = latency;
-		    if (counter.maxMS < latency)
-			counter.maxMS = latency;
-		}
-		counter.numTrans++;
-		counter.sumMS += latency;
-		if (tdata.trans_error)
-		    counter.numError++;
-		if (tdata.trans_rbk)
-		    counter.numRbk++;
-
-		counter.bucket[bucket]++;
+		counter.minMS = latency;
+		counter.maxMS = latency;
 	    }
+	    else
+	    {
+		if (counter.minMS > latency)
+		    counter.minMS = latency;
+		if (counter.maxMS < latency)
+		    counter.maxMS = latency;
+	    }
+	    counter.numTrans++;
+	    counter.sumMS += latency;
+	    if (tdata.trans_error)
+		counter.numError++;
+	    if (tdata.trans_rbk)
+		counter.numRbk++;
+
+	    counter.bucket[bucket]++;
 	}
 
 	/*
