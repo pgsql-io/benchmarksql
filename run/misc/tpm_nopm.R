@@ -20,22 +20,27 @@ for (interval in c(1, 2, 5, 10, 20, 60, 120, 300, 600)) {
 }
 idiv <- interval * 1000.0
 skip <- xmin * 60000
+cutoff <- xmax * 60000
 
 # ----
 # Read the result.csv and then filter the raw data
 # for != DELIVERY_BG and == NEW_ORDER transactions.
 # ----
 data1 <- read.csv("data/result.csv", head=TRUE)
-data1 <- data1[data1$startms >= skip, ]
+if (is.na(data1[nrow(data1),]$error))
+{
+    data1 <- data1[0:(nrow(data1) - 1), ]
+}
+data1 <- data1[data1$endms >= skip & data1$endms < cutoff, ]
 total1 <- data1[data1$ttype != 'DELIVERY_BG', ]
 neworder1 <- data1[data1$ttype == 'NEW_ORDER', ]
 
 # ----
 # Aggregate the counts of both data sets grouped by second.
 # ----
-countTotal <- setNames(aggregate(total1$latency, list(elapsed=trunc(total1$startms / idiv) * idiv), NROW),
+countTotal <- setNames(aggregate(total1$latency, list(elapsed=trunc(total1$endms / idiv) * idiv), NROW),
 		   c('elapsed', 'count'));
-countNewOrder <- setNames(aggregate(neworder1$latency, list(elapsed=trunc(neworder1$startms / idiv) * idiv), NROW),
+countNewOrder <- setNames(aggregate(neworder1$latency, list(elapsed=trunc(neworder1$endms / idiv) * idiv), NROW),
 		   c('elapsed', 'count'));
 
 countTotal

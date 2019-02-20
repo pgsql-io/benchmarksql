@@ -15,9 +15,10 @@ public class jTPCCScheduler implements Runnable
 	SCHED_BEGIN = 2,
 	SCHED_TERMINAL_DATA = 3,
 	SCHED_DELIVERY_DATA = 4,
-	SCHED_DONE = 5,
-	SCHED_TERM_LAUNCH_DONE = 6,
-	SCHED_SUT_LAUNCH_DONE = 7;
+	SCHED_END = 5,
+	SCHED_DONE = 6,
+	SCHED_TERM_LAUNCH_DONE = 7,
+	SCHED_SUT_LAUNCH_DONE = 8;
 
     private static org.apache.log4j.Logger log = Logger.getLogger(jTPCCScheduler.class);
 
@@ -132,8 +133,10 @@ public class jTPCCScheduler implements Runnable
 
 		case SCHED_BEGIN:
 		    log_info("rampup done - measurement begins");
-		    gdata.monkeys.enableStatistics();
-		    gdata.systemUnderTest.deliveryBg.result.enable();
+		    break;
+
+		case SCHED_END:
+		    log_info("run done - measurement ends");
 		    break;
 
 		case SCHED_TERM_LAUNCH_DONE:

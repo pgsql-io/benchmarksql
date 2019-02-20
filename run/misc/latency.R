@@ -20,14 +20,28 @@ for (interval in c(1, 2, 5, 10, 20, 60, 120, 300, 600)) {
 }
 idiv <- interval * 1000.0
 skip <- xmin * 60000
+cutoff <- xmax * 60000
 
 # ----
-# Read the result.csv and then filter the raw data
-# by transaction type
+# Read the result.csv
 # ----
 rawData <- read.csv("data/result.csv", head=TRUE)
-rawData <- rawData[rawData$startms >= skip, ]
-rawData <- rawData[0:(nrow(rawData) - 1), ]
+
+# ----
+# If the result file is truncated (like when reading it while
+# the benchmark is still running), we need to remove an
+# incomplete last line.
+# ----
+if (is.na(rawData[nrow(rawData),]$error))
+{
+    rawData <- rawData[0:(nrow(rawData) - 1), ]
+}
+
+# ----
+# Select just the measurement part of the data and filter
+# by transaction type.
+# ----
+rawData <- rawData[rawData$endms >= skip & rawData$endms < cutoff, ]
 noBGData <- rawData[rawData$ttype != 'DELIVERY_BG', ]
 newOrder <- rawData[rawData$ttype == 'NEW_ORDER', ]
 payment <- rawData[rawData$ttype == 'PAYMENT', ]
@@ -39,15 +53,15 @@ deliveryBG <- rawData[rawData$ttype == 'DELIVERY_BG', ]
 # ----
 # Aggregate the latency grouped by interval.
 # ----
-aggNewOrder <- setNames(aggregate(newOrder$latency, list(elapsed=trunc(newOrder$startms / idiv) * idiv), mean),
+aggNewOrder <- setNames(aggregate(newOrder$latency, list(elapsed=trunc(newOrder$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggPayment <- setNames(aggregate(payment$latency, list(elapsed=trunc(payment$startms / idiv) * idiv), mean),
+aggPayment <- setNames(aggregate(payment$latency, list(elapsed=trunc(payment$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggOrderStatus <- setNames(aggregate(orderStatus$latency, list(elapsed=trunc(orderStatus$startms / idiv) * idiv), mean),
+aggOrderStatus <- setNames(aggregate(orderStatus$latency, list(elapsed=trunc(orderStatus$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggStockLevel <- setNames(aggregate(stockLevel$latency, list(elapsed=trunc(stockLevel$startms / idiv) * idiv), mean),
+aggStockLevel <- setNames(aggregate(stockLevel$latency, list(elapsed=trunc(stockLevel$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
-aggDelivery <- setNames(aggregate(delivery$latency, list(elapsed=trunc(delivery$startms / idiv) * idiv), mean),
+aggDelivery <- setNames(aggregate(delivery$latency, list(elapsed=trunc(delivery$endms / idiv) * idiv), mean),
 		   c('elapsed', 'latency'));
 
 noBGData
