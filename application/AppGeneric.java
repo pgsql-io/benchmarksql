@@ -229,6 +229,7 @@ public class AppGeneric extends jTPCCApplication
 	switch (jTPCC.dbType)
 	{
 	    case jTPCCConfig.DB_POSTGRES:
+	    case jTPCCConfig.DB_MARIADB:
 		stmtStockLevelSelectLow = dbConn.prepareStatement(
 			"SELECT count(*) AS low_stock FROM (" +
 			"    SELECT s_w_id, s_i_id, s_quantity " +

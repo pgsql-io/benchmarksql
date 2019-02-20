@@ -144,6 +144,8 @@ public class jTPCC
 	    dbType = jTPCCConfig.DB_POSTGRES;
 	else if (iDBType.equals("firebird"))
 	    dbType = jTPCCConfig.DB_FIREBIRD;
+	else if (iDBType.equals("mariadb"))
+	    dbType = jTPCCConfig.DB_MARIADB;
 	else
 	{
 	    log.error("unknown database type '" + iDBType + "'");
