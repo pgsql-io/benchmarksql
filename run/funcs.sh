@@ -25,9 +25,6 @@ function getProp()
 function setCP()
 {
     case "$(getProp db)" in
-	firebird)
-	    cp="../lib/firebird/*:../lib/*"
-	    ;;
 	oracle)
 	    cp="../lib/oracle/*"
 	    if [ ! -z "${ORACLE_HOME}" -a -d ${ORACLE_HOME}/lib ] ; then
@@ -37,6 +34,12 @@ function setCP()
 	    ;;
 	postgres)
 	    cp="../lib/postgres/*:../lib/*"
+	    ;;
+	firebird)
+	    cp="../lib/firebird/*:../lib/*"
+	    ;;
+	mariadb)
+	    cp="../lib/mariadb/*:../lib/*"
 	    ;;
     esac
     myCP=".:${cp}:../dist/*"
@@ -48,7 +51,7 @@ function setCP()
 # is a database, we support.
 # ----
 case "$(getProp db)" in
-    firebird|oracle|postgres)
+    oracle|postgres|firebird|mariadb)
 	;;
     "")	echo "ERROR: missing db= config option in ${PROPS}" >&2
 	exit 1
