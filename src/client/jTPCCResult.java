@@ -33,10 +33,6 @@ public class jTPCCResult
 	    tdata.trans_type > jTPCCTData.TT_DELIVERY_BG)
 	    return;
 
-	/* Only collect data within the defined measurement window */
-	if (tdata.trans_end < jTPCC.result_begin || tdata.trans_end >= jTPCC.result_end)
-	    return;
-
 	counter = counters[tdata.trans_type];
 
 	latency = tdata.trans_end - tdata.trans_due;
@@ -47,32 +43,38 @@ public class jTPCCResult
 	if (bucket >= NUM_BUCKETS)
 	    bucket = NUM_BUCKETS - 1;
 
-	synchronized(lock)
+	/* Only collect data within the defined measurement window */
+	if (tdata.trans_end >= jTPCC.result_begin && tdata.trans_end < jTPCC.result_end)
 	{
-	    if (counter.numTrans == 0)
+	    synchronized(lock)
 	    {
-		counter.minMS = latency;
-		counter.maxMS = latency;
-	    }
-	    else
-	    {
-		if (counter.minMS > latency)
+		if (counter.numTrans == 0)
+		{
 		    counter.minMS = latency;
-		if (counter.maxMS < latency)
 		    counter.maxMS = latency;
-	    }
-	    counter.numTrans++;
-	    counter.sumMS += latency;
-	    if (tdata.trans_error)
-		counter.numError++;
-	    if (tdata.trans_rbk)
-		counter.numRbk++;
+		}
+		else
+		{
+		    if (counter.minMS > latency)
+			counter.minMS = latency;
+		    if (counter.maxMS < latency)
+			counter.maxMS = latency;
+		}
+		counter.numTrans++;
+		counter.sumMS += latency;
+		if (tdata.trans_error)
+		    counter.numError++;
+		if (tdata.trans_rbk)
+		    counter.numRbk++;
 
-	    counter.bucket[bucket]++;
+		counter.bucket[bucket]++;
+	    }
 	}
 
 	/*
 	 * Send the per transaction CSV entry to the result.csv
+	 * in any case. The report generator will take care of
+	 * filtering the relevant data.
 	 */
 	jTPCC.csv_result_write(
 	    jTPCC.runID + "," +
