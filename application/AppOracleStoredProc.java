@@ -83,18 +83,10 @@ public class AppOracleStoredProc extends jTPCCApplication
     	throws Exception
     {
 	CallableStatement	stmt;
+	OracleConnection	oConn = (OracleConnection)dbConn;
 
 	try {
 	    // Execute the stored procedure for NEW_ORDER
-	    ArrayDescriptor oracleIntArray =
-		ArrayDescriptor.createDescriptor("INT_ARRAY", dbConn);
-	    ArrayDescriptor oracleDecimalArray =
-		ArrayDescriptor.createDescriptor("NUM_ARRAY", dbConn);
-	    ArrayDescriptor oracleCharArray =
-		ArrayDescriptor.createDescriptor("CHAR_ARRAY", dbConn);
-	    ArrayDescriptor oracleVarcharArray =
-		ArrayDescriptor.createDescriptor("VARCHAR24_ARRAY", dbConn);
-
 	    stmt = dbConn.prepareCall(stmtNewOrderStoredProc);
 
 	    int[] ol_supply_w_id = new int[15];
@@ -108,10 +100,9 @@ public class AppOracleStoredProc extends jTPCCApplication
 		ol_quantity[i] = newOrder.ol_quantity[i];
 	    }
 
-
-	    ARRAY ora_ol_supply_w_id = new ARRAY(oracleIntArray, dbConn, ol_supply_w_id);
-	    ARRAY ora_ol_i_id = new ARRAY(oracleIntArray, dbConn, ol_i_id);
-	    ARRAY ora_ol_quantity = new ARRAY(oracleIntArray, dbConn, ol_quantity);
+	    Array ora_ol_supply_w_id = oConn.createOracleArray("INT_ARRAY", ol_supply_w_id);
+	    Array ora_ol_i_id = oConn.createOracleArray("INT_ARRAY", ol_i_id);
+	    Array ora_ol_quantity = oConn.createOracleArray("INT_ARRAY", ol_quantity);
 
 	    stmt.setInt(1, newOrder.w_id);
 	    stmt.setInt(2, newOrder.d_id);
@@ -137,11 +128,11 @@ public class AppOracleStoredProc extends jTPCCApplication
 	    stmt.executeUpdate();
 
 	    // The stored proc succeeded. Extract the results.
-	    ARRAY ora_ol_amount = ((OracleCallableStatement)stmt).getARRAY(7);
-	    ARRAY ora_i_name = ((OracleCallableStatement)stmt).getARRAY(8);
-	    ARRAY ora_i_price = ((OracleCallableStatement)stmt).getARRAY(9);
-	    ARRAY ora_s_quantity = ((OracleCallableStatement)stmt).getARRAY(10);
-	    ARRAY ora_brand_generic = ((OracleCallableStatement)stmt).getARRAY(11);
+	    BigDecimal[] ora_ol_amount = (BigDecimal[])(stmt.getArray(7).getArray());
+	    String[] ora_i_name = (String[])(stmt.getArray(8).getArray());
+	    BigDecimal[] ora_i_price = (BigDecimal[])(stmt.getArray(9).getArray());
+	    BigDecimal[] ora_s_quantity = (BigDecimal[])(stmt.getArray(10).getArray());
+	    String[] ora_brand_generic = (String[])(stmt.getArray(11).getArray());
 
 	    newOrder.w_tax = stmt.getDouble(12);
 	    newOrder.d_tax = stmt.getDouble(13);
@@ -153,19 +144,15 @@ public class AppOracleStoredProc extends jTPCCApplication
 	    newOrder.c_credit = stmt.getString(19);
 	    newOrder.c_discount = stmt.getDouble(20);
 
-	    double[] ol_amount_arr = ora_ol_amount.getDoubleArray();
-	    String[] i_name_arr = (String[]) ora_i_name.getArray();
-	    double[] i_price_arr = ora_i_price.getDoubleArray();
-	    int[] s_quantity_arr = ora_s_quantity.getIntArray();
-	    String[] brand_generic_arr = (String[]) ora_brand_generic.getArray();
-
 	    for(int i = 0; i < 15; i++)
-	    { if( i < ol_amount_arr.length){
-		newOrder.ol_amount[i] = ol_amount_arr[i];
-		newOrder.i_name[i] = i_name_arr[i];
-		newOrder.i_price[i] = i_price_arr[i];
-		newOrder.s_quantity[i] = s_quantity_arr[i];
-		newOrder.brand_generic[i] = brand_generic_arr[i];
+	    {
+	        if (ora_ol_amount[i] != null)
+		{
+		    newOrder.ol_amount[i] = ora_ol_amount[i].doubleValue();
+		    newOrder.i_name[i] = ora_i_name[i];
+		    newOrder.i_price[i] = ora_i_price[i].doubleValue();
+		    newOrder.s_quantity[i] = ora_s_quantity[i].intValue();
+		    newOrder.brand_generic[i] = ora_brand_generic[i];
 		}
 	    }
 
@@ -346,13 +333,6 @@ public class AppOracleStoredProc extends jTPCCApplication
 
 	try {
 	    // Execute the stored procedure for ORDER_STATUS
-	    ArrayDescriptor oracleIntArray =
-		ArrayDescriptor.createDescriptor("INT_ARRAY", dbConn);
-	    ArrayDescriptor oracleDecimalArray =
-		ArrayDescriptor.createDescriptor("NUM_ARRAY", dbConn);
-	    ArrayDescriptor oracleTimestampArray =
-		ArrayDescriptor.createDescriptor("TIMESTAMP_ARRAY", dbConn);
-
 	    int[] supply_w_id_arr = new int[15];
 	    int[] i_id_arr = new int[15];
 	    int[] quantity_arr = new int[15];
@@ -390,28 +370,22 @@ public class AppOracleStoredProc extends jTPCCApplication
 	    orderStatus.o_entry_d = stmt.getTimestamp(9).toString();
 	    orderStatus.o_carrier_id = stmt.getInt(10);
 
-	    ARRAY ora_supply_w_id_arr = ((OracleCallableStatement)stmt).getARRAY(11);
-	    ARRAY ora_i_id_arr = ((OracleCallableStatement)stmt).getARRAY(12);
-	    ARRAY ora_quantity_arr = ((OracleCallableStatement)stmt).getARRAY(13);
-	    ARRAY ora_amount_arr = ((OracleCallableStatement)stmt).getARRAY(14);
-	    ARRAY ora_delivery_d_arr = ((OracleCallableStatement)stmt).getARRAY(15);
+	    BigDecimal[] ora_supply_w_id = (BigDecimal[])(stmt.getArray(11).getArray());
+	    BigDecimal[] ora_i_id = (BigDecimal[])(stmt.getArray(12).getArray());
+	    BigDecimal[] ora_quantity = (BigDecimal[])(stmt.getArray(13).getArray());
+	    BigDecimal[] ora_amount = (BigDecimal[])(stmt.getArray(14).getArray());
+	    String[] ora_delivery_d = (String[])(stmt.getArray(15).getArray());
 
-	    supply_w_id_arr = ora_supply_w_id_arr.getIntArray();
-	    i_id_arr = ora_i_id_arr.getIntArray();
-	    quantity_arr = ora_quantity_arr.getIntArray();
-	    amount_arr = ora_amount_arr.getDoubleArray();
-	    delivery_d = (String[]) ora_delivery_d_arr.getArray();
-
-	    for (int i = 0; i < amount_arr.length; i++)
+	    for (int i = 0; i < 15 && ora_supply_w_id != null; i++)
             {
-                orderStatus.ol_supply_w_id[i] = supply_w_id_arr[i];
-                orderStatus.ol_i_id[i] = i_id_arr[i];
-                orderStatus.ol_quantity[i] = quantity_arr[i];
-                orderStatus.ol_amount[i] = amount_arr[i];
-                if (delivery_d[i] == null)
+                orderStatus.ol_supply_w_id[i] = ora_supply_w_id[i].intValue();
+                orderStatus.ol_i_id[i] = ora_i_id[i].intValue();
+                orderStatus.ol_quantity[i] = ora_quantity[i].intValue();
+                orderStatus.ol_amount[i] = ora_amount[i].doubleValue();
+                if (ora_delivery_d[i] == null)
                     orderStatus.ol_delivery_d[i] = " ";
                 else
-                    orderStatus.ol_delivery_d[i] = delivery_d[i];
+                    orderStatus.ol_delivery_d[i] = ora_delivery_d[i];
             }
 
 	    dbConn.commit();
@@ -517,11 +491,7 @@ public class AppOracleStoredProc extends jTPCCApplication
 
 	try {
 	    // Execute the stored procedure for DELIVERY_BG
-	    ArrayDescriptor oracleIntArray =
-		ArrayDescriptor.createDescriptor("INT_ARRAY", dbConn);
-
 	    int[] delivery_array = new int[10];
-
 
 	    stmt = dbConn.prepareCall(stmtDeliveryBGStoredProc);
 	    stmt.setInt(1, deliveryBG.w_id);
@@ -532,14 +502,14 @@ public class AppOracleStoredProc extends jTPCCApplication
 	    stmt.executeUpdate();
 
 	    // The stored proc succeeded. Extract the results.
-	    ARRAY ora_array = ((OracleCallableStatement)stmt).getARRAY(4);
-	    delivery_array = ora_array.getIntArray();
-	    deliveryBG.delivered_o_id = new int[delivery_array.length];
+	    BigDecimal[] ora_array = (BigDecimal[])(stmt.getArray(4).getArray());
 
+	    deliveryBG.delivered_o_id = new int[delivery_array.length];
 	    for(int i = 0; i < 10; i++)
 	    {
-		deliveryBG.delivered_o_id[i] = delivery_array[i];
+		deliveryBG.delivered_o_id[i] = ora_array[i].intValue();
 	    }
+
 	    dbConn.commit();
 	    stmt.close();
 	}
