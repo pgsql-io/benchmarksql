@@ -196,11 +196,11 @@ cat >>report.html <<_EOF_
     </table>
   </p>
   <p>
-    The TPC-C specification has an theoretical maximum of 12.86 NEW_ORDER
+    The TPC-C specification has a theoretical maximum of 12.86 NEW_ORDER
     transactions per minute per warehouse. In reality this value cannot
     be reached because it would require a perfect mix with 45% of NEW_ORDER
     transactions and a ZERO response time from the System under Test
-    including the database. 
+    including the database.
   </p>
   <p>
     The above tpmC of ${tpmC} is ${tpmCpct} of that theoretical maximum for a
@@ -220,12 +220,30 @@ cat >>report.html <<_EOF_
     tpmC is the number of NEW_ORDER Transactions, that where processed
     per minute. tpmTOTAL is the number of Transactions processed per
     minute for all transaction types, but without the background part
-    of the DELIVERY transaction. 
+    of the DELIVERY transaction.
 
     <br/>
     <img src="data:image/svg+xml;base64,$(base64 tpm_nopm.svg)" />
     <br/>
     <img src="data:image/svg+xml;base64,$(base64 latency.svg)" />
+  </p>
+_EOF_
+
+# ----
+# Show the graphs for Latency/Delay of NewOrder
+# ----
+cat >>report.html <<_EOF_
+  <h2>
+    Latency and In-Queue Delay of NEW_ORDER Transactions
+  </h2>
+  <p>
+    The total end user experienced Latency of a transaction is the
+    sum of the actual processing time (including database access) and
+    the time it spent waiting in the SUT queue for the next SUT
+    thread to pick it up.
+
+    <br/>
+    <img src="data:image/svg+xml;base64,$(base64 latency_new_order.svg)" />
   </p>
 _EOF_
 
@@ -267,7 +285,7 @@ cat >>report.html <<_EOF_
   <br/>
   <p>
     <b>Note:</b>In the graph below the percentages for User, System and IOWait CPU time are stacked
-    on top of each other. 
+    on top of each other.
 
     <br/>
     <img src="data:image/svg+xml;base64,$(base64 cpu_utilization.svg)" />
@@ -285,7 +303,7 @@ cat >>report.html <<_EOF_
     copied into a kernel buffer. Several tuning parameters control
     when the OS is actually transferring these dirty buffers to
     the IO controller(s) in order to eventually get written to
-    real disks (or similar). 
+    real disks (or similar).
 
     <br/>
     <img src="data:image/svg+xml;base64,$(base64 dirty_buffers.svg)" />
