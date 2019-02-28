@@ -38,6 +38,8 @@ function getProp()
     grep "^${1}=" run.properties | sed -e "s/^${1}=//"
 }
 
+REPORT_FILE="$(readlink -f ${1}).html"
+
 ./generateGraphs.sh "${1}" $SKIP
 cd "${1}"
 echo -n "Generating ${1}/report.html ... "
@@ -362,12 +364,12 @@ cat >>report.html <<_EOF_
 </html>
 
 _EOF_
+echo "OK"
 
 # ----
 # Copy the report to the name of the result directory as .html
 # We do the dirname-trick to strip any trailing / that might
 # have resulted from tab-completion.
 # ----
-cp report.html ../$(dirname ${1}/.dummy).html
+cp report.html "${REPORT_FILE}"
 
-echo "OK"

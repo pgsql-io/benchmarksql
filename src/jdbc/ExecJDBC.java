@@ -127,13 +127,13 @@ public class ExecJDBC {
 
     } catch(IOException ie) {
         System.out.println(ie.getMessage());
-
+	System.exit(1);
     } catch(SQLException se) {
         System.out.println(se.getMessage());
-
+	System.exit(1);
     } catch(Exception e) {
         e.printStackTrace();
-
+	System.exit(1);
     //exit Cleanly
     } finally {
       try {

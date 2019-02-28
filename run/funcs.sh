@@ -1,7 +1,7 @@
 # ----
 # $1 is the properties file
 # ----
-PROPS=$1
+PROPS="$1"
 if [ ! -f ${PROPS} ] ; then
     echo "${PROPS}: no such file" >&2
     exit 1
@@ -14,7 +14,7 @@ fi
 # ----
 function getProp()
 {
-    grep "^${1}=" ${PROPS} | sed -e "s/^${1}=//"
+    grep "^${1}=" ${PROPS} | sed -e "s/^${1}=//" -e 's/\s*$//'
 }
 
 # ----
@@ -42,7 +42,7 @@ function setCP()
 	    cp="../lib/mariadb/*:../lib/*"
 	    ;;
     esac
-    myCP=".:${cp}:../dist/*"
+    myCP="../extra_lib/*:.:${cp}:../dist/*"
     export myCP
 }
 
@@ -50,14 +50,14 @@ function setCP()
 # Make sure that the properties file does have db= and the value
 # is a database, we support.
 # ----
-case "$(getProp db)" in
+db=$(getProp db)
+case "${db}" in
     oracle|postgres|firebird|mariadb)
 	;;
     "")	echo "ERROR: missing db= config option in ${PROPS}" >&2
 	exit 1
 	;;
-    *)	echo "ERROR: unsupported database type 'db=$(getProp db)' in ${PROPS}" >&2
+    *)	echo "ERROR: unsupported database type db=${db} in ${PROPS}" >&2
 	exit 1
 	;;
 esac
-
