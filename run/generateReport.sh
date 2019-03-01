@@ -9,7 +9,7 @@ TABLE_WIDTH="1100px"
 if [ $# -gt 1 ] ; then
 	SKIP=$2
 else
-	SKIP=0
+	SKIP=-1
 fi
 
 function getRunInfo()
