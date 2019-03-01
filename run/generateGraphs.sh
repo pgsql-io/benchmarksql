@@ -14,7 +14,7 @@ fi
 if [ $# -gt 1 ] ; then
     SKIP=$2
 else
-    SKIP=0
+    SKIP=-1
 fi
 
 RUN_DIR=`pwd`
