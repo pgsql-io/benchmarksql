@@ -18,7 +18,8 @@ public class jTPCCScheduler implements Runnable
 	SCHED_END = 5,
 	SCHED_DONE = 6,
 	SCHED_TERM_LAUNCH_DONE = 7,
-	SCHED_SUT_LAUNCH_DONE = 8;
+	SCHED_SUT_LAUNCH_DONE = 8,
+	SCHED_REPORT = 9;
 
     private static org.apache.log4j.Logger log = Logger.getLogger(jTPCCScheduler.class);
 
@@ -29,6 +30,9 @@ public class jTPCCScheduler implements Runnable
     private int		avl_max_nodes = 0;
     private int		avl_max_height = 0;
     private Random	random;
+
+    private long	current_trans_count = 0;
+    private long	current_neword_count = 0;
 
     public jTPCCScheduler(jTPCC gdata)
     {
@@ -121,6 +125,21 @@ public class jTPCCScheduler implements Runnable
 	    {
 		case SCHED_TERMINAL_DATA:
 		    gdata.systemUnderTest.queueAppend(tdata);
+		    switch (tdata.trans_type)
+		    {
+		        case jTPCCTData.TT_NEW_ORDER:
+			    current_trans_count++;
+			    current_neword_count++;
+			    break;
+		        case jTPCCTData.TT_PAYMENT:
+		        case jTPCCTData.TT_ORDER_STATUS:
+		        case jTPCCTData.TT_STOCK_LEVEL:
+		        case jTPCCTData.TT_DELIVERY:
+			    current_trans_count++;
+			    break;
+			default:
+			    break;
+		    }
 		    break;
 
 		case SCHED_TERM_LAUNCH:
@@ -145,6 +164,16 @@ public class jTPCCScheduler implements Runnable
 
 		case SCHED_SUT_LAUNCH_DONE:
 		    log_info("all SUT threads active");
+		    break;
+
+		case SCHED_REPORT:
+		    log_info("Current TPM=" + (current_trans_count * 60) / jTPCC.reportIntervalSecs +
+			     " NOPM=" + (current_neword_count * 60) / jTPCC.reportIntervalSecs);
+		    current_trans_count = 0;
+		    current_neword_count = 0;
+		    this.at(tdata.trans_due + jTPCC.reportIntervalSecs * 1000,
+			    SCHED_REPORT,
+			    tdata);
 		    break;
 
 		default:

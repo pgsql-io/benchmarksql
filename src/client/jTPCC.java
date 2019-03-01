@@ -39,6 +39,7 @@ public class jTPCC
     public  static int		rampupMins;
     public  static int		rampupSUTMins;
     public  static int		rampupTerminalMins;
+    public  static int		reportIntervalSecs;
     public  static double	keyingTimeMultiplier;
     public  static double	thinkTimeMultiplier;
     public  static boolean	traceTerminalIO = false;
@@ -124,6 +125,7 @@ public class jTPCC
 	runMins			= Integer.parseInt(getProp(ini, "runMins"));
 	rampupSUTMins		= Integer.parseInt(getProp(ini, "rampupSUTMins"));
 	rampupTerminalMins	= Integer.parseInt(getProp(ini, "rampupTerminalMins"));
+	reportIntervalSecs	= Integer.parseInt(getProp(ini, "reportIntervalSecs"));
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
 	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
@@ -458,6 +460,9 @@ public class jTPCC
 			  new jTPCCTData());
 	this.scheduler.at(now + numSUTThreads * sutThreadDelay,
 			  jTPCCScheduler.SCHED_SUT_LAUNCH_DONE,
+			  new jTPCCTData());
+	this.scheduler.at(now + reportIntervalSecs * 1000,
+			  jTPCCScheduler.SCHED_REPORT,
 			  new jTPCCTData());
 
 	try {
