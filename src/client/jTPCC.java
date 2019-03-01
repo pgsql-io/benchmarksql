@@ -461,9 +461,12 @@ public class jTPCC
 	this.scheduler.at(now + numSUTThreads * sutThreadDelay,
 			  jTPCCScheduler.SCHED_SUT_LAUNCH_DONE,
 			  new jTPCCTData());
-	this.scheduler.at(now + reportIntervalSecs * 1000,
-			  jTPCCScheduler.SCHED_REPORT,
-			  new jTPCCTData());
+	if (reportIntervalSecs > 0)
+	{
+	    this.scheduler.at(now + reportIntervalSecs * 1000,
+			      jTPCCScheduler.SCHED_REPORT,
+			      new jTPCCTData());
+	}
 
 	try {
 	    scheduler_thread.join();
