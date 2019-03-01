@@ -37,11 +37,14 @@ public class jTPCC
     public  static int		numSUTThreads;
     public  static int		runMins;
     public  static int		rampupMins;
-    public  static int		sutThreadDelay;
-    public  static int		terminalDelay;
+    public  static int		rampupSUTMins;
+    public  static int		rampupTerminalMins;
     public  static double	keyingTimeMultiplier;
     public  static double	thinkTimeMultiplier;
     public  static boolean	traceTerminalIO = false;
+
+    public  static int		sutThreadDelay;
+    public  static int		terminalDelay;
 
     public  static double	newOrderWeight;
     public  static double	paymentWeight;
@@ -119,8 +122,8 @@ public class jTPCC
 	numSUTThreads		= Integer.parseInt(getProp(ini, "sutThreads"));
 	rampupMins		= Integer.parseInt(getProp(ini, "rampupMins"));
 	runMins			= Integer.parseInt(getProp(ini, "runMins"));
-	sutThreadDelay		= Integer.parseInt(getProp(ini, "sutThreadDelay"));
-	terminalDelay		= Integer.parseInt(getProp(ini, "terminalDelay"));
+	rampupSUTMins		= Integer.parseInt(getProp(ini, "rampupSUTMins"));
+	rampupTerminalMins	= Integer.parseInt(getProp(ini, "rampupTerminalMins"));
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
 	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
@@ -139,6 +142,9 @@ public class jTPCC
 	fmt.format("newOrderWeight=%.3f", newOrderWeight);
 	log_info(sb.toString());
 	log_info("");
+
+	sutThreadDelay = (rampupSUTMins * 60000) / numSUTThreads;
+	terminalDelay = (rampupTerminalMins * 60000) / (numWarehouses * 10);
 
 	if (iDBType.equals("oracle"))
 	    dbType = jTPCCConfig.DB_ORACLE;
