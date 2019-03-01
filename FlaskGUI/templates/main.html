@@ -85,17 +85,26 @@
       <tr>
         <th>Result&nbsp;Name</th>
         <th>Start&nbsp;Time</th>
-        <th colspan="2">Action</th>
+        <th>State</th>
+        <th colspan="3">Action</th>
       </tr>
-      {% for run_id, res_name, res_start, res_active in results %}
+      {% for run_id, res_name, res_start, res_state in results %}
         <tr>
 	  <td>{{ res_name }}</td>
 	  <td>{{ res_start }}</td>
-	  {% if not res_active %}
+	  <td>{{ res_state }}</td>
+	  {% if res_state == "RUN" %}
+	    <td colspan="3" align="center">In&nbsp;Progress</td>
+	  {% endif %}
+	  {% if res_state == "CANCELED" %}
+	    <td><a href="{{ url_for('result_log') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Log</a></td>
+	    <td>&nbsp;</td>
+	    <td><a href="{{ url_for('result_delete') }}?run_id={{ run_id }}">Delete&nbsp;Result</a></td>
+	  {% endif %}
+	  {% if res_state == "FINISHED" %}
+	    <td><a href="{{ url_for('result_log') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Log</a></td>
 	    <td><a href="{{ url_for('result_show') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Report</a></td>
 	    <td><a href="{{ url_for('result_delete') }}?run_id={{ run_id }}">Delete&nbsp;Result</a></td>
-	  {% else %}
-	    <td colspan="2">In&nbsp;Progress</td>
 	  {% endif %}
 	</tr>
       {% endfor %}

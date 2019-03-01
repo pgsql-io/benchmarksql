@@ -87,10 +87,16 @@ class BenchmarkSQL:
         if self.current_job is not None:
             self.current_job.join(0.0)
             if not self.current_job.is_alive():
+                for entry in self.status_data['results']:
+                    if entry['name'] == self.current_job_name:
+                        if entry['state'] == 'RUN':
+                            entry['state'] = 'FINISHED'
+                        break
                 self.current_job = None
                 self.current_job_type = 'IDLE'
                 self.current_job_name = ""
         result = self.current_job_type
+        self.save_status()
         self.lock.release()
         return result
 
@@ -134,21 +140,16 @@ class BenchmarkSQL:
     def get_results(self):
         self.lock.acquire()
         results = []
-        new_data = []
         for entry in self.status_data['results']:
             result_dir = os.path.join(self.data_dir, entry['name'])
-            if not os.path.exists(result_dir):
-                continue
-            new_data.append(entry)
             results.append(
                 (
                     entry['run_id'],
                     entry['name'],
                     entry['start'],
-                    entry['name'] == self.current_job_name,
+                    entry['state'],
                 )
             )
-        self.status_data['results'] = new_data
         self.lock.release()
         return results
 
@@ -172,6 +173,20 @@ class BenchmarkSQL:
         except Exception as e:
             return str(e)
         return report
+
+    def get_log(self, run_id):
+        try:
+            run_id = int(run_id)
+        except Exception as e:
+            return "What?"
+
+        html_path = os.path.join(self.data_dir, "result_{0:06d}".format(run_id), 'console.log')
+        try:
+            with open(html_path, 'r') as fd:
+                log = fd.read()
+        except Exception as e:
+            return str(e)
+        return log
 
     def delete_result(self, run_id):
         try:
@@ -205,6 +220,7 @@ class BenchmarkSQL:
                 'run_id':   run_id,
                 'name':     "result_{0:06d}".format(run_id),
                 'start':    time.asctime(),
+                'state':    'RUN',
             }] + self.status_data['results']
         self.save_status()
 
@@ -244,7 +260,12 @@ class BenchmarkSQL:
             print "current job has no process"
             self.lock.release()
             return
+        for entry in self.status_data['results']:
+            if entry['name'] == self.current_job_name:
+                entry['state'] = 'CANCELED'
+                break
         self.current_job.proc.send_signal(signal.SIGINT)
+        self.save_status()
         self.lock.release()
 
 class RunBenchmark(threading.Thread):
@@ -282,6 +303,9 @@ class RunBenchmark(threading.Thread):
 
         if rc != 0:
             self.bench.add_job_output("\n\nBenchmarkSQL had exit code {0} - not generating report\n".format(rc))
+            result_log = os.path.join(result_dir, 'console.log')
+            with codecs.open(result_log, 'w', encoding='utf8') as fd:
+                fd.write(self.bench.current_job_output)
             return
 
         self.bench.add_job_output("\nBenchmarkSQL run complete - generating report\n")

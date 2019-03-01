@@ -71,6 +71,11 @@ def job_status():
         ]
     return json.dumps(result)
 
+@app.route('/result_log/')
+def result_log():
+    args = flask.request.args
+    return flask.Response(bench.get_log(args['run_id']), mimetype='text/plain')
+
 @app.route('/result_show/')
 def result_show():
     args = flask.request.args
