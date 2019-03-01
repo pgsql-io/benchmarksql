@@ -5,13 +5,13 @@
 # -*- coding: utf-8
 
 import codecs
+import json
 import os
-import subprocess
 import shutil
 import signal
+import subprocess
 import threading
 import time
-import json
 
 class BenchmarkSQL:
     """
@@ -56,6 +56,7 @@ class BenchmarkSQL:
         self.current_job_name = ""
         self.current_job_output = ""
         self.current_job_start = 0.0
+        self.lock = threading.Lock()
 
     def load_status(self):
         """
@@ -75,59 +76,88 @@ class BenchmarkSQL:
         """
         Save the current status data into the /data/status.json file
         """
+        # ----
+        # Caller should hold lock
+        # ----
         with open(self.status_file, 'w') as fd:
             fd.write(json.dumps(self.status_data, indent = 4))
 
     def get_job_type(self):
+        self.lock.acquire()
         if self.current_job is not None:
             self.current_job.join(0.0)
             if not self.current_job.is_alive():
                 self.current_job = None
                 self.current_job_type = 'IDLE'
                 self.current_job_name = ""
-        return self.current_job_type
+        result = self.current_job_type
+        self.lock.release()
+        return result
 
     def get_job_runtime(self):
+        self.lock.acquire()
         if self.current_job is None:
-            return "--:--:--"
-        runtime = int(time.time() - self.current_job_start)
-        return "{0:02d}:{1:02d}:{2:02d}".format(
-                runtime / 3600, (runtime / 60) % 60, runtime % 60)
+            result = "--:--:--"
+        else:
+            runtime = int(time.time() - self.current_job_start)
+            result =  "{0:02d}:{1:02d}:{2:02d}".format(
+                      runtime / 3600, (runtime / 60) % 60, runtime % 60)
+        self.lock.release()
+        return result
 
     def get_job_output(self):
-        return self.current_job_output
+        self.lock.acquire()
+        result = self.current_job_output
+        self.lock.release()
+        return result
+
+    def add_job_output(self, output):
+        self.lock.acquire()
+        self.current_job_output += output
+        self.lock.release()
 
     def get_properties(self):
+        self.lock.acquire()
         last_path = os.path.join(self.data_dir, 'last.properties')
         if os.path.exists(last_path):
             with open(last_path, 'r') as fd:
                 properties = fd.read()
-            return properties
-        sample_path = os.path.join(self.run_dir, 'sample.flask.properties')
-        with open(sample_path, 'r') as fd:
-            properties = fd.read()
-        return properties
+            result = properties
+        else:
+            sample_path = os.path.join(self.run_dir, 'sample.flask.properties')
+            with open(sample_path, 'r') as fd:
+                properties = fd.read()
+            result = properties
+        self.lock.release()
+        return result
 
     def get_results(self):
+        self.lock.acquire()
         results = []
-        for result in self.status_data['results']:
-            result_dir = os.path.join(self.data_dir, result['name'])
+        new_data = []
+        for entry in self.status_data['results']:
+            result_dir = os.path.join(self.data_dir, entry['name'])
             if not os.path.exists(result_dir):
                 continue
+            new_data.append(entry)
             results.append(
                 (
-                    result['run_id'],
-                    result['name'],
-                    result['start'],
-                    result['name'] == self.current_job_name,
+                    entry['run_id'],
+                    entry['name'],
+                    entry['start'],
+                    entry['name'] == self.current_job_name,
                 )
             )
+        self.status_data['results'] = new_data
+        self.lock.release()
         return results
 
     def save_properties(self, properties):
+        self.lock.acquire()
         last_path = os.path.join(self.data_dir, 'last.properties')
         with open(last_path, 'w') as fd:
             fd.write(properties)
+        self.lock.release()
 
     def get_report(self, run_id):
         try:
@@ -149,6 +179,7 @@ class BenchmarkSQL:
         except Exception as e:
             return "What?"
 
+        self.lock.acquire()
         html_path = os.path.join(self.data_dir, "result_{0:06d}.html".format(run_id))
         data_path = os.path.join(self.data_dir, "result_{0:06d}".format(run_id))
         new_results = [x for x in self.status_data['results'] if x['run_id'] != run_id]
@@ -163,8 +194,10 @@ class BenchmarkSQL:
             print str(e)
         self.status_data['results'] = new_results
         self.save_status()
+        self.lock.release()
 
     def run_benchmark(self):
+        self.lock.acquire()
         self.status_data['run_count'] += 1
         run_id = self.status_data['run_count']
         self.status_data['results'] = [
@@ -180,33 +213,39 @@ class BenchmarkSQL:
         self.current_job = RunBenchmark(self, run_id)
         self.current_job_output = ""
         self.current_job_start = time.time()
-
         self.current_job.start()
+        self.lock.release()
 
     def run_build(self):
+        self.lock.acquire()
         self.current_job_type = 'BUILD'
         self.current_job = RunDatabaseBuild(self)
         self.current_job_output = ""
         self.current_job_start = time.time()
-
         self.current_job.start()
+        self.lock.release()
 
     def run_destroy(self):
+        self.lock.acquire()
         self.current_job_type = 'DESTROY'
         self.current_job = RunDatabaseDestroy(self)
         self.current_job_output = ""
         self.current_job_start = time.time()
-
         self.current_job.start()
+        self.lock.release()
 
     def cancel_job(self):
+        self.lock.acquire()
         if self.current_job is None:
             print "no current job"
+            self.lock.release()
             return
         if self.current_job.proc is None:
             print "current job has no process"
+            self.lock.release()
             return
         self.current_job.proc.send_signal(signal.SIGINT)
+        self.lock.release()
 
 class RunBenchmark(threading.Thread):
     def __init__(self, bench, run_id):
@@ -236,23 +275,23 @@ class RunBenchmark(threading.Thread):
             line = self.proc.stdout.readline()
             if line == "":
                 break
-            self.bench.current_job_output += line
+            self.bench.add_job_output(line)
         self.proc.wait()
         rc = self.proc.returncode
         self.proc = None
 
         if rc != 0:
-            self.bench.current_job_output += "\n\nBenchmarkSQL had exit code {0} - not generating report\n".format(rc)
+            self.bench.add_job_output("\n\nBenchmarkSQL had exit code {0} - not generating report\n".format(rc))
             return
 
-        self.bench.current_job_output += "\nBenchmarkSQL run complete - generating report\n"
+        self.bench.add_job_output("\nBenchmarkSQL run complete - generating report\n")
         cmd = ['sh', './generateReport.sh', result_dir]
         self.proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, stdin = None)
         while True:
             line = self.proc.stdout.readline().decode('utf-8')
             if line == "":
                 break
-            self.bench.current_job_output += line
+            self.bench.add_job_output(line)
         self.proc.wait()
         self.proc = None
 
@@ -280,19 +319,18 @@ class RunDatabaseBuild(threading.Thread):
         self.proc = subprocess.Popen(cmd, 
             stdout = subprocess.PIPE, 
             stderr = subprocess.STDOUT,
-            stdin = None,
-            creationflags = 0)
+            stdin = None)
         while True:
             line = self.proc.stdout.readline()
             if line == "":
                 break
-            self.bench.current_job_output += line
+            self.bench.add_job_output(line)
         self.proc.wait()
         rc = self.proc.returncode
         self.proc = None
 
         if rc != 0:
-            self.bench.current_job_output += "\n\nBenchmarkSQL terminated with exit code {0}\n".format(rc)
+            self.bench.add_job_output("\n\nBenchmarkSQL terminated with exit code {0}\n".format(rc))
             return
 
 class RunDatabaseDestroy(threading.Thread):
@@ -317,11 +355,11 @@ class RunDatabaseDestroy(threading.Thread):
             line = self.proc.stdout.readline()
             if line == "":
                 break
-            self.bench.current_job_output += line
+            self.bench.add_job_output(line)
         self.proc.wait()
         rc = self.proc.returncode
         self.proc = None
 
         if rc != 0:
-            self.bench.current_job_output += "\n\nBenchmarkSQL had exit code {0}\n".format(rc)
+            self.bench.add_job_output("\n\nBenchmarkSQL had exit code {0}\n".format(rc))
             return
