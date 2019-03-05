@@ -107,27 +107,6 @@ big		{ font-weight: 900;
 _EOF_
 
 # ----
-# Show the run properties.
-# ----
-cat >>report.html <<_EOF_
-  <h2>
-    Run Properties
-  </h2>
-  <p>
-    <table width="${TABLE_WIDTH}" border="0">
-    <tr><td bgcolor="#f0f0f0">
-    <pre><small>
-_EOF_
-sed -e 's/^password=.*/password=\*\*\*\*\*\*/' <run.properties >>report.html
-cat >>report.html <<_EOF_
-    </small></pre>
-    </td></tr>
-    </table>
-  </p>
-
-_EOF_
-
-# ----
 # Show the result summary.
 # ----
 cat >>report.html <<_EOF_
@@ -355,6 +334,27 @@ _EOF_
 done
 
 fi ; # End of osCollector dependent code
+
+# ----
+# Show the run properties.
+# ----
+cat >>report.html <<_EOF_
+  <h2>
+    Run Properties
+  </h2>
+  <p>
+    <table width="${TABLE_WIDTH}" border="0">
+    <tr><td bgcolor="#f0f0f0">
+    <pre><small>
+_EOF_
+sed -e 's/^password=.*/password=\*\*\*\*\*\*/' <run.properties >>report.html
+cat >>report.html <<_EOF_
+    </small></pre>
+    </td></tr>
+    </table>
+  </p>
+
+_EOF_
 
 # ----
 # Finish the document.
