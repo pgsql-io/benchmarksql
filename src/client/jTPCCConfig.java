@@ -7,7 +7,7 @@ import java.text.*;
 
 public interface jTPCCConfig
 {
-    public final static String JTPCCVERSION = "5.2";
+    public final static String JTPCCVERSION = "6.devel";
 
     public final static int	DB_UNKNOWN = 0,
 				DB_ORACLE = 1,

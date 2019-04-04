@@ -17,6 +17,8 @@ else
     SKIP=0
 fi
 
+RUN_DIR=`pwd`
+
 WIDTH=12
 HEIGHT=6
 POINTSIZE=12
@@ -36,7 +38,7 @@ for graph in $SIMPLE_GRAPHS ; do
           -e "s/@HEIGHT@/${HEIGHT}/g" \
           -e "s/@POINTSIZE@/${POINTSIZE}/g" \
           -e "s/@SKIP@/${SKIP}/g" \
-          <../misc/${graph}.R | R --no-save)
+          <${RUN_DIR}/misc/${graph}.R | R --no-save)
     if [ $? -ne 0 ] ; then
         echo "ERROR"
         echo "$out" >&2
@@ -56,7 +58,7 @@ for fname in ./data/blk_*.csv ; do
           -e "s/@HEIGHT@/${HEIGHT}/g" \
           -e "s/@POINTSIZE@/${POINTSIZE}/g" \
           -e "s/@SKIP@/${SKIP}/g" \
-          -e "s/@DEVICE@/${devname}/g" <../misc/blk_device_iops.R | R --no-save)
+          -e "s/@DEVICE@/${devname}/g" <${RUN_DIR}/misc/blk_device_iops.R | R --no-save)
     if [ $? -ne 0 ] ; then
         echo "ERROR"
         echo "$out" >&2
@@ -69,7 +71,7 @@ for fname in ./data/blk_*.csv ; do
           -e "s/@HEIGHT@/${HEIGHT}/g" \
           -e "s/@POINTSIZE@/${POINTSIZE}/g" \
           -e "s/@SKIP@/${SKIP}/g" \
-          -e "s/@DEVICE@/${devname}/g" <../misc/blk_device_kbps.R | R --no-save)
+          -e "s/@DEVICE@/${devname}/g" <${RUN_DIR}/misc/blk_device_kbps.R | R --no-save)
     if [ $? -ne 0 ] ; then
         echo "ERROR"
         echo "$out" >&2
@@ -89,7 +91,7 @@ for fname in ./data/net_*.csv ; do
           -e "s/@HEIGHT@/${HEIGHT}/g" \
           -e "s/@POINTSIZE@/${POINTSIZE}/g" \
           -e "s/@SKIP@/${SKIP}/g" \
-          -e "s/@DEVICE@/${devname}/g" <../misc/net_device_iops.R | R --no-save)
+          -e "s/@DEVICE@/${devname}/g" <${RUN_DIR}/misc/net_device_iops.R | R --no-save)
     if [ $? -ne 0 ] ; then
         echo "ERROR"
         echo "$out" >&2
@@ -102,7 +104,7 @@ for fname in ./data/net_*.csv ; do
           -e "s/@HEIGHT@/${HEIGHT}/g" \
           -e "s/@POINTSIZE@/${POINTSIZE}/g" \
           -e "s/@SKIP@/${SKIP}/g" \
-          -e "s/@DEVICE@/${devname}/g" <../misc/net_device_kbps.R | R --no-save)
+          -e "s/@DEVICE@/${devname}/g" <${RUN_DIR}/misc/net_device_kbps.R | R --no-save)
     if [ $? -ne 0 ] ; then
         echo "ERROR"
         echo "$out" >&2
