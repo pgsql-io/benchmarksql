@@ -66,6 +66,33 @@ public class AppGeneric extends jTPCCApplication
 	dbProps = new Properties();
 	dbProps.setProperty("user", gdata.iUser);
 	dbProps.setProperty("password", gdata.iPassword);
+
+	/*
+	 * Fine tuning of database conneciton parameters if needed.
+	 * TODO: See if this could be moved into the URI.
+	 */
+	switch (jTPCC.dbType)
+	{
+	    case jTPCCConfig.DB_FIREBIRD:
+		/*
+		 * Firebird needs no_rec_version for our load
+		 * to work. Even with that some "deadlocks"
+		 * occur. Note that the message "deadlock" in
+		 * Firebird can mean something completely different,
+		 * namely that there was a conflicting write to
+		 * a row that could not be resolved.
+		 */
+		dbProps.setProperty("TRANSACTION_READ_COMMITTED",
+			"isc_tpb_read_committed," +
+			"isc_tpb_no_rec_version," +
+			"isc_tpb_write," +
+			"isc_tpb_wait");
+		break;
+
+	    default:
+		    break;
+	}
+
 	dbConn = DriverManager.getConnection(gdata.iConn, dbProps);
 	dbConn.setAutoCommit(false);
 

@@ -142,6 +142,8 @@ public class jTPCC
 	    dbType = jTPCCConfig.DB_ORACLE;
 	else if (iDBType.equals("postgres"))
 	    dbType = jTPCCConfig.DB_POSTGRES;
+	else if (iDBType.equals("firebird"))
+	    dbType = jTPCCConfig.DB_FIREBIRD;
 	else
 	{
 	    log.error("unknown database type '" + iDBType + "'");
