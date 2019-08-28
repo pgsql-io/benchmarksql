@@ -351,6 +351,10 @@ public class jTPCCSUT
 			     * terminal data instance and fill it with the
 			     * delivery background information. Then send
 			     * it directly into the SUT worker queue.
+			     *
+			     * TODO: requires a config option
+			     * TODO: implement total limit of parallel
+			     *       DeliveryBG jobs running
 			     */
 			    jTPCCTData     tdata = new jTPCCTData();
 
