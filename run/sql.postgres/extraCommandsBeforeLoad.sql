@@ -1,5 +1,5 @@
-ALTER TABLE bmsql_oorder SET (FILLFACTOR = 80);
-ALTER TABLE bmsql_order_line SET (FILLFACTOR = 80);
+ALTER TABLE bmsql_oorder SET (FILLFACTOR = 50);
+ALTER TABLE bmsql_order_line SET (FILLFACTOR = 50);
 ALTER TABLE bmsql_warehouse SET (FILLFACTOR = 50);
 ALTER TABLE bmsql_district SET (FILLFACTOR = 79);
 ALTER TABLE bmsql_customer SET (FILLFACTOR = 90);
