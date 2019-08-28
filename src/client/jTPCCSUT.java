@@ -39,7 +39,7 @@ public class jTPCCSUT
 	log = Logger.getLogger(jTPCCSUT.SUTThread.class);
 
 	try {
-	    sut = new SUTThread(t_id, gdata);
+	    sut = new SUTThread(t_id);
 	    sutThreads[t_id] = new Thread(sut);
 	    sutThreads[t_id].start();
 	}
@@ -101,7 +101,7 @@ public class jTPCCSUT
 	private Random			random;
 	private jTPCCApplication	application;
 
-	public SUTThread(int t_id, jTPCC gdata)
+	public SUTThread(int t_id)
 	{
 	    this.t_id = t_id;
 	    this.random = new Random(System.currentTimeMillis());
@@ -224,18 +224,40 @@ public class jTPCCSUT
 		    deliveryBg.jobDone(tdata);
 		else
 		    gdata.monkeys.queueAppend(tdata);
+
+	        /*
+		 * Handle restartSUTThreadProb. If not 0.0 it specifies
+		 * the probability in % at which the SUTThread causes
+		 * the Application (for this thread) to disconnect and
+		 * reconnect to the database.
+		 */
+		if (jTPCC.restartSUTThreadProb > 0.0)
+		{
+		    if (random.nextDouble() <= (jTPCC.restartSUTThreadProb / 100.0))
+		    {
+			try
+			{
+			    this.application.finish();
+			    this.application.init(gdata, t_id, log);
+			}
+			catch (Exception e)
+			{
+			    log_error("Exception: " + e.getMessage());
+			    log_error("Aborting SUT thread");
+			    return;
+			}
+		    }
+		}
 	    }
 
 	    /*
 	     * Let the application implementation clean up and disconnect.
 	     */
-	    try
-	    {
+	    try {
 		this.application.finish();
 	    }
 	    catch (Exception e)
 	    {
-		log_error("Exception: " + e.getMessage());
 	    }
 	}
 

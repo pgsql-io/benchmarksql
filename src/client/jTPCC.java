@@ -40,6 +40,7 @@ public class jTPCC
     public  static int		rampupSUTMins;
     public  static int		rampupTerminalMins;
     public  static int		reportIntervalSecs;
+    public  static double	restartSUTThreadProb;
     public  static double	keyingTimeMultiplier;
     public  static double	thinkTimeMultiplier;
     public  static boolean	traceTerminalIO = false;
@@ -126,6 +127,7 @@ public class jTPCC
 	rampupSUTMins		= Integer.parseInt(getProp(ini, "rampupSUTMins"));
 	rampupTerminalMins	= Integer.parseInt(getProp(ini, "rampupTerminalMins"));
 	reportIntervalSecs	= Integer.parseInt(getProp(ini, "reportIntervalSecs"));
+	restartSUTThreadProb	= Double.parseDouble(getProp(ini, "restartSUTThreadProbability"));
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
 	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
@@ -322,6 +324,7 @@ public class jTPCC
 		runInfoCSV.write("runID,dbType,jTPCCVersion,application," +
 				 "rampupMins,runMins," +
 				 "loadWarehouses,runWarehouses,numSUTThreads," +
+				 "restartSUTThreadProbability," +
 				 "thinkTimeMultiplier,keyingTimeMultiplier\n");
 		runInfoCSV.write(runID + "," +
 				 iDBType + "," +
@@ -332,6 +335,7 @@ public class jTPCC
 				 loadWarehouses + "," +
 				 numWarehouses + "," +
 				 numSUTThreads + "," +
+				 restartSUTThreadProb + "," +
 				 thinkTimeMultiplier + "," +
 				 keyingTimeMultiplier + "\n");
 		runInfoCSV.close();
