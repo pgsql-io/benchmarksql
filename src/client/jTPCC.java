@@ -35,6 +35,8 @@ public class jTPCC
     public  static int		numWarehouses;
     public  static int		numMonkeys;
     public  static int		numSUTThreads;
+    public  static int		maxDeliveryBGThreads;
+    public  static int		maxDeliveryBGPerWH;
     public  static int		runMins;
     public  static int		rampupMins;
     public  static int		rampupSUTMins;
@@ -122,6 +124,8 @@ public class jTPCC
 	numWarehouses		= Integer.parseInt(getProp(ini, "warehouses"));
 	numMonkeys		= Integer.parseInt(getProp(ini, "monkeys"));
 	numSUTThreads		= Integer.parseInt(getProp(ini, "sutThreads"));
+	maxDeliveryBGThreads	= Integer.parseInt(getProp(ini, "maxDeliveryBGThreads"));
+	maxDeliveryBGPerWH	= Integer.parseInt(getProp(ini, "maxDeliveryBGPerWarehouse"));
 	rampupMins		= Integer.parseInt(getProp(ini, "rampupMins"));
 	runMins			= Integer.parseInt(getProp(ini, "runMins"));
 	rampupSUTMins		= Integer.parseInt(getProp(ini, "rampupSUTMins"));
@@ -324,6 +328,7 @@ public class jTPCC
 		runInfoCSV.write("runID,dbType,jTPCCVersion,application," +
 				 "rampupMins,runMins," +
 				 "loadWarehouses,runWarehouses,numSUTThreads," +
+				 "maxDeliveryBGThreads,maxDeliveryBGPerWarehouse," +
 				 "restartSUTThreadProbability," +
 				 "thinkTimeMultiplier,keyingTimeMultiplier\n");
 		runInfoCSV.write(runID + "," +
@@ -335,6 +340,8 @@ public class jTPCC
 				 loadWarehouses + "," +
 				 numWarehouses + "," +
 				 numSUTThreads + "," +
+				 maxDeliveryBGThreads + "," +
+				 maxDeliveryBGPerWH + "," +
 				 restartSUTThreadProb + "," +
 				 thinkTimeMultiplier + "," +
 				 keyingTimeMultiplier + "\n");

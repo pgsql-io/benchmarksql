@@ -321,13 +321,16 @@ public class jTPCCSUT
 	private DeliveryEntry	queueTail;
 	private Object		lock;
 	public  jTPCCResult	result;
-	private boolean		warehouseBusy[];
+	private int		warehouseBusy[];
+	private int		deliveriesBusy = 0;
 
 	public DeliveryScheduler()
 	{
 	    lock = new Object();
 	    result = new jTPCCResult();
-	    warehouseBusy = new boolean[jTPCC.numWarehouses];
+	    warehouseBusy = new int[jTPCC.numWarehouses];
+	    for (int i = 0; i < jTPCC.numWarehouses; i++)
+		warehouseBusy[i] = 0;
 	}
 
 	public void run()
@@ -341,20 +344,24 @@ public class jTPCCSUT
 
 		    for (ent = queueHead; ent != null; ent = next)
 		    {
+			/*
+			 * Bail out of here if the maximum allowed
+			 * SUT theads are busy with deliviries.
+			 */
+			if (deliveriesBusy >= jTPCC.maxDeliveryBGThreads)
+			    break;
+
 			next = ent.next;
 
-			if (!warehouseBusy[ent.w_id - 1])
+			if (warehouseBusy[ent.w_id - 1] < jTPCC.maxDeliveryBGPerWH)
 			{
 			    /*
-			     * This warehouse does not currently have a
-			     * delivery transaction running. Create a
-			     * terminal data instance and fill it with the
-			     * delivery background information. Then send
-			     * it directly into the SUT worker queue.
-			     *
-			     * TODO: requires a config option
-			     * TODO: implement total limit of parallel
-			     *       DeliveryBG jobs running
+			     * This warehouse does not currently have
+			     * the maximum allowed delivery transactions
+			     * in progress. Create a terminal data
+			     * instance and fill it with the delivery
+			     * background information. Then send it
+			     * directly into the SUT worker queue.
 			     */
 			    jTPCCTData     tdata = new jTPCCTData();
 
@@ -386,8 +393,9 @@ public class jTPCCSUT
 			    else
 				ent.next.prev = ent.prev;
 
-			    /* Mark this warehouse busy. */
-			    warehouseBusy[ent.w_id - 1] = true;
+			    /* Bump the busy counters */
+			    warehouseBusy[ent.w_id - 1]++;
+			    deliveriesBusy++;
 			}
 		    }
 
@@ -448,7 +456,9 @@ public class jTPCCSUT
 
 	    synchronized(lock)
 	    {
-		warehouseBusy[tdata.term_w_id - 1] = false;
+		/* Decrease the busy counters */
+		warehouseBusy[tdata.term_w_id - 1]--;
+		deliveriesBusy--;
 		lock.notify();
 	    }
 	}
