@@ -1,5 +1,5 @@
 
-The following assumes a default installation of oracle-xe-11.2.0-1.0.
+The following assumes a default installation of oracle
 
 Creating the benchmarksql user run the following commands in sqlplus
 under the sysdba account:
