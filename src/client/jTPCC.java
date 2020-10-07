@@ -162,6 +162,8 @@ public class jTPCC
 	    dbType = jTPCCConfig.DB_FIREBIRD;
 	else if (iDBType.equals("mariadb"))
 	    dbType = jTPCCConfig.DB_MARIADB;
+	else if (iDBType.equals("transact-sql"))
+	    dbType = jTPCCConfig.DB_TSQL;
 	else
 	{
 	    log.error("unknown database type '" + iDBType + "'");

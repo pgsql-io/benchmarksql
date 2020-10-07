@@ -13,7 +13,8 @@ public interface jTPCCConfig
 				DB_ORACLE = 1,
 				DB_POSTGRES = 2,
 				DB_FIREBIRD = 3,
-				DB_MARIADB = 4;
+				DB_MARIADB = 4,
+				DB_TSQL = 5;
 
     public final static int NEW_ORDER = 1, PAYMENT = 2, ORDER_STATUS = 3, DELIVERY = 4, STOCK_LEVEL = 5;
 

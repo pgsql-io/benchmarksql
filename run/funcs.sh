@@ -41,6 +41,9 @@ function setCP()
 	mariadb)
 	    cp="../lib/mariadb/*:../lib/*"
 	    ;;
+	transact-sql)
+	    cp="../lib/transact-sql/*:../lib/*"
+	    ;;
     esac
     myCP="../extra_lib/*:.:${cp}:../dist/*"
     export myCP
@@ -52,7 +55,7 @@ function setCP()
 # ----
 db=$(getProp db)
 case "${db}" in
-    oracle|postgres|firebird|mariadb)
+    oracle|postgres|firebird|mariadb|transact-sql)
 	;;
     "")	echo "ERROR: missing db= config option in ${PROPS}" >&2
 	exit 1

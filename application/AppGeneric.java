@@ -102,11 +102,21 @@ public class AppGeneric extends jTPCCApplication
 		"    FROM bmsql_customer " +
 		"    JOIN bmsql_warehouse ON (w_id = c_w_id) " +
 		"    WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?");
-	stmtNewOrderSelectDist = dbConn.prepareStatement(
-		"SELECT d_tax, d_next_o_id " +
-		"    FROM bmsql_district " +
-		"    WHERE d_w_id = ? AND d_id = ? " +
-		"    FOR UPDATE");
+	if (jTPCC.dbType == jTPCCConfig.DB_TSQL)
+	{
+	    stmtNewOrderSelectDist = dbConn.prepareStatement(
+		    "SELECT d_tax, d_next_o_id " +
+		    "    FROM bmsql_district WITH (UPDLOCK) " +
+		    "    WHERE d_w_id = ? AND d_id = ? ");
+	}
+	else
+	{
+	    stmtNewOrderSelectDist = dbConn.prepareStatement(
+		    "SELECT d_tax, d_next_o_id " +
+		    "    FROM bmsql_district " +
+		    "    WHERE d_w_id = ? AND d_id = ? " +
+		    "    FOR UPDATE");
+	}
 	stmtNewOrderUpdateDist = dbConn.prepareStatement(
 		"UPDATE bmsql_district " +
 		"    SET d_next_o_id = d_next_o_id + 1 " +
@@ -120,14 +130,27 @@ public class AppGeneric extends jTPCCApplication
 		"INSERT INTO bmsql_new_order (" +
 		"    no_o_id, no_d_id, no_w_id) " +
 		"VALUES (?, ?, ?)");
-	stmtNewOrderSelectStock = dbConn.prepareStatement(
-		"SELECT s_quantity, s_data, " +
-		"       s_dist_01, s_dist_02, s_dist_03, s_dist_04, " +
-		"       s_dist_05, s_dist_06, s_dist_07, s_dist_08, " +
-		"       s_dist_09, s_dist_10 " +
-		"    FROM bmsql_stock " +
-		"    WHERE s_w_id = ? AND s_i_id = ? " +
-		"    FOR UPDATE");
+	if (jTPCC.dbType == jTPCCConfig.DB_TSQL)
+	{
+	    stmtNewOrderSelectStock = dbConn.prepareStatement(
+		    "SELECT s_quantity, s_data, " +
+		    "       s_dist_01, s_dist_02, s_dist_03, s_dist_04, " +
+		    "       s_dist_05, s_dist_06, s_dist_07, s_dist_08, " +
+		    "       s_dist_09, s_dist_10 " +
+		    "    FROM bmsql_stock WITH (UPDLOCK) " +
+		    "    WHERE s_w_id = ? AND s_i_id = ? ");
+	}
+	else
+	{
+	    stmtNewOrderSelectStock = dbConn.prepareStatement(
+		    "SELECT s_quantity, s_data, " +
+		    "       s_dist_01, s_dist_02, s_dist_03, s_dist_04, " +
+		    "       s_dist_05, s_dist_06, s_dist_07, s_dist_08, " +
+		    "       s_dist_09, s_dist_10 " +
+		    "    FROM bmsql_stock " +
+		    "    WHERE s_w_id = ? AND s_i_id = ? " +
+		    "    FOR UPDATE");
+	}
 	stmtNewOrderSelectItem = dbConn.prepareStatement(
 		"SELECT i_price, i_name, i_data " +
 		"    FROM bmsql_item " +
@@ -161,13 +184,25 @@ public class AppGeneric extends jTPCCApplication
 		"    FROM bmsql_customer " +
 		"    WHERE c_w_id = ? AND c_d_id = ? AND c_last = ? " +
 		"    ORDER BY c_first");
-	stmtPaymentSelectCustomer = dbConn.prepareStatement(
-		"SELECT c_first, c_middle, c_last, c_street_1, c_street_2, " +
-		"       c_city, c_state, c_zip, c_phone, c_since, c_credit, " +
-		"       c_credit_lim, c_discount, c_balance " +
-		"    FROM bmsql_customer " +
-		"    WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? " +
-		"    FOR UPDATE");
+	if (jTPCC.dbType == jTPCCConfig.DB_TSQL)
+	{
+	    stmtPaymentSelectCustomer = dbConn.prepareStatement(
+		    "SELECT c_first, c_middle, c_last, c_street_1, c_street_2, " +
+		    "       c_city, c_state, c_zip, c_phone, c_since, c_credit, " +
+		    "       c_credit_lim, c_discount, c_balance " +
+		    "    FROM bmsql_customer WITH (UPDLOCK) " +
+		    "    WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? ");
+	}
+	else
+	{
+	    stmtPaymentSelectCustomer = dbConn.prepareStatement(
+		    "SELECT c_first, c_middle, c_last, c_street_1, c_street_2, " +
+		    "       c_city, c_state, c_zip, c_phone, c_since, c_credit, " +
+		    "       c_credit_lim, c_discount, c_balance " +
+		    "    FROM bmsql_customer " +
+		    "    WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? " +
+		    "    FOR UPDATE");
+	}
 	stmtPaymentSelectCustomerData = dbConn.prepareStatement(
 		"SELECT c_data " +
 		"    FROM bmsql_customer " +
@@ -230,6 +265,7 @@ public class AppGeneric extends jTPCCApplication
 	{
 	    case jTPCCConfig.DB_POSTGRES:
 	    case jTPCCConfig.DB_MARIADB:
+	    case jTPCCConfig.DB_TSQL:
 		stmtStockLevelSelectLow = dbConn.prepareStatement(
 			"SELECT count(*) AS low_stock FROM (" +
 			"    SELECT s_w_id, s_i_id, s_quantity " +
