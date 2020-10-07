@@ -53,10 +53,7 @@ create table bmsql_customer (
   c_data         varchar(500)
 );
 
-create sequence bmsql_hist_id_seq;
-
 create table bmsql_history (
-  hist_id  integer,
   h_c_id   integer,
   h_c_d_id integer,
   h_c_w_id integer,

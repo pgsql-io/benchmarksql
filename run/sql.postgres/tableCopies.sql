@@ -29,7 +29,7 @@ copy bmsql_customer
   from '/tmp/csv/customer.csv' WITH CSV;
 
 copy bmsql_history
-  (hist_id, h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data)
+  (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data)
   from '/tmp/csv/cust-hist.csv' WITH CSV;
 
 copy bmsql_oorder
