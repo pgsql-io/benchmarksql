@@ -55,41 +55,41 @@ cat >report.html <<_EOF_
   </title>
   <style>
 
-h1,h2,h3,h4	{ color:#2222AA;
+h1,h2,h3,h4     { color:#2222AA;
 		}
 
-h1		{ font-family: Helvetica,Arial;
+h1              { font-family: Helvetica,Arial;
 		  font-weight: 700;
 		  font-size: 24pt;
 		}
 
-h2		{ font-family: Helvetica,Arial;
+h2              { font-family: Helvetica,Arial;
 		  font-weight: 700;
 		  font-size: 18pt;
 		}
 
-h3,h4		{ font-family: Helvetica,Arial;
+h3,h4           { font-family: Helvetica,Arial;
 		  font-weight: 700;
 		  font-size: 16pt;
 		}
 
-p,li,dt,dd	{ font-family: Helvetica,Arial;
+p,li,dt,dd      { font-family: Helvetica,Arial;
 		  font-size: 14pt;
 		}
 
-p		{ margin-left: 50px;
+p               { margin-left: 50px;
 		}
 
-pre		{ font-family: Courier,Fixed;
+pre             { font-family: Courier,Fixed;
 		  font-size: 14pt;
 		}
 
-samp		{ font-family: Courier,Fixed;
+samp            { font-family: Courier,Fixed;
 		  font-weight: 900;
 		  font-size: 14pt;
 		}
 
-big		{ font-weight: 900;
+big             { font-weight: 900;
 		  font-size: 120%;
 		}
 
@@ -119,8 +119,8 @@ cat >> report.html <<_EOF_
   <p>
     <table width="${TABLE_WIDTH}" border="2">
     <tr>
-      <th rowspan="2" width="20%"><b>Transaction<br/>Type</b></th>
-      <th colspan="5" width="40%"><b>Latency</b></th>
+      <th rowspan="2" width="18%"><b>Transaction<br/>Type</b></th>
+      <th colspan="6" width="42%"><b>Latency</b></th>
       <th rowspan="2" width="8%"><b>Count</b></th>
       <th rowspan="2" width="8%"><b>Percent</b></th>
       <th rowspan="2" width="8%"><b>Rollback</b></th>
@@ -128,11 +128,12 @@ cat >> report.html <<_EOF_
       <th rowspan="2" width="8%"><b>Skipped<br/>Deliveries</b></th>
     </tr>
     <tr>
-      <th width="8%"><b>90th&nbsp;%</b></th>
-      <th width="8%"><b>95th&nbsp;%</b></th>
-      <th width="8%"><b>98th&nbsp;%</b></th>
-      <th width="8%"><b>Avg</b></th>
-      <th width="8%"><b>Max</b></th>
+      <th width="7%"><b>90th&nbsp;%</b></th>
+      <th width="7%"><b>95th&nbsp;%</b></th>
+      <th width="7%"><b>98th&nbsp;%</b></th>
+      <th width="7%"><b>Avg</b></th>
+      <th width="7%"><b>Max</b></th>
+      <th width="7%"><b>Limit</b></th>
     </tr>
 _EOF_
 
@@ -142,13 +143,46 @@ tr ',' ' ' <data/tx_summary.csv | \
 	[ ${name} == "tpmC" ] && continue
 	[ ${name} == "tpmTotal" ] && continue
 
+	# ----
+	# Determine maximum response time limit by transaction type
+	# ----
+	case "${name}" in
+	  DELIVERY_BG)  limit=80
+			;;
+	  STOCK_LEVEL)  limit=20
+			;;
+	  *)            limit=5
+			;;
+	esac
+
+	# ----
+	# Set the color of the n'th percentile and limit columns
+	# ----
+	style_ninth='style="color:#008000;"'
+	style_n5th='style="color:#008000;"'
+	style_n8th='style="color:#008000;"'
+	style_limit='style="color:#008000;"'
+	if (( $(echo "${n8th} > ${limit}" | bc -l) )) ; then
+	    style_n8th='style="color:#f08000;"'
+	    style_limit='style="color:#f08000;"'
+	fi
+	if (( $(echo "${n5th} > ${limit}" | bc -l) )) ; then
+	    style_n5th='style="color:#f08000;"'
+	    style_limit='style="color:#f08000;"'
+	fi
+	if (( $(echo "${ninth} > ${limit}" | bc -l) )) ; then
+	    style_ninth='style="color:#c00000;"'
+	    style_limit='style="color:#c00000;"'
+	fi
+
 	echo "    <tr>"
 	echo "      <td align=\"left\">${name}</td>"
-	echo "      <td align=\"right\">${ninth}</td>"
-	echo "      <td align=\"right\">${n5th}</td>"
-	echo "      <td align=\"right\">${n8th}</td>"
-	echo "      <td align=\"right\">${avg}</td>"
-	echo "      <td align=\"right\">${max}</td>"
+	echo "      <td align=\"right\" ${style_ninth}>${ninth}s</td>"
+	echo "      <td align=\"right\" ${style_n5th}>${n5th}s</td>"
+	echo "      <td align=\"right\" ${style_n8th}>${n8th}s</td>"
+	echo "      <td align=\"right\">${avg}s</td>"
+	echo "      <td align=\"right\">${max}s</td>"
+	echo "      <td align=\"right\" ${style_limit}>${limit}s</td>"
 	echo "      <td align=\"right\">${count}</td>"
 	echo "      <td align=\"right\">${percent}</td>"
 	echo "      <td align=\"right\">${rbk}</td>"
@@ -167,12 +201,12 @@ cat >>report.html <<_EOF_
   <p>
     <table border="0">
       <tr>
-        <td align="left"><big><b>Overall tpmC:</b></big></td>
-        <td align="right"><big><b>${tpmC}</b></big></td>
+	<td align="left"><big><b>Overall tpmC:</b></big></td>
+	<td align="right"><big><b>${tpmC}</b></big></td>
       </tr>
       <tr>
-        <td align="left"><big><b>Overall tpmTotal:</b></big></td>
-        <td align="right"><big><b>${tpmTotal}</b></big></td>
+	<td align="left"><big><b>Overall tpmTotal:</b></big></td>
+	<td align="right"><big><b>${tpmTotal}</b></big></td>
       </tr>
     </table>
   </p>
@@ -296,7 +330,7 @@ _EOF_
 # ---
 for devdata in data/blk_*.csv ; do
     if [ ! -f "$devdata" ] ; then
-        break
+	break
     fi
 
     dev=$(basename ${devdata} .csv)
@@ -317,7 +351,7 @@ done
 # ---
 for devdata in data/net_*.csv ; do
     if [ ! -f "$devdata" ] ; then
-        break
+	break
     fi
 
     dev=$(basename ${devdata} .csv)
