@@ -9,6 +9,8 @@
   <property name="dist"  location="dist"/>
   <property name="logs"  location="run/logs"/>
 
+  <property name="docker.tag"  value="benchmarksql-v6.0"/>
+
   <property name="lib.dir"     value="lib"/>
   <path id="classpath">
       <fileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -58,6 +60,14 @@
   <target name="dist" depends="compile" >
     <mkdir dir="${dist}"/>
     <jar jarfile="${dist}/BenchmarkSQL-6.devel.jar" basedir="${build}"/>
+  </target>
+
+  <target name="docker" depends="dist" >
+    <exec executable="docker" >
+      <arg value="build"/>
+      <arg value="-t${docker.tag}"/>
+      <arg value="."/>
+    </exec>
   </target>
 
   <target name="clean" description="clean up" >

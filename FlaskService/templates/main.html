@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <title>BenchmarkSQL Status</title>
+
+    <script>
+      var last_typ = "IDLE";
+
+      function update_log() {
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+	  // alert("got called readyState=" + xhr.readyState);
+	  if (xhr.readyState == 4 && xhr.status == 200) {
+	    // alert('got data');
+	    var typ = document.getElementById("job_type");
+	    var tim = document.getElementById("job_runtime");
+	    var txt = document.getElementById("job_log");
+	    var adjust = (txt.scrollTop + txt.offsetHeight) > (txt.scrollHeight - 5);
+
+	    var result = JSON.parse(xhr.responseText);
+
+	    typ.innerHTML = result[0];
+	    tim.innerHTML = result[1];
+	    txt.innerHTML = result[2];
+	    if (adjust) {
+	      txt.scrollTop = txt.scrollHeight;
+	    }
+
+	    var new_typ = result[0];
+	    if (new_typ == "IDLE" && last_typ != "IDLE") {
+	      var refresh = document.getElementById("refresh");
+	      refresh.click();
+	    }
+	    last_typ = new_typ;
+	  }
+	}
+	xhr.open('GET', '{{ url_job_status }}', true);
+	xhr.send();
+      }
+    </script>
+  </head>
+  <body onLoad="setInterval(update_log, 1000)">
+    <h1>BenchmarkSQL Status is <span id="job_type">{{ current_job_type }}</span></h1>
+    <h2>Current job is running for <span id="job_runtime">{{ current_job_runtime }}</span></h2>
+    <form action="{{ url_for('index') }}" method="post">
+      <h2>Properties</h2>
+      <table border=0>
+	<tr>
+	  <td colspan="5">
+	    <textarea name="properties" cols="100" rows="15">{{ properties }}</textarea>
+	  </td>
+	  <td valign="top">
+	    <input type="submit" name="action" style="width:300px" value="Load Oracle Sample" disabled />
+	    <br />
+	    <input type="submit" name="action" style="width:300px" value="Load PostgreSQL Sample" disabled />
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center">
+	    <input type="submit" name="action" style="width:100px" value="RUN" {{ state_run }} />
+	  </td>
+	  <td align="center">
+	    <input type="submit" name="action" style="width:100px" value="BUILD" {{ state_build }} />
+	  </td>
+	  <td align="center">
+	    <input type="submit" name="action" style="width:100px" value="DESTROY" {{ state_destroy }} />
+	  </td>
+	  <td align="center">
+	    <input type="submit" name="action" style="width:100px" value="CANCEL" {{ state_cancel }} />
+	  </td>
+	  <td align="center">
+	    <input type="submit" name="action" id="refresh" style="width:100px" value="REFRESH" {{ state_refresh }} />
+	  </td>
+	  <td>&nbsp;</td>
+      </table>
+    </form>
+    <h2>Current/Last Job Output</h2>
+    <textarea id="job_log" cols="160" rows="22" readonly>{{ current_job_output }}</textarea>
+    <script>
+      var txt = document.getElementById("job_log");
+      txt.scrollTop = txt.scrollHeight;
+    </script>
+    <h2>Results</h2>
+    <table border="2" width="80%">
+      <tr>
+        <th>Result&nbsp;Name</th>
+        <th>Start&nbsp;Time</th>
+        <th>State</th>
+        <th colspan="3">Action</th>
+      </tr>
+      {% for run_id, res_name, res_start, res_state in results %}
+        <tr>
+	  <td>{{ res_name }}</td>
+	  <td>{{ res_start }}</td>
+	  <td>{{ res_state }}</td>
+	  {% if res_state == "RUN" %}
+	    <td colspan="3" align="center">In&nbsp;Progress</td>
+	  {% endif %}
+	  {% if res_state == "CANCELED" %}
+	    <td><a href="{{ url_for('result_log') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Log</a></td>
+	    <td><a href="{{ url_for('result_show') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Report</a></td>
+	    <td><a href="{{ url_for('result_delete') }}?run_id={{ run_id }}">Delete&nbsp;Result</a></td>
+	  {% endif %}
+	  {% if res_state == "FINISHED" %}
+	    <td><a href="{{ url_for('result_log') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Log</a></td>
+	    <td><a href="{{ url_for('result_show') }}?run_id={{ run_id }}" target="_blank">Show&nbsp;Report</a></td>
+	    <td><a href="{{ url_for('result_delete') }}?run_id={{ run_id }}">Delete&nbsp;Result</a></td>
+	  {% endif %}
+	</tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
