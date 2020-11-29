@@ -22,7 +22,7 @@ Architecture of the BenchmarkSQL Timed Driver
 =============================================
 To avoid the above problems, the Terminal in the BenchmarkSQL Timed Driver is not a thread by itself, but a data structure that is passed around in queues between several thread groups. 
 
-![](TimedDriver-1.svg)
+<img src="TimedDriver-1.svg" width="100%"/>
 
 TData
 -----
