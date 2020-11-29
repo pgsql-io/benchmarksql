@@ -5,21 +5,6 @@ if [ $# -ne 1 ] ; then
     exit 2
 fi
 
-# ----
-# In case we get a SIGINT or SIGTERM, kill the whole process group.
-# Note that below we start all load steps in the background and
-# test with kill -0 when they end. This is because bash doesn't
-# process signals while it is waiting on a command.
-# ----
-function abort_run() {
-    echo "" >&2
-    echo "abort_run called" >&2
-    PGID=$(ps -h -o pgid $$ | sed -e 's/[^0-9]*//g')
-    setsid kill -- -$PGID
-    exit 1
-}
-trap abort_run SIGINT SIGTERM
-
 SEQ_FILE="./.jTPCC_run_seq.dat"
 if [ ! -f "${SEQ_FILE}" ] ; then
     echo "0" > "${SEQ_FILE}"
