@@ -127,8 +127,16 @@ flags _-it_ with _-d_.
 At this point the BenchmarkSQL service is running and you can connect to
 it with you browser on http://localhost:5000
 
-If you created this service on a remote machine, don't forget to open port
-5000/tcp in the firewall.
+If you created this service on a remote machine, don't simply open port
+5000/tcp in the firewall. **Keep in mind that the configuration file,
+controlling the actual database server, contains all the connection
+credentials in clear text!** The plan is to substantially enhance the
+Flask GUI and API with user and configuration management. Then provide
+instructions how to secure the container behind an
+[nginx](https://www.nginx.com/) reverse proxy for encryption. In the meantime
+please use ssh to tunnel port 5000/tcp securely to the benchmark
+driver machine. Since that tunnel is only for the WEB UI and API traffic,
+it won't affect the benchmark results at all.
 
 
 TODO: Point to a tutorial walking through the Flask GUI.
