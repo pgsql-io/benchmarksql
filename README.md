@@ -116,7 +116,7 @@ docker run --rm -it --name benchmarksql-service \
 * It creates a local directory to preserve configuration and result data.
   This directory is mounted into the container.
 * It runs the docker image **benchmarksql-v6.0** as a container
-  with a tag **benchmarksql-service. This container is running the
+  with a tag **benchmarksql-service**. This container is running the
   service under the current user (not root) and it forwards port 5000/tcp
   into the container for the Flask UI and API.
 
@@ -125,8 +125,8 @@ log for debugging purposes. To run it in the background simply replace the
 flags _-it_ with _-d_.
 
 At this point the BenchmarkSQL service is running and you can connect to
-it with you browser on 
-<a href="http://localhost:5000" target="_blank">http://localhost:5000</a>.
+it with you browser on http://localhost:5000
+
 If you created this service on a remote machine, don't forget to open port
 5000/tcp in the firewall.
 
