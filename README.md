@@ -4,10 +4,38 @@ BenchmarkSQL
 BenchmarkSQL is a [GPLv2](./doc/LICENSE.gpl-2.0.txt)
 fair-use TPC-C like testing tool.
 
+TPC-C
+-----
+
+The TPC-C is an OLTP benchmark defined by the
+[Transaction Processing Counil](http://tpc.org). It consists of 9 tables
+that are connected with 10 Foreign Key Relationships. Except for the **Item**
+table, everything is scaled in cardinality by the number of warehouses (**W**),
+that are generated during the initial load of the database.
+
+<img src="./doc/TPC-C_ERD.svg" width="100%"/>
+
+This schema is used by 5 different transactions that produce a variety of
+different access patterns on the tables. 
+
+* **Item** is read only.
+* **Warehouse**, **District**, **Customer** and **Stock** are read/write.
+* **New-Order** is insert, read and delete, like a queue that at any given
+  time has approximately W * 9000 rows in it.
+* **Order** and **Order-Line** receive inserts and every row inserted will
+  have a time delayed update to it, after which the row becomes stale and
+  may be read infrequently in the future.
+* **History** is insert only.
+
+This is an impressive complexity and set of different access patterns for
+such a small schema and number of transaction profiles. It is one of the
+reasons why **TPC-C** is still one of the most important database benchmarks
+today.
+
 Overview
 --------
 
-BenchmarkSQL is a TPC-C like testing tool implemented in JAVA, using
+BenchmarkSQL is implemented in JAVA, using
 JDBC to stress test SQL databases. The overall architecture is a
 series of data structures, queues and thread groups that handle the
 simulated terminals, users and application threads. 
@@ -15,8 +43,8 @@ simulated terminals, users and application threads.
 Its architecture allows BenchmarkSQL to drive TPC-C configurations
 up to many thousands of warehouses (known as the scaling factor) without
 overwhelming the job scheduler of the test driver itself. Yet it is
-capable of doing so without sacrificing the most important measurement
-in a TPC-C: the end-user experienced response time at the terminal.
+capable of doing so without sacrificing one of the most important measurements
+in a TPC-C, the end-user experienced response time at the terminal.
 
 <img src="./doc/TimedDriver-1.svg" width="100%"/>
 
@@ -33,11 +61,11 @@ while controlling it through a browser or scripted.
 
 See the [build instructions](./doc/BUILDING.md) for details.
 
-Running
--------
+Launching the Service Container
+-------------------------------
 
 Once the Docker image is built a container can be started with the
-```service-start.sh```
+```service-start.sh``` script.
 ```
 #!/bin/sh
 
@@ -65,10 +93,11 @@ it with you browser on http://localhost:5000
 
 If you created this service on a remote machine, don't simply open port
 5000/tcp in the firewall. **Keep in mind that the configuration file,
-controlling the actual database server, contains all the connection
-credentials in clear text!** The plan is to substantially enhance the
+controlling the benchmark run settings, contains all the connection
+credentials for your database in clear text!**
+The plan is to substantially enhance the
 Flask GUI and API with user and configuration management. Then provide
-instructions how to secure the container behind an
+instructions on how to secure the container behind an
 [nginx](https://www.nginx.com/) reverse proxy for encryption. In the meantime
 please use ssh to tunnel port 5000/tcp securely to the benchmark
 driver machine. Since that tunnel is only for the WEB UI and API traffic,
