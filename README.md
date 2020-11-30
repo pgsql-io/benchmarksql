@@ -1,7 +1,8 @@
 BenchmarkSQL
 ============
 
-BenchmarkSQL is a GPLv2 fair-use TPC-C like testing tool.
+BenchmarkSQL is a [GPLv2](./doc/LICENSE.gpl-2.0.txt)
+fair-use TPC-C like testing tool.
 
 Overview
 --------
