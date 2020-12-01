@@ -103,8 +103,14 @@ please use ssh to tunnel port 5000/tcp securely to the benchmark
 driver machine. Since that tunnel is only for the WEB UI and API traffic,
 it won't affect the benchmark results at all.
 
+Configuring and Running a Benchmark
+-----------------------------------
 
-TODO: Point to a tutorial walking through the Flask GUI.
+BenchmarkSQL is configured with files in the JAVA properties format.
+A detailed description of all parameters in that file can be found
+[here](./doc/PROPERTIES.md).
+
+TODO: Tutorial of how to use the WEB UI
 
 Automation
 ----------
