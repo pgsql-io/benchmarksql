@@ -72,8 +72,8 @@ show speeding up the attempted rate of transactions 10 times.
 
 | Parameter		| Description				| Example |
 | --------------------- | ------------------------------------- | ------- |
-| **keyingTimeMultiplier** | Keying is the simulated time, the user needs to fill the input screen. This is a random number of seconds within a range dependent on the transaction type. | 0.1 |
-| **thinkTimeMultiplier** | Similar to the Keying the Trink time is the simulated time, the user needs to process the transaction outcome by reading the output screen. This is a fixed number of seconds dependent on the transaction type. | 0.1 |
+| **keyingTimeMultiplier** | Keying is the simulated time, the user needs to fill the input screen. This is a fixed number of seconds dependent on the transaction type. | 0.1 |
+| **thinkTimeMultiplier** | Similar to the Keying the Trink time is the simulated time, the user needs to process the transaction outcome by reading the output screen. This is a random time with a defined mean per transaction time. | 0.1 |
 
 Transaction Mix Parameters
 --------------------------
