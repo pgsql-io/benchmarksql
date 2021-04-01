@@ -45,7 +45,19 @@ function setCP()
 	    cp="../lib/transact-sql/*:../lib/*"
 	    ;;
     esac
-    myCP="../extra_lib/*:.:${cp}:../dist/*"
+    if [ -d "/service_data/extra_lib" ] ; then
+	cp="/service_data/extra_lib/*:${cp}"
+        for f in `find "/service_data/extra_lib" -type d` ; do
+	    cp="${f}/*:${cp}"
+	done
+    fi
+    if [ -d "../service_data/extra_lib" ] ; then
+	cp="../service_data/extra_lib/*:${cp}"
+        for f in `find "../service_data/extra_lib" -type d` ; do
+	    cp="${f}/*:${cp}"
+	done
+    fi
+    myCP="${cp}:../dist/*"
     export myCP
 }
 
