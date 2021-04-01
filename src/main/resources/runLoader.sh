@@ -13,4 +13,4 @@ setCP || exit 1
 myOPTS="-Dprop=${PROPS}"
 myOPTS="${myOPTS} -Djava.security.egd=file:/dev/./urandom"
 
-java -cp "$myCP" $myOPTS LoadData $*
+java -cp "$myCP" $myOPTS com.github.pgsqlio.benchmarksql.loader.LoadData $*

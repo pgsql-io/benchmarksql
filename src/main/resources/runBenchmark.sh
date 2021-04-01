@@ -19,7 +19,7 @@ setCP || exit 1
 myOPTS="-Dprop=$1 -DrunID=${SEQ}"
 myOPTS="${myOPTS} -Djava.security.egd=file:/dev/./urandom"
 
-java -cp "$myCP" $myOPTS jTPCC &
+java -cp "$myCP" $myOPTS com.github.pgsqlio.benchmarksql.jtpcc.jTPCC &
 PID=$!
 while true ; do
     kill -0 $PID 2>/dev/null || break

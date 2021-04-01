@@ -24,7 +24,6 @@ COPY ./target/ /benchmarksql/run/
 RUN mkdir -p /service_data
 RUN ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat
 RUN ln -s /service_data/benchmarksql-error.log /benchmarksql/run/
-RUN ln -s /service_data/extra_lib /benchmarksql/extra_lib
 
 CMD ["python3", "/benchmarksql/FlaskService/main.py"]
 

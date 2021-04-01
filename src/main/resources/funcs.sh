@@ -14,7 +14,8 @@ fi
 # ----
 function getProp()
 {
-    grep "^${1}=" ${PROPS} | sed -e "s/^${1}=//" -e 's/\s*$//'
+    grep "^${1}=" ${PROPS} | sed -e "s/^${1}=//"
+    # grep "^${1}=" ${PROPS} | sed -e "s/^${1}=//" -e 's/\s*$//'
 }
 
 # ----
@@ -26,26 +27,26 @@ function setCP()
 {
     case "$(getProp db)" in
 	oracle)
-	    cp="../lib/oracle/*"
+	    cp="../lib/*"
 	    if [ ! -z "${ORACLE_HOME}" -a -d ${ORACLE_HOME}/lib ] ; then
 		cp="${cp}:${ORACLE_HOME}/lib/*"
 	    fi
 	    cp="${cp}:../lib/*"
 	    ;;
 	postgres)
-	    cp="../lib/postgres/*:../lib/*"
+	    cp="../lib/*"
 	    ;;
 	firebird)
-	    cp="../lib/firebird/*:../lib/*"
+	    cp="../lib/*"
 	    ;;
 	mariadb)
-	    cp="../lib/mariadb/*:../lib/*"
+	    cp="../lib/*"
 	    ;;
 	transact-sql)
-	    cp="../lib/transact-sql/*:../lib/*"
+	    cp="../lib/*"
 	    ;;
     esac
-    myCP="../extra_lib/*:.:${cp}:../dist/*"
+    myCP="./:../BenchmarkSQL.jar:${cp}"
     export myCP
 }
 
