@@ -27,32 +27,31 @@ Instructions for running BenchmarkSQL on PostgreSQL
     created by unpacking the release tarball/zipfile. Use the ant
     command to compile the code.
 
-    [wieck@localhost ~] $ cd benchmarksql
-    [wieck@localhost benchmarksql] $ ant
-    Buildfile: /nas1/home/wieck/benchmarksql.git/build.xml
-
-    init:
-        [mkdir] Created dir: /home/wieck/benchmarksql/build
-
-    compile:
-	[javac] Compiling 11 source files to /home/wieck/benchmarksql/build
-
-    dist:
-	[mkdir] Created dir: /home/wieck/benchmarksql/dist
-	  [jar] Building jar: /home/wieck/benchmarksql/dist/BenchmarkSQL-6.devel.jar
-    BUILD SUCCESSFUL
-    Total time: 1 second
-    [wieck@localhost benchmarksql] $
+```
+$ cd benchmarksql
+$ mvn
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.github.pgsql-io:benchmarksql >------------------
+[INFO] Building A TPC-C like test tool 6.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+...
+```
 
 3. Create the benchmark configuration file
 
     Change the the run directory, copy the props.pg file and edit
     the copy to match your system setup and desired scaling.
 
-    [wieck@localhost benchmarksql] $ cd run
-    [wieck@localhost run] $ cp sample.postgresql.properties my_postgres.properties
-    [wieck@localhost run] $ vi my_postgres.properties
-    [wieck@localhost run] $
+```
+$ cd target/run
+$ cp sample.postgresql.properties my_postgres.properties
+$ vi my_postgres.properties
+```
 
     Note that the provided example configuration is meant to test
     the functionality of your setupr. That benchmarksql can connect
@@ -84,7 +83,8 @@ Instructions for running BenchmarkSQL on PostgreSQL
 
     Execute the runDatabaseBuild.sh script with your configuration file.
 
-    [wieck@localhost run]$ ./runDatabaseBuild.sh my_postgres.properties
+
+    $ ./runDatabaseBuild.sh my_postgres.properties
     # ------------------------------------------------------------
     # Loading SQL file ./sql.common/tableCreates.sql
     # ------------------------------------------------------------
@@ -123,11 +123,10 @@ Instructions for running BenchmarkSQL on PostgreSQL
     primary key (d_w_id, d_id);
     [...]
     vacuum analyze;
-    [wieck@localhost run]$
 
 5. Run the configured benchmark
 
-    [wieck@localhost run]$ ./runBenchmark.sh my_postgres.properties
+    $ ./runBenchmark.sh my_postgres.properties
 
     The benchmark should run for the number of configured concurrent
     connections (terminals) and the duration or number of transactions.
@@ -154,8 +153,8 @@ Instructions for running BenchmarkSQL on PostgreSQL
 
     Rebuild the database (if needed) by running
 
-    [wieck@localhost run]$ ./runDatabaseDestroy.sh my_postgres.properties
-    [wieck@localhost run]$ ./runDatabaseBuild.sh my_postgres.properties
+    $ ./runDatabaseDestroy.sh my_postgres.properties
+    $ ./runDatabaseBuild.sh my_postgres.properties
 
     Then run the benchmark again.
 
