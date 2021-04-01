@@ -1,12 +1,13 @@
 FROM centos:8
 
-RUN yum -y update
+RUN dnf -y update
 
-RUN yum -y install epel-release
-RUN yum -y install java-1.8.0-openjdk-headless
-RUN yum -y install R-core bc
-RUN yum -y install python3
-RUN yum -y install python3-pip
+RUN dnf -y install epel-release
+RUN dnf -y install java-1.8.0-openjdk-headless
+RUN dnf -y install R-core
+RUN dnf -y install bc
+RUN dnf -y install python3
+RUN dnf -y install python3-pip
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 ENV FLASK_ENV=development
