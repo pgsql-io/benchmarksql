@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCC - BenchmarkSQL main class
  *
@@ -12,6 +13,10 @@ import java.util.regex.Pattern;
 import java.lang.Integer;
 import java.lang.Double;
 import java.lang.Boolean;
+import com.github.pgsqlio.benchmarksql.application.AppGeneric;
+import com.github.pgsqlio.benchmarksql.application.oracle.AppOracleStoredProc;
+import com.github.pgsqlio.benchmarksql.application.postgres.AppPostgreSQLStoredProc;
+import com.github.pgsqlio.benchmarksql.oscollector.*;
 
 public class jTPCC
 {

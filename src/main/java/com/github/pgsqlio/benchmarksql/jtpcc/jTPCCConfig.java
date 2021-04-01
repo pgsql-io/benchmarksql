@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCConfig - Basic configuration parameters for jTPCC
  *

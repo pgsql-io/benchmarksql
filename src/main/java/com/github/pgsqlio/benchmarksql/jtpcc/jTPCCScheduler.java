@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCScheduler - Event scheduler for jTPCC
  *

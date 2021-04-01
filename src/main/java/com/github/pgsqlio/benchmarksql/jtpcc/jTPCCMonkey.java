@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCMonkey - The terminal input data generator and output consumer.
  *

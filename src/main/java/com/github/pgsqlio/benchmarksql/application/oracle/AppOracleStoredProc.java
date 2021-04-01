@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.application.oracle;
 /*
  * AppOracleStoredProc - TPC-C Transaction Implementation for using
  *			 Stored Procedures on Oracle
@@ -10,6 +11,7 @@ import java.sql.*;
 import java.math.*;
 import oracle.jdbc.*;
 import oracle.sql.*;
+import com.github.pgsqlio.benchmarksql.jtpcc.*;
 
 public class AppOracleStoredProc extends jTPCCApplication
 {

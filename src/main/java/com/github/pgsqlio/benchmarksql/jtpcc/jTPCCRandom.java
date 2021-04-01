@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCRandom - Random functions for TPC-C
  *
@@ -54,7 +55,7 @@ public class jTPCCRandom
      *     Used to create the master jTPCCRandom() instance for loading
      *     the database. See below.
      */
-    jTPCCRandom()
+    public jTPCCRandom()
     {
 	if (initialized)
 	    throw new IllegalStateException("Global instance exists");
@@ -122,7 +123,7 @@ public class jTPCCRandom
      *     generate them per instance, but each thread's instance must
      *     inherit those numbers from a global instance.
      */
-    jTPCCRandom newRandom()
+    public jTPCCRandom newRandom()
     {
 	return new jTPCCRandom(this);
     }

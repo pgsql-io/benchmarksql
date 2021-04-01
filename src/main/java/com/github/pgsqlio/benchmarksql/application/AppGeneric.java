@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.application;
 /*
  * AppGeneric - TPC-C Transaction Implementation for using
  *		Generic with plain JDBC PreparedStatements.
@@ -7,6 +8,7 @@ import org.apache.log4j.*;
 
 import java.util.*;
 import java.sql.*;
+import com.github.pgsqlio.benchmarksql.jtpcc.*;
 
 public class AppGeneric extends jTPCCApplication
 {

@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.loader;
 /*
  * LoadData - Load Sample Data directly into database tables or into
  * CSV files using multiple parallel workers.
@@ -11,6 +12,7 @@ import java.sql.*;
 import java.util.*;
 import java.io.*;
 import java.lang.Integer;
+import com.github.pgsqlio.benchmarksql.jtpcc.*;
 
 public class LoadData
 {

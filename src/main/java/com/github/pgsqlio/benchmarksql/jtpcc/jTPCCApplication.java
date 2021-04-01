@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCApplication - Dummy of the DB specific implementation of the
  * 		      TPC-C Transactions

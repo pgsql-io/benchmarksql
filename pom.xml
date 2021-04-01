@@ -1,0 +1,149 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.pgsql-io</groupId>
+	<artifactId>benchmarksql</artifactId>
+	<version>6.0.0-SNAPSHOT</version>
+	<name>A TPC-C like test tool</name>
+	<description>BenchmarkSQL is a TPC-C fair-use implementation.</description>
+
+	<!-- TODO To change when this project use github pages -->
+	<url>https://github.com/pgsql-io/benchmarksql</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<!-- To check newer version of the dependencies, run the following: -->
+	<!-- mvn versions:display-dependency-updates -->
+	<dependencies>
+
+		<!-- Logging facility drivers -->
+		<!-- TODO to update to log4j v2 -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+		<!-- Postgres driver -->
+		<!-- Depending the Java version, it could use a different version. -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.19</version>
+		</dependency>
+
+		<!-- Oracle db driver -->
+		<!-- Depending the Java version, it could use a different version. -->
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>21.1.0.0</version>
+		</dependency>
+
+		<!-- Microsoft SQL Server driver -->
+		<!-- Depending the Java version, it could use a different version. -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>9.2.1.jre8</version>
+		</dependency>
+
+		<!-- Db2 driver -->
+		<dependency>
+			<groupId>com.ibm.db2</groupId>
+			<artifactId>jcc</artifactId>
+			<version>11.5.5.0</version>
+		</dependency>
+
+		<!-- MySQL driver -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.23</version>
+		</dependency>
+
+		<!-- MariaDB -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>2.7.2</version>
+		</dependency>
+
+		<!-- Firebird driver -->
+		<!-- https://firebirdsql.org/en/jdbc-driver/ -->
+		<dependency>
+			<groupId>org.firebirdsql.jdbc</groupId>
+			<artifactId>jaybird</artifactId>
+			<version>4.0.3.java8</version>
+		</dependency>
+
+	</dependencies>
+
+	<!-- When executing mvn, it cleans the target directory, and then creates 
+		the package and copy the resources. -->
+	<build>
+		<defaultGoal>clean package</defaultGoal>
+
+		<!-- Name of the target jar (no version in the name). -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<finalName>BenchmarkSQL</finalName>
+				</configuration>
+			</plugin>
+
+			<!-- Copies the necessary jars in the target directory. This builds a 
+				jar without JDBC drivers. -->
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Copies the resource files, the bash, cmd and sql scripts. -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<outputDirectory>${basedir}/target/run</outputDirectory>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<organization>
+		<name>PGSQL</name>
+		<url>https://pgsql.io/</url>
+	</organization>
+	<!-- TODO Travis - -> <ciManagement> <system>Travis-CI</system> <url>https://travis-ci.com/github/ECI-SGBD/BenchmarkSQL-4</url> 
+		</ciManagement -->
+	<issueManagement>
+		<url>https://github.com/pgsql-io/benchmarksql/issues</url>
+		<system>GitHub</system>
+	</issueManagement>
+	<scm>
+		<url>https://github.com/pgsql-io/benchmarksql</url>
+	</scm>
+</project>

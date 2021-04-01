@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jdbc;
 /*
  * ExecJDBC - Command line program to process SQL DDL statements, from
  *             a text input file, to any JDBC Data Source

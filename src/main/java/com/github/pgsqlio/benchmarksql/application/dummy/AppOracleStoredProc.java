@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.application.dummy;
 /*
  * AppOracleStoredProc - TPC-C Transaction Implementation for using
  *			 Stored Procedures on Oracle
@@ -8,6 +9,7 @@ import org.apache.log4j.*;
 import java.util.*;
 import java.sql.*;
 import java.math.*;
+import com.github.pgsqlio.benchmarksql.jtpcc.*;
 
 public class AppOracleStoredProc extends jTPCCApplication
 {

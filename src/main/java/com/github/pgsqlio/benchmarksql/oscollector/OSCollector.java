@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.oscollector;
 /*
  * OSCollector.java
  *

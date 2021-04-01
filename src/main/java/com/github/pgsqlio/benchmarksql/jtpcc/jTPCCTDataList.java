@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.jtpcc;
 /*
  * jTPCCTDataList - A double linked list of Terminal Data objects.
  *

@@ -1,3 +1,4 @@
+package com.github.pgsqlio.benchmarksql.loader;
 /*
  * LoadDataWorker - Class to load one Warehouse (or in a special case
  * the ITEM table).
@@ -10,6 +11,7 @@
 import java.sql.*;
 import java.util.*;
 import java.io.*;
+import com.github.pgsqlio.benchmarksql.jtpcc.*;
 
 public class LoadDataWorker implements Runnable
 {
