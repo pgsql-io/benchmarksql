@@ -20,6 +20,9 @@ RUN pip3 install Flask
 COPY ./target/ /benchmarksql
 
 RUN mkdir -p /service_data
+RUN ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat
+RUN ln -s /service_data/benchmarksql-error.log /benchmarksql/run/benchmarksql-error.log
+RUN ln -s /service_data/benchmarksql-trace.log /benchmarksql/run/benchmarksql-trace.log
 
 CMD ["python3", "/benchmarksql/run/FlaskService/main.py"]
 
