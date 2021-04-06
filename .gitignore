@@ -2,3 +2,8 @@ build
 dist
 results
 service_data
+/bin/
+/target/
+.classpath
+.project
+.settings

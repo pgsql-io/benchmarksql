@@ -1,3 +1,5 @@
+# Note: This should be run, once Maven has build correctly the target directory.
+
 FROM centos:8
 
 RUN dnf -y update
@@ -15,11 +17,7 @@ ENV FLASK_ENV=development
 RUN pip3 install pip --upgrade
 RUN pip3 install Flask
 
-RUN mkdir -p /benchmarksql
-COPY ./FlaskService/ /benchmarksql/FlaskService/
-COPY ./dist/ /benchmarksql/dist/
-COPY ./lib/ /benchmarksql/lib/
-COPY ./run/ /benchmarksql/run/
+COPY ./target/ /benchmarksql
 
 RUN mkdir -p /service_data
 RUN rm -f /benchmarksql/run/.jTPCC_run_seq.dat
@@ -28,7 +26,6 @@ RUN rm -f /benchmarksql/run/benchmarksql-trace.log
 RUN ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat
 RUN ln -s /service_data/benchmarksql-error.log /benchmarksql/run/benchmarksql-error.log
 RUN ln -s /service_data/benchmarksql-trace.log /benchmarksql/run/benchmarksql-trace.log
-RUN ln -s /service_data/extra_lib /benchmarksql/extra_lib
 
-CMD ["python3", "/benchmarksql/FlaskService/main.py"]
+CMD ["python3", "/benchmarksql/run/FlaskService/main.py"]
 

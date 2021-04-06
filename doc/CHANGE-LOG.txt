@@ -2,6 +2,12 @@
 BENCHMARKSQL CHANGE LOG:
 ------------------------
 
+Version 6.0
+-----------
+
+  + Project lifecycle manager with Maven instead of Ant.
+  + TODO
+
 Version 5.1 lussman & jannicash:
 --------------------------------
   +  Clarify License
