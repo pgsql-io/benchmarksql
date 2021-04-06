@@ -79,7 +79,7 @@
 		<dependency>
 			<groupId>org.firebirdsql.jdbc</groupId>
 			<artifactId>jaybird</artifactId>
-			<version>4.0.3.java8</version>
+			<version>4.0.3.java11</version>
 		</dependency>
 
 	</dependencies>
