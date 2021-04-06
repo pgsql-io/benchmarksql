@@ -28,17 +28,17 @@ class BenchmarkSQL:
         # actual job scripts.
         # ----
         head, tail = os.path.split(__file__)
-        self.run_dir = os.path.abspath(os.path.join(head, '..', 'run'))
+        self.run_dir = os.path.abspath(os.path.join(head, '..'))
         if not os.path.exists(os.path.join(self.run_dir, 'runBenchmark.sh')):
             raise Exception("BenchmarkSQL run components not found at '{0}'".format(self.run_dir))
         os.chdir(self.run_dir)
 
         # ----
-        # The "service_data" directory defaults to benchmarksql/service_data.
+        # The "service_data" directory defaults to ./service_data.
         # It that does not exist we assume to live in the docker container
         # and try /service_data.
         # ----
-        self.data_dir = os.path.abspath(os.path.join(head, '..', 'service_data'))
+        self.data_dir = os.path.abspath(os.path.join(os.path.curdir, 'service_data'))
         if os.path.isdir(self.data_dir):
             print("using existing", self.data_dir)
         else:
