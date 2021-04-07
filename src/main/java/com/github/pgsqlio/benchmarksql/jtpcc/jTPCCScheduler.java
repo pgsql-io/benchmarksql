@@ -46,7 +46,7 @@ public class jTPCCScheduler implements Runnable
 	long		now;
 	jTPCCTData  tdata;
 
-	log_info("ready");
+	log.info("Scheduler, ready");
 
 	for (;;)
 	{
@@ -70,7 +70,7 @@ public class jTPCCScheduler implements Runnable
 			 */
 			if ((tdata = avl_first()) == null)
 			{
-			    // log_info("queue empty");
+			    log.trace("Scheduler, queue empty");
 			    avl_lock.wait();
 			    continue;
 			}
@@ -87,8 +87,8 @@ public class jTPCCScheduler implements Runnable
 			now = System.currentTimeMillis();
 			if (tdata.trans_due > now)
 			{
-			    // log_info("next event due at " +
-			    //	     new java.sql.Timestamp(tdata.trans_due));
+			    log.trace("Scheduler, next event due at {}",
+			    	     new java.sql.Timestamp(tdata.trans_due));
 			    avl_lock.wait(tdata.trans_due - now);
 			    continue;
 			}
@@ -98,14 +98,14 @@ public class jTPCCScheduler implements Runnable
 			 * past). Consume it from the queue and exit the
 			 * wait loop.
 			 */
-			// log_info("removing " + tdata.dumpHdr());
+			log.trace("Scheduler, removing {}", tdata.dumpHdr());
 			avl_remove(tdata);
 			break;
 		    }
 		}
 		catch (InterruptedException e)
 		{
-		    log_error("InterruptedException: " + e.getMessage());
+		    log.error("Scheduler, InterruptedException: {}", e.getMessage());
 		    return;
 		}
 	    }
@@ -151,24 +151,24 @@ public class jTPCCScheduler implements Runnable
 		    break;
 
 		case SCHED_BEGIN:
-		    log_info("rampup done - measurement begins");
+		    log.info("Scheduler, rampup done - measurement begins");
 		    break;
 
 		case SCHED_END:
-		    log_info("run done - measurement ends");
+		    log.info("Scheduler, run done - measurement ends");
 		    break;
 
 		case SCHED_TERM_LAUNCH_DONE:
-		    log_info("all simulated terminals active");
+		    log.info("Scheduler, all simulated terminals active");
 		    break;
 
 		case SCHED_SUT_LAUNCH_DONE:
-		    log_info("all SUT threads active");
+		    log.info("Scheduler, all SUT threads active");
 		    break;
 
 		case SCHED_REPORT:
-		    log_info("Current TPM=" + (current_trans_count * 60) / jTPCC.reportIntervalSecs +
-			     " NOPM=" + (current_neword_count * 60) / jTPCC.reportIntervalSecs);
+		    log.info("Scheduler, Current TPM={}, NOPM={}", (current_trans_count * 60) / jTPCC.reportIntervalSecs,
+			      (current_neword_count * 60) / jTPCC.reportIntervalSecs);
 		    current_trans_count = 0;
 		    current_neword_count = 0;
 		    this.at(tdata.trans_due + jTPCC.reportIntervalSecs * 1000,
@@ -177,12 +177,12 @@ public class jTPCCScheduler implements Runnable
 		    break;
 
 		default:
-		    log_error("unknown scheduler code " + tdata.sched_code);
+		    log.error("Scheduler, unknown scheduler code {}", tdata.sched_code);
 		    break;
 	    }
 	}
 
-	log_info("done");
+	log.info("Scheduler, done");
     }
 
     public void at(long when, int code, jTPCCTData tdata)
@@ -234,7 +234,7 @@ public class jTPCCScheduler implements Runnable
 	else if (side > 0)
 	    into.term_right = avl_insert_node(into.term_right, node);
 	else
-	    log_error("duplicate avl node " + node.dumpHdr());
+	    log.error("Scheduler, duplicate avl node {}", node.dumpHdr());
 	return avl_balance(into);
     }
 
@@ -255,7 +255,7 @@ public class jTPCCScheduler implements Runnable
 
 	if (stack == null)
 	{
-	    log_error("entry not found in avl_remove_node: " +
+	    log.error("Scheduler, entry not found in avl_remove_node: {}",
 		      needle.dumpHdr());
 	    return null;
 	}
@@ -401,13 +401,4 @@ public class jTPCCScheduler implements Runnable
 	return (long)(this.random.nextDouble() * (max - min + 1) + min);
     }
 
-    private void log_info(String message)
-    {
-	log.info("Scheduler, " + message);
-    }
-
-    private void log_error(String message)
-    {
-	log.error("Scheduler, " + message);
-    }
 }

@@ -2,16 +2,20 @@ package com.github.pgsqlio.benchmarksql.jtpcc;
 
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * jTPCCRandom - Random functions for TPC-C
  *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
- *
  */
 public class jTPCCRandom
 {
+    private static Logger log = LogManager.getLogger(jTPCCRandom.class);
+
     private static final char[] aStringChars = {
 	    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 	    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -62,7 +66,7 @@ public class jTPCCRandom
 	jTPCCRandom.nURandCI_ID = nextLong(0, 8191);
 
 	initialized = true;
-	System.out.println("random initialized");
+	log.warn("random initialized");
     }
 
     /*

@@ -77,7 +77,7 @@ public class OSCollector
 	}
 	catch (Exception e)
 	{
-	    log.error("OSCollector, " + e.getMessage());
+	    log.error("OSCollector, {}", e.getMessage());
 	    System.exit(1);
 	}
 
@@ -102,8 +102,8 @@ public class OSCollector
 	}
 	catch (Exception e)
 	{
-	    log.error("OSCollector " + e.getMessage());
-	    e.printStackTrace();
+	    log.error("OSCollector {}", e.getMessage());
+	    log.info(e);
 	    System.exit(1);
 	}
 
@@ -121,7 +121,7 @@ public class OSCollector
 	}
 	catch (InterruptedException ie)
 	{
-	    log.error("OSCollector, " + ie.getMessage());
+	    log.error("OSCollector, {}", ie.getMessage());
 	    return;
 	}
     }
@@ -151,9 +151,7 @@ public class OSCollector
 		    line = osData.readLine();
 		    if (line == null)
 		    {
-		    	log.error("OSCollector, unexpected EOF " +
-				  "while reading from external " +
-				  "helper process");
+		    	log.error("OSCollector, unexpected EOF while reading from external helper process");
 		    	break;
 		    }
 		    parent.resultCSVs[resultIdx].write(line);
@@ -164,7 +162,7 @@ public class OSCollector
 		}
 		catch (Exception e)
 		{
-		    log.error("OSCollector, " + e.getMessage());
+		    log.error("OSCollector, {}", e.getMessage());
 		    break;
 		}
 	    }
@@ -177,7 +175,7 @@ public class OSCollector
 	    }
 	    catch (Exception e)
 	    {
-	    	log.error("OSCollector, " + e.getMessage());
+	    	log.error("OSCollector, {}", e.getMessage());
 	    }
 	}
     }

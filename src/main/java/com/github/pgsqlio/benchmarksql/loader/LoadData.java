@@ -9,6 +9,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
 
 /**
@@ -20,6 +24,8 @@ import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
  */
 public class LoadData
 {
+    private static Logger log = LogManager.getLogger(LoadData.class);
+
     private static Properties   ini = new Properties();
     private static String       db;
     private static Properties   dbProps;
@@ -52,8 +58,8 @@ public class LoadData
     public static void main(String[] args) {
 	int     i;
 
-	System.out.println("Starting BenchmarkSQL LoadData");
-	System.out.println("");
+	log.error("Starting BenchmarkSQL LoadData");
+	log.info("");
 
 	/*
 	 * Load the Benchmark properties file.
@@ -64,7 +70,7 @@ public class LoadData
 	}
 	catch (IOException e)
 	{
-	    System.err.println("ERROR: " + e.getMessage());
+	    log.error("ERROR: {}", e.getMessage());
 	    System.exit(1);
 	}
 	argv = args;
@@ -83,7 +89,7 @@ public class LoadData
 	}
 	catch (Exception e)
 	{
-	    System.err.println("ERROR: cannot load JDBC driver - " +
+	    log.error("ERROR: cannot load JDBC driver - {}",
 			       e.getMessage());
 	    System.exit(1);
 	}
@@ -132,12 +138,12 @@ public class LoadData
 	    }
 	    catch (IOException ie)
 	    {
-		System.err.println(ie.getMessage());
+		log.error(ie.getMessage());
 		System.exit(3);
 	    }
 	}
 
-	System.out.println("");
+	log.info("");
 
 	/*
 	 * Create the number of requested workers and start them.
@@ -163,7 +169,7 @@ public class LoadData
 	    }
 	    catch (SQLException se)
 	    {
-		System.err.println("ERROR: " + se.getMessage());
+		log.error("ERROR: {}", se.getMessage());
 		System.exit(3);
 		return;
 	    }
@@ -177,7 +183,7 @@ public class LoadData
 	    }
 	    catch (InterruptedException ie)
 	    {
-		System.err.println("ERROR: worker " + i + " - " +
+		log.error("ERROR: worker {} - {}", i,
 				   ie.getMessage());
 		System.exit(4);
 	    }
@@ -203,7 +209,7 @@ public class LoadData
 	    }
 	    catch (IOException ie)
 	    {
-		System.err.println(ie.getMessage());
+		log.error(ie.getMessage());
 		System.exit(3);
 	    }
 	}
@@ -346,12 +352,12 @@ public class LoadData
 	    strVal = ini.getProperty(name);
 
 	if (strVal == null)
-	    System.out.println(name + " (not defined)");
+	    log.warn( "{} (not defined)", name);
 	else
 	    if (name.equals("password"))
-		System.out.println(name + "=***********");
+		log.info("{}=***********", name);
 	    else
-		System.out.println(name + "=" + strVal);
+		log.info("{}={}", name, strVal);
 	return strVal;
     }
 
@@ -373,15 +379,15 @@ public class LoadData
 
 	if (strVal == null)
 	{
-	    System.out.println(name + " (not defined - using default '" +
-			       defVal + "')");
+	    log.error("{} (not defined - using default '{}')", name,
+			       defVal );
 	    return defVal;
 	}
 	else
 	    if (name.equals("password"))
-		System.out.println(name + "=***********");
+		log.info("{}=***********", name);
 	    else
-		System.out.println(name + "=" + strVal);
+		log.info("{}={}", name, strVal);
 	return strVal;
     }
 

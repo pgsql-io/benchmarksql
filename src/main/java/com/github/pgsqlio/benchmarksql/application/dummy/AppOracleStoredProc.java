@@ -12,8 +12,8 @@ import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
  */
 public class AppOracleStoredProc extends jTPCCApplication
 {
+	private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private jTPCC			gdata;
-    private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private int				sut_id;
 
     public void init(jTPCC gdata, int sut_id)

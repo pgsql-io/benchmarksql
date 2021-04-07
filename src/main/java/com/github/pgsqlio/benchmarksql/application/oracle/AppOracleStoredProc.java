@@ -25,8 +25,8 @@ import oracle.jdbc.OracleTypes;
  */
 public class AppOracleStoredProc extends jTPCCApplication
 {
+	private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private jTPCC			gdata;
-    private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private int				sut_id;
 
     private Connection			dbConn;
@@ -186,10 +186,10 @@ public class AppOracleStoredProc extends jTPCCApplication
             else
             {
                 log.error("Unexpected SQLException in NEW_ORDER");
-                log.error("message: '" + se.getMessage() + "' trans_rbk=" + trans_rbk);
+                log.error("message: '{}' trans_rbk={}", se.getMessage(), trans_rbk);
                 for (SQLException x = se; x != null; x = x.getNextException())
                     log.error(x.getMessage());
-                se.printStackTrace();
+                log.info(se);
             }
 
             try
@@ -305,10 +305,10 @@ public class AppOracleStoredProc extends jTPCCApplication
 	catch (SQLException se)
 	{
 	    log.error("Unexpected SQLException in PAYMENT");
-	    log.error("message: '" + se.getMessage());
+	    log.error("message: {}", se.getMessage());
 	    for (SQLException x = se; x != null; x = x.getNextException())
 		log.error(x.getMessage());
-	    se.printStackTrace();
+	    log.info(se);
 
 	    try
 	    {
@@ -406,10 +406,10 @@ public class AppOracleStoredProc extends jTPCCApplication
 	catch (SQLException se)
         {
             log.error("Unexpected SQLException in ORDER_STATUS");
-            log.error("message: '" + se.getMessage());
+            log.error("message: {}", se.getMessage());
             for (SQLException x = se; x != null; x = x.getNextException())
                 log.error(x.getMessage());
-            se.printStackTrace();
+            log.info(se);
 
             try
             {
@@ -464,10 +464,10 @@ public class AppOracleStoredProc extends jTPCCApplication
 	catch (SQLException se)
 	{
 	    log.error("Unexpected SQLException in NEW_ORDER");
-	    log.error("message: '" + se.getMessage());
+	    log.error("message: {}", se.getMessage());
 	    for (SQLException x = se; x != null; x = x.getNextException())
 		log.error(x.getMessage());
-	    se.printStackTrace();
+	    log.info(se);
 
 	    try
 	    {
@@ -527,10 +527,10 @@ public class AppOracleStoredProc extends jTPCCApplication
 	catch (SQLException se)
         {
             log.error("Unexpected SQLException in DELIVERY_BG");
-            log.error("message: '" + se.getMessage());
+            log.error("message: {}", se.getMessage());
             for (SQLException x = se; x != null; x = x.getNextException())
 		log.error(x.getMessage());
-		se.printStackTrace();
+        log.info(se);
 
             try
             {

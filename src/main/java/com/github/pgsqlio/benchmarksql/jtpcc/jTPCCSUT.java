@@ -43,7 +43,8 @@ public class jTPCCSUT
 	}
 	catch (Exception ex)
 	{
-	    log.error(ex.toString());
+	    log.error(ex.getMessage());
+	    log.info(ex);
 	}
     }
 
@@ -121,8 +122,8 @@ public class jTPCCSUT
 	    }
 	    catch (Exception e)
 	    {
-	    	log_error("Exception: " + e.getMessage());
-	    	log_error("Aborting SUT thread");
+	    	log.error("sut-{} Exception: {}", this.t_id, e.getMessage());
+	    	log.error("sut-{} Aborting SUT thread", this.t_id);
 		return;
 	    }
 
@@ -144,7 +145,7 @@ public class jTPCCSUT
 			}
 			catch (InterruptedException e)
 			{
-			    log_error("InterruptedException: " +
+			    log.error("sut-{} InterruptedException: {}", this.t_id,
 				  e.getMessage());
 			    return;
 			}
@@ -193,16 +194,16 @@ public class jTPCCSUT
 			    break;
 
 			default:
-			    log_error("unhandled Transaction type code " +
-				      tdata.trans_type + " in SUT.");
+			    log.error("sut-{} unhandled Transaction type code {} in SUT", this.t_id,
+				      tdata.trans_type);
 			    break;
 		    }
 		}
 		catch (Exception e)
 		{
-		    log_error("Exception: " + e.getMessage() + " ttype=" + tdata.trans_type);
+		    log.error("sut-{} Exception: {} ttype={}", this.t_id, e.getMessage(), tdata.trans_type);
 		    tdata.trans_error = true;
-		    e.printStackTrace(System.out);
+		    log.info(e);
 		}
 
 		/*
@@ -238,8 +239,8 @@ public class jTPCCSUT
 			}
 			catch (Exception e)
 			{
-			    log_error("Exception: " + e.getMessage());
-			    log_error("Aborting SUT thread");
+			    log.error("sut-{} Exception: {}", this.t_id, e.getMessage());
+			    log.error("sut-{} Aborting SUT thread", this.t_id);
 			    return;
 			}
 		    }
@@ -300,15 +301,6 @@ public class jTPCCSUT
 	    return (long)(random.nextDouble() * (max - min + 1) + min);
 	}
 
-	private void log_info(String message)
-	{
-	    log.info("sut-" + t_id + ", " + message);
-	}
-
-	private void log_error(String message)
-	{
-	    log.error("sut-" + t_id + ", " + message);
-	}
     }
 
     public class DeliveryScheduler implements Runnable

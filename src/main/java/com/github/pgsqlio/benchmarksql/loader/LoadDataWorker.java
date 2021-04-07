@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Formatter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
 
 /**
@@ -17,6 +20,8 @@ import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
  */
 public class LoadDataWorker implements Runnable
 {
+    private static Logger log = LogManager.getLogger(LoadDataWorker.class);
+
     private int                 worker;
     private Connection          dbConn;
     private jTPCCRandom         rnd;
@@ -181,27 +186,27 @@ public class LoadDataWorker implements Runnable
 		if (job == 0)
 		{
 		    fmt.format("Worker %03d: Loading ITEM", worker);
-		    System.out.println(sb.toString());
+		    log.warn(sb.toString());
 		    sb.setLength(0);
 
 		    loadItem();
 
 		    fmt.format("Worker %03d: Loading ITEM done", worker);
-		    System.out.println(sb.toString());
+		    log.warn(sb.toString());
 		    sb.setLength(0);
 		}
 		else
 		{
 		    fmt.format("Worker %03d: Loading Warehouse %6d",
 			       worker, job);
-		    System.out.println(sb.toString());
+		    log.warn(sb.toString());
 		    sb.setLength(0);
 
 		    loadWarehouse(job);
 
 		    fmt.format("Worker %03d: Loading Warehouse %6d done",
 			       worker, job);
-		    System.out.println(sb.toString());
+		    log.warn(sb.toString());
 		    sb.setLength(0);
 		}
 	    }
@@ -217,7 +222,7 @@ public class LoadDataWorker implements Runnable
 	    while (se != null)
 	    {
 		fmt.format("Worker %03d: ERROR: %s", worker, se.getMessage());
-		System.err.println(sb.toString());
+		log.error(sb.toString());
 		sb.setLength(0);
 		se = se.getNextException();
 	    }
@@ -225,9 +230,9 @@ public class LoadDataWorker implements Runnable
 	catch (Exception e)
 	{
 	    fmt.format("Worker %03d: ERROR: %s", worker, e.getMessage());
-	    System.err.println(sb.toString());
+	    log.error(sb.toString());
 	    sb.setLength(0);
-	    e.printStackTrace();
+	    log.info(e);
 	    return;
 	}
     } // End run()

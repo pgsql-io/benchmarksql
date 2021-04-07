@@ -10,6 +10,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * ExecJDBC - Command line program to process SQL DDL statements, from
  *             a text input file, to any JDBC Data Source
@@ -20,6 +23,7 @@ import java.util.Properties;
  */
 public class ExecJDBC {
 
+    private static Logger log = LogManager.getLogger(ExecJDBC.class);
 
   public static void main(String[] args) {
 
@@ -71,7 +75,7 @@ public class ExecJDBC {
 
          if (line.length() != 0) {
            if (line.startsWith("--") && !line.startsWith("-- {")) {
-              System.out.println(rLine);  // print comment line
+        	   log.error(rLine);  // print comment line
            } else {
 	       if (line.equals("$$"))
 	       {
@@ -132,13 +136,15 @@ public class ExecJDBC {
       in.close();
 
     } catch(IOException ie) {
-        System.out.println(ie.getMessage());
+    	log.error(ie.getMessage());
+        log.info(ie);
 	System.exit(1);
     } catch(SQLException se) {
-        System.out.println(se.getMessage());
+    	log.error(se.getMessage());
+        log.info(se);
 	System.exit(1);
     } catch(Exception e) {
-        e.printStackTrace();
+    	log.error(e);
 	System.exit(1);
     //exit Cleanly
     } finally {
@@ -146,7 +152,7 @@ public class ExecJDBC {
         if (conn !=null)
            conn.close();
       } catch(SQLException se) {
-        se.printStackTrace();
+    	  log.error(se);
       } // end finally
 
     } // end try
@@ -156,12 +162,13 @@ public class ExecJDBC {
 
   static void execJDBC(Statement stmt, String query) {
 
-    System.out.println(query + ";");
+	  log.warn("{};", query);
 
     try {
       stmt.execute(query);
     }catch(SQLException se) {
-      System.out.println(se.getMessage());
+    	log.error(se.getMessage());
+        log.info(se);
     } // end try
 
   } // end execJDBCCommand
@@ -173,7 +180,7 @@ public class ExecJDBC {
     try {
       outPropertyValue = System.getProperty(inSysProperty, defaultValue);
     } catch (Exception e) {
-      System.err.println("Error Reading Required System Property '" + inSysProperty + "'");
+      log.error("Error Reading Required System Property '{}'", inSysProperty);
     }
 
     return(outPropertyValue);

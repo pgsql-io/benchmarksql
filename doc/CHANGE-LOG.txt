@@ -5,7 +5,10 @@ BENCHMARKSQL CHANGE LOG:
 Version 6.0
 -----------
 
-  + Project lifecycle manager with Maven instead of Ant.
+  + Refactoring
+    + Project lifecycle manager with Maven instead of Ant.
+    + Classes in packages.
+    + Updated to log4j v2, and all output is managed by this framework.
   + TODO
 
 Version 5.1 lussman & jannicash:

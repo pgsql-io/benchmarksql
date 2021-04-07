@@ -17,9 +17,6 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
-/**
- * jTPCC - BenchmarkSQL main class
- */
 import org.apache.logging.log4j.Logger;
 
 import com.github.pgsqlio.benchmarksql.application.AppGeneric;
@@ -27,6 +24,9 @@ import com.github.pgsqlio.benchmarksql.application.oracle.AppOracleStoredProc;
 import com.github.pgsqlio.benchmarksql.application.postgres.AppPostgreSQLStoredProc;
 import com.github.pgsqlio.benchmarksql.oscollector.OSCollector;
 
+/**
+ * jTPCC - BenchmarkSQL main class
+ */
 public class jTPCC
 {
     private static Logger log = LogManager.getLogger(jTPCC.class);
@@ -96,7 +96,7 @@ public class jTPCC
     private String getProp (Properties p, String pName)
     {
 	String prop =  p.getProperty(pName);
-	log_info("" + pName + "=" + prop);
+	log.info("main, {}={}", pName, prop);
 	return(prop);
     }
 
@@ -111,21 +111,21 @@ public class jTPCC
 	try {
 	    ini.load( new FileInputStream(System.getProperty("prop")));
 	} catch (IOException e) {
-	    log_error("could not load properties file");
+	    log.error("main, could not load properties file");
 	}
 
 	/*
 	 * Get all the configuration settings
 	 */
-	log_info("");
-	log_info("+-------------------------------------------------------------+");
-	log_info("     BenchmarkSQL v" + jTPCCConfig.JTPCCVERSION);
-	log_info("+-------------------------------------------------------------+");
-	log_info(" (c) 2003, Raul Barbosa");
-	log_info(" (c) 2004-2014, Denis Lussier");
-	log_info(" (c) 2016-2019, Jan Wieck");
-	log_info("+-------------------------------------------------------------+");
-	log_info("");
+	log.info("main, ");
+	log.info("main, +-------------------------------------------------------------+");
+	log.warn("main,      BenchmarkSQL v{}", jTPCCConfig.JTPCCVERSION);
+	log.info("main, +-------------------------------------------------------------+");
+	log.info("main,  (c) 2003, Raul Barbosa");
+	log.info("main,  (c) 2004-2014, Denis Lussier");
+	log.info("main,  (c) 2016-2019, Jan Wieck");
+	log.info("main, +-------------------------------------------------------------+");
+	log.info("main, ");
 	String  iDBType		= getProp(ini,"db");
 	String	iDriver		= getProp(ini,"driver");
 	applicationName		= getProp(ini,"application");
@@ -133,7 +133,7 @@ public class jTPCC
 	iUser			= getProp(ini,"user");
 	iPassword		= ini.getProperty("password");
 
-	log_info("");
+	log.info("main, ");
 	numWarehouses		= Integer.parseInt(getProp(ini, "warehouses"));
 	numMonkeys		= Integer.parseInt(getProp(ini, "monkeys"));
 	numSUTThreads		= Integer.parseInt(getProp(ini, "sutThreads"));
@@ -148,7 +148,7 @@ public class jTPCC
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
 	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
-	log_info("");
+	log.info("main, ");
 	paymentWeight		= Double.parseDouble(getProp(ini, "paymentWeight"));
 	orderStatusWeight	= Double.parseDouble(getProp(ini, "orderStatusWeight"));
 	deliveryWeight		= Double.parseDouble(getProp(ini, "deliveryWeight"));
@@ -157,12 +157,12 @@ public class jTPCC
 				  deliveryWeight - stockLevelWeight;
 	if (newOrderWeight < 0.0)
 	{
-	    log_error("newOrderWeight is below zero");
+	    log.error("main, newOrderWeight is below zero");
 	    return;
 	}
 	fmt.format("newOrderWeight=%.3f", newOrderWeight);
-	log_info(sb.toString());
-	log_info("");
+	log.info("main, {}", sb.toString());
+	log.info("main, ");
 
 	sutThreadDelay = (rampupSUTMins * 60000) / numSUTThreads;
 	terminalDelay = (rampupTerminalMins * 60000) / (numWarehouses * 10);
@@ -179,7 +179,7 @@ public class jTPCC
 	    dbType = jTPCCConfig.DB_TSQL;
 	else
 	{
-	    log.error("unknown database type '" + iDBType + "'");
+	    log.error("Unknown database type '{}'", iDBType);
 	    return;
 	}
 
@@ -191,13 +191,13 @@ public class jTPCC
 	{
 	    String		driver = iDriver;
 
-	    log_info("Loading database driver: \'" + driver + "\'...");
+	    log.info("main, Loading database driver: \'{}\'...", driver);
 	    Class.forName(iDriver);
 	}
 	catch(Exception ex)
 	{
-	    log_error("Unable to load the database driver!");
-	    log_error(ex.toString());
+	    log.error("main, Unable to load the database driver!");
+	    log.error("main, {}", ex.getMessage());
 	    return;
 	}
 
@@ -245,8 +245,8 @@ public class jTPCC
 	}
 	catch(Exception ex)
 	{
-	    log_error("Unable to read load configuration");
-	    log_error(ex.toString());
+	    log.error("main, Unable to read load configuration");
+	    log.error("main, {}", ex.getMessage());
 	    return;
 	}
 
@@ -257,7 +257,7 @@ public class jTPCC
 	    !applicationName.equals("PostgreSQLStoredProc") &&
 	    !applicationName.equals("OracleStoredProc"))
 	{
-	    log.error("Unknown application name '"+applicationName+"'");
+	    log.error("Unknown application name '{}'",applicationName);
 	    return;
 	}
 
@@ -309,14 +309,12 @@ public class jTPCC
 	    // Create the output directory structure.
 	    if (!resultDir.mkdir())
 	    {
-		log.error("Failed to create directory '" +
-			  resultDir.getPath() + "'");
+		log.error("Failed to create directory '{}'", resultDir.getPath());
 		System.exit(1);
 	    }
 	    if (!resultDataDir.mkdir())
 	    {
-		log.error("Failed to create directory '" +
-			  resultDataDir.getPath() + "'");
+		log.error("Failed to create directory '{}'", resultDataDir.getPath());
 		System.exit(1);
 	    }
 
@@ -331,8 +329,8 @@ public class jTPCC
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("main, copied " + System.getProperty("prop") +
-		     " to " + new File(resultDir, "run.properties").getPath());
+	    log.info("main, copied {} to {}", System.getProperty("prop"),
+		     new File(resultDir, "run.properties").getPath());
 
 	    // Create the runInfo.csv file.
 	    String runInfoCSVName = new File(resultDataDir, "runInfo.csv").getPath();
@@ -367,7 +365,7 @@ public class jTPCC
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("main, created " + runInfoCSVName + " for runID " +
+	    log.info("main, created {} for runID {}", runInfoCSVName,
 		     runID);
 
 	    // Open the per transaction result.csv file.
@@ -383,7 +381,7 @@ public class jTPCC
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("main, writing per transaction results to " +
+	    log.info("main, writing per transaction results to {}",
 		     resultCSVName);
 
 	    if (osCollectorScript != null)
@@ -401,10 +399,10 @@ public class jTPCC
 
 	/* Initialize the random number generator and report C values. */
 	rnd = new jTPCCRandom(loadNuRandCLast);
-	log_info("");
-	log_info("C value for nURandCLast at load: " + loadNuRandCLast);
-	log_info("C value for nURandCLast this run: " + rnd.getNURandCLast());
-	log_info("");
+	log.info("main, ");
+	log.info("main, C value for nURandCLast at load: {}", loadNuRandCLast);
+	log.info("main, C value for nURandCLast this run: {}", rnd.getNURandCLast());
+	log.info("main, ");
 
 	terminal_data = new jTPCCTData[numWarehouses * 10];
 
@@ -496,24 +494,24 @@ public class jTPCC
 
 	try {
 	    scheduler_thread.join();
-	    log_info("scheduler returned");
+	    log.info("main, scheduler returned");
 	}
 	catch(InterruptedException e)
 	{
-	    log_error("InterruptedException: " + e.getMessage());
+	    log.error("main, InterruptedException: {}", e.getMessage());
 	}
 
 	/*
 	 * Time to stop input data generation.
 	 */
 	monkeys.terminate();
-	log_info("all simulated terminals ended");
+	log.info("main, all simulated terminals ended");
 
 	/*
 	 * Stop the SUT.
 	 */
 	systemUnderTest.terminate();
-	log_info("all SUT threads ended");
+	log.info("main, all SUT threads ended");
 
 	/*
 	 * Report final transaction statistics.
@@ -526,7 +524,7 @@ public class jTPCC
 	if (resultCSV != null)
 	{
 	    try {
-		log_info("per transaction result file finished");
+		log.info("main, per transaction result file finished");
 		resultCSV.close();
 	    }
 	    catch (Exception e)
@@ -542,7 +540,7 @@ public class jTPCC
 	{
 	    osCollector.stop();
 	    osCollector = null;
-	    log_info("OS Collector stopped");
+	    log.info("main, OS Collector stopped");
 	}
     }
 
@@ -569,21 +567,6 @@ public class jTPCC
 	    {
 	    }
 	}
-    }
-
-    private void log_trace(String message)
-    {
-	log.trace("main, " + message);
-    }
-
-    private void log_info(String message)
-    {
-	log.info("main, " + message);
-    }
-
-    private void log_error(String message)
-    {
-	log.error("main, "+ message);
     }
 
     private void exit()

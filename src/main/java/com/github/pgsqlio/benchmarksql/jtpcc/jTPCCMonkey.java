@@ -107,7 +107,7 @@ public class jTPCCMonkey
 		       jTPCCTData.trans_type_names[tt],
 		       sumStats.counters[tt].numTrans, percent, mean,
 		       max, nth_pct, rbk, errors);
-	    log.info("result, " + sb.toString());
+	    log.info("result, {}", sb.toString());
 	    sb.setLength(0);
 	}
 	log.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
@@ -119,11 +119,11 @@ public class jTPCCMonkey
 	    (double)(jTPCC.runMins),
 	    (double)(sumStats.counters[jTPCCTData.TT_NEW_ORDER].numTrans) /
 	    ((double)jTPCC.numWarehouses * 0.1286 * (double)(jTPCC.runMins)));
-	log.info("result, " + sb.toString());
+	log.info("result, {}", sb.toString());
 	sb.setLength(0);
 
 	fmt.format("Overall TPM:  %,12.0f", total_count / (double)(jTPCC.runMins));
-	log.info("result, " + sb.toString());
+	log.info("result, {}", sb.toString());
 	sb.setLength(0);
     }
 
@@ -202,7 +202,7 @@ public class jTPCCMonkey
 			}
 			catch (InterruptedException e)
 			{
-			    log_error("InterruptedException: " +
+			    log.error("monkey-{}, InterruptedException: {}", this.m_id,
 				      e.getMessage());
 			    return;
 			}
@@ -454,13 +454,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 22; i++)
 		{
-		    log_trace(sb[i].toString());
+		    log.trace("monkey-{}, {}", this.m_id, sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -573,13 +573,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 21; i++)
 		{
-		    log_trace(sb[i].toString());
+		    log.trace("monkey-{}, {}", this.m_id, sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -657,13 +657,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 22; i++)
 		{
-		    log_trace(sb[i].toString());
+		    log.trace("monkey-{}, {}", this.m_id ,sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -693,13 +693,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log_trace("+------------------------------------------------------------------------------+");
-		log_trace("                                  Delivery");
-		log_trace("Warehouse:	      " + screen.w_id);
-		log_trace("Carrier Number:   " + screen.o_carrier_id);
-		log_trace("");
-		log_trace("Execution Status: " + screen.execution_status);
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+");
+		log.trace("monkey-{},                                   Delivery", this.m_id);
+		log.trace("monkey-{}, Warehouse:	      {}", this.m_id, screen.w_id);
+		log.trace("monkey-{}, Carrier Number:   {}", this.m_id, screen.o_carrier_id);
+		log.trace("monkey-{}, ", this.m_id);
+		log.trace("monkey-{}, Execution Status: {}", this.m_id, screen.execution_status);
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -727,14 +727,14 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log_trace("+------------------------------------------------------------------------------+");
-		log_trace("                                 Stock Level");
-		log_trace("Warehouse: " + screen.w_id);
-		log_trace("District:  " + screen.d_id);
-		log_trace("");
-		log_trace("Stock Level Threshold: " + screen.threshold);
-		log_trace("Low Stock Count:	   " + screen.low_stock);
-		log_trace("+------------------------------------------------------------------------------+");
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		log.trace("monkey-{},                                  Stock Level", this.m_id);
+		log.trace("monkey-{}, Warehouse: {}", this.m_id, screen.w_id);
+		log.trace("monkey-{}, District:  {}", this.m_id, screen.d_id);
+		log.trace("monkey-{}, ", this.m_id);
+		log.trace("monkey-{}, Stock Level Threshold: {}", this.m_id, screen.threshold);
+		log.trace("monkey-{}, Low Stock Count:	   {}", this.m_id, screen.low_stock);
+		log.trace("monkey-{}, +------------------------------------------------------------------------------+");
 	    }
 	}
 
@@ -770,19 +770,5 @@ public class jTPCCMonkey
 	    return this.random.nextDouble();
 	}
 
-	private void log_info(String message)
-	{
-	    log.info("monkey-" + this.m_id + ", " + message);
-	}
-
-	private void log_error(String message)
-	{
-	    log.error("monkey-" + this.m_id + ", " + message);
-	}
-
-	private void log_trace(String message)
-	{
-	    log.trace("monkey-" + this.m_id + ", " + message);
-	}
     }
 }
