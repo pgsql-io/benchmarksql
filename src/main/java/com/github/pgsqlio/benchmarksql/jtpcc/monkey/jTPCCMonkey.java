@@ -1,10 +1,17 @@
-package com.github.pgsqlio.benchmarksql.jtpcc;
+package com.github.pgsqlio.benchmarksql.jtpcc.monkey;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCResult;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCScheduler;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTDataList;
 
 /**
  * jTPCCMonkey - The terminal input data generator and output consumer.
@@ -412,8 +419,7 @@ public class jTPCCMonkey
 	    jTPCCTData.NewOrderData newOrder = tdata.new_order;
 
 	    tdata.new_order = null;
-	    if (!jTPCC.traceTerminalIO)
-		return;
+	    if (log.isDebugEnabled()) {
 
 	    StringBuffer    sb[] = new StringBuffer[23];
 	    Formatter       fmt[] = new Formatter[23];
@@ -461,6 +467,7 @@ public class jTPCCMonkey
 		    sb[i].setLength(0);
 		}
 		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+	    }
 	    }
 	}
 
@@ -515,8 +522,7 @@ public class jTPCCMonkey
 	    jTPCCTData.PaymentData payment = tdata.payment;
 
 	    tdata.payment = null;
-	    if (!jTPCC.traceTerminalIO)
-		return;
+	    if (log.isDebugEnabled()) {
 
 	    StringBuffer    sb[] = new StringBuffer[23];
 	    Formatter       fmt[] = new Formatter[23];
@@ -581,6 +587,7 @@ public class jTPCCMonkey
 		}
 		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
+	    }
 	}
 
 	/*
@@ -617,8 +624,7 @@ public class jTPCCMonkey
 	    jTPCCTData.OrderStatusData orderStatus = tdata.order_status;
 
 	    tdata.order_status = null;
-	    if (!jTPCC.traceTerminalIO)
-		return;
+	    if (log.isDebugEnabled()) {
 
 	    StringBuffer    sb[] = new StringBuffer[23];
 	    Formatter       fmt[] = new Formatter[23];
@@ -665,6 +671,7 @@ public class jTPCCMonkey
 		}
 		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
+	    }
 	}
 
 	/*
@@ -688,8 +695,7 @@ public class jTPCCMonkey
 	    jTPCCTData.DeliveryData screen = tdata.delivery;
 
 	    tdata.delivery = null;
-	    if (!jTPCC.traceTerminalIO)
-		return;
+	    if (log.isDebugEnabled()) {
 
 	    synchronized(trace_terminal_lock)
 	    {
@@ -700,6 +706,7 @@ public class jTPCCMonkey
 		log.trace("monkey-{}, ", this.m_id);
 		log.trace("monkey-{}, Execution Status: {}", this.m_id, screen.execution_status);
 		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+	    }
 	    }
 	}
 
@@ -722,8 +729,7 @@ public class jTPCCMonkey
 	    jTPCCTData.StockLevelData screen = tdata.stock_level;
 
 	    tdata.stock_level = null;
-	    if (!jTPCC.traceTerminalIO)
-		return;
+	    if (log.isDebugEnabled()) {
 
 	    synchronized(trace_terminal_lock)
 	    {
@@ -735,6 +741,7 @@ public class jTPCCMonkey
 		log.trace("monkey-{}, Stock Level Threshold: {}", this.m_id, screen.threshold);
 		log.trace("monkey-{}, Low Stock Count:	   {}", this.m_id, screen.low_stock);
 		log.trace("monkey-{}, +------------------------------------------------------------------------------+");
+	    }
 	    }
 	}
 

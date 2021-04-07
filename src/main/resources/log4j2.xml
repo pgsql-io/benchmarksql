@@ -10,6 +10,11 @@
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
 			</PatternLayout>
 		</File>
+		<File name="MonkeyLog" fileName="Monkey.log">
+			<PatternLayout>
+				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+			</PatternLayout>
+		</File>
 	</Appenders>
 	<Loggers>
 		<Root level="trace">
@@ -20,6 +25,13 @@
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="BenchmarkLog" />
 		</Logger>
+		
+		<!-- This replaces the parameter traceTerminalIO=true -->
+		<!--Logger name="com.github.pgsqlio.benchmarksql.jtpcc.monkey" level="trace"
+			additivity="false"-->
+			<!-- AppenderRef ref="MonkeyLog" /-->
+		<!--/Logger-->
+
 		<!-- Other loggers could be (each of the packages):-->
 		<!-- com.github.pgsqlio.benchmarksql.application -->
 		<!-- com.github.pgsqlio.benchmarksql.jdbc -->
