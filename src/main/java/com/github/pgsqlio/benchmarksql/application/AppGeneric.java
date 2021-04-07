@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCApplication;
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCConfig;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCMonkey;
 import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
 
 /**

@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.pgsqlio.benchmarksql.application.AppGeneric;
 import com.github.pgsqlio.benchmarksql.application.oracle.AppOracleStoredProc;
 import com.github.pgsqlio.benchmarksql.application.postgres.AppPostgreSQLStoredProc;
-import com.github.pgsqlio.benchmarksql.jtpcc.monkey.jTPCCMonkey;
 import com.github.pgsqlio.benchmarksql.oscollector.OSCollector;
 
 /**
@@ -60,6 +59,7 @@ public class jTPCC
     public  static double	restartSUTThreadProb;
     public  static double	keyingTimeMultiplier;
     public  static double	thinkTimeMultiplier;
+    public  static boolean	traceTerminalIO = false;
 
     public  static int		sutThreadDelay;
     public  static int		terminalDelay;
@@ -147,6 +147,7 @@ public class jTPCC
 	restartSUTThreadProb	= Double.parseDouble(getProp(ini, "restartSUTThreadProbability"));
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
+	traceTerminalIO		= Boolean.parseBoolean(getProp(ini, "traceTerminalIO"));
 	log.info("main, ");
 	paymentWeight		= Double.parseDouble(getProp(ini, "paymentWeight"));
 	orderStatusWeight	= Double.parseDouble(getProp(ini, "orderStatusWeight"));
