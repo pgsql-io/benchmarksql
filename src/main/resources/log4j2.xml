@@ -10,15 +10,24 @@
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
 			</PatternLayout>
 		</File>
+		<File name="TerminalIO" fileName="terminalio.log">
+			<PatternLayout>
+				<Pattern>%m%n</Pattern>
+			</PatternLayout>
+		</File>
 	</Appenders>
 	<Loggers>
-		<Root level="trace">
+		<Root level="info">
 			<AppenderRef ref="Console" />
 		</Root>
-		<Logger name="com.github.pgsqlio.benchmarksql" level="trace"
+		<Logger name="com.github.pgsqlio.benchmarksql" level="info"
 			additivity="false">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="BenchmarkLog" />
+		</Logger>
+		<Logger name="com.github.pgsqlio.benchmarksql.jtpcc.jTPCCMonkey.terminalIO" level="info"
+			additivity="false">
+			<AppenderRef ref="TerminalIO" />
 		</Logger>
 		<!-- Other loggers could be (each of the packages):-->
 		<!-- com.github.pgsqlio.benchmarksql.application -->

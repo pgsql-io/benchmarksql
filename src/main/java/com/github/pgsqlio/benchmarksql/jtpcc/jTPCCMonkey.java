@@ -12,6 +12,8 @@ import org.apache.logging.log4j.Logger;
 public class jTPCCMonkey
 {
     private static Logger log = LogManager.getLogger(jTPCCMonkey.class);
+    private static Logger termlog = LogManager.getLogger(
+                          jTPCCMonkey.class.getName() + ".terminalIO");
 
     private jTPCC		gdata;
     private int			numMonkeys;
@@ -454,13 +456,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 22; i++)
 		{
-		    log.trace("monkey-{}, {}", this.m_id, sb[i].toString());
+		    termlog.info("monkey-{}, {}", this.m_id, sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -573,13 +575,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 21; i++)
 		{
-		    log.trace("monkey-{}, {}", this.m_id, sb[i].toString());
+		    termlog.info("monkey-{}, {}", this.m_id, sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -657,13 +659,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 		for (int i = 0; i < 22; i++)
 		{
-		    log.trace("monkey-{}, {}", this.m_id ,sb[i].toString());
+		    termlog.info("monkey-{}, {}", this.m_id ,sb[i].toString());
 		    sb[i].setLength(0);
 		}
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -693,13 +695,13 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+");
-		log.trace("monkey-{},                                   Delivery", this.m_id);
-		log.trace("monkey-{}, Warehouse:	      {}", this.m_id, screen.w_id);
-		log.trace("monkey-{}, Carrier Number:   {}", this.m_id, screen.o_carrier_id);
-		log.trace("monkey-{}, ", this.m_id);
-		log.trace("monkey-{}, Execution Status: {}", this.m_id, screen.execution_status);
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{},                                   Delivery", this.m_id);
+		termlog.info("monkey-{}, Warehouse:	      {}", this.m_id, screen.w_id);
+		termlog.info("monkey-{}, Carrier Number:   {}", this.m_id, screen.o_carrier_id);
+		termlog.info("monkey-{}, ", this.m_id);
+		termlog.info("monkey-{}, Execution Status: {}", this.m_id, screen.execution_status);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
@@ -727,14 +729,14 @@ public class jTPCCMonkey
 
 	    synchronized(trace_terminal_lock)
 	    {
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
-		log.trace("monkey-{},                                  Stock Level", this.m_id);
-		log.trace("monkey-{}, Warehouse: {}", this.m_id, screen.w_id);
-		log.trace("monkey-{}, District:  {}", this.m_id, screen.d_id);
-		log.trace("monkey-{}, ", this.m_id);
-		log.trace("monkey-{}, Stock Level Threshold: {}", this.m_id, screen.threshold);
-		log.trace("monkey-{}, Low Stock Count:	   {}", this.m_id, screen.low_stock);
-		log.trace("monkey-{}, +------------------------------------------------------------------------------+");
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
+		termlog.info("monkey-{},                                  Stock Level", this.m_id);
+		termlog.info("monkey-{}, Warehouse: {}", this.m_id, screen.w_id);
+		termlog.info("monkey-{}, District:  {}", this.m_id, screen.d_id);
+		termlog.info("monkey-{}, ", this.m_id);
+		termlog.info("monkey-{}, Stock Level Threshold: {}", this.m_id, screen.threshold);
+		termlog.info("monkey-{}, Low Stock Count:	   {}", this.m_id, screen.low_stock);
+		termlog.info("monkey-{}, +------------------------------------------------------------------------------+", this.m_id);
 	    }
 	}
 
