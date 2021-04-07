@@ -1,19 +1,31 @@
 package com.github.pgsqlio.benchmarksql.application;
-/*
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Formatter;
+import java.util.Properties;
+import java.util.Vector;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCApplication;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCConfig;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCMonkey;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
+
+/**
  * AppGeneric - TPC-C Transaction Implementation for using
  *		Generic with plain JDBC PreparedStatements.
- *
  */
-import org.apache.log4j.*;
-
-import java.util.*;
-import java.sql.*;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class AppGeneric extends jTPCCApplication
 {
+	private static Logger	log = LogManager.getLogger(AppGeneric.class);;
     private jTPCC			gdata;
-    private org.apache.log4j.Logger	log;
     private int				sut_id;
 
     private Connection			dbConn;
@@ -55,13 +67,12 @@ public class AppGeneric extends jTPCCApplication
     public PreparedStatement    stmtDeliveryBGUpdateCustomer;
 
 
-    public void init(jTPCC gdata, int sut_id, org.apache.log4j.Logger sutLog)
+    public void init(jTPCC gdata, int sut_id)
     	throws Exception
     {
 	Properties	dbProps;
 
     	this.gdata	= gdata;
-	this.log	= sutLog;
 	this.sut_id	= sut_id;
 
 	// Connect to the database

@@ -1,17 +1,12 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+
+/**
  * jTPCCApplication - Dummy of the DB specific implementation of the
  * 		      TPC-C Transactions
- *
  */
-
-import org.apache.log4j.*;
-
-import java.sql.*;
-
 public class jTPCCApplication
 {
-    public void init(jTPCC gdata, int sut_id, org.apache.log4j.Logger sutLog)
+    public void init(jTPCC gdata, int sut_id)
     	throws Exception
     {
     }

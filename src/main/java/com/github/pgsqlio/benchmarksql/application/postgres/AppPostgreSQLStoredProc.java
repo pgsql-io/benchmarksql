@@ -1,20 +1,29 @@
 package com.github.pgsqlio.benchmarksql.application.postgres;
-/*
+import java.math.BigDecimal;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCApplication;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
+
+/**
  * AppPostgreSQLStoredProc - TPC-C Transaction Implementation for using
  *			     Stored Procedures on PostgreSQL
- *
  */
-import org.apache.log4j.*;
-
-import java.util.*;
-import java.sql.*;
-import java.math.*;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class AppPostgreSQLStoredProc extends jTPCCApplication
 {
+	private static Logger	log = LogManager.getLogger(AppPostgreSQLStoredProc.class);
     private jTPCC			gdata;
-    private org.apache.log4j.Logger	log;
     private int				sut_id;
 
     private Connection			dbConn;
@@ -26,13 +35,12 @@ public class AppPostgreSQLStoredProc extends jTPCCApplication
     public PreparedStatement    stmtDeliveryBGStoredProc;
 
 
-    public void init(jTPCC gdata, int sut_id, org.apache.log4j.Logger sutLog)
+    public void init(jTPCC gdata, int sut_id)
     	throws Exception
     {
 	Properties	dbProps;
 
     	this.gdata	= gdata;
-	this.log	= sutLog;
 	this.sut_id	= sut_id;
 
 	// Connect to the database

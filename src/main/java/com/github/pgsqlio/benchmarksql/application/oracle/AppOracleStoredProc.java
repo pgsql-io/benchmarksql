@@ -1,22 +1,32 @@
 package com.github.pgsqlio.benchmarksql.application.oracle;
-/*
+import java.math.BigDecimal;
+import java.sql.Array;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCApplication;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
+
+import oracle.jdbc.OracleConnection;
+import oracle.jdbc.OracleTypes;
+
+/**
  * AppOracleStoredProc - TPC-C Transaction Implementation for using
  *			 Stored Procedures on Oracle
- *
  */
-import org.apache.log4j.*;
-
-import java.util.*;
-import java.sql.*;
-import java.math.*;
-import oracle.jdbc.*;
-import oracle.sql.*;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class AppOracleStoredProc extends jTPCCApplication
 {
     private jTPCC			gdata;
-    private org.apache.log4j.Logger	log;
+    private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private int				sut_id;
 
     private Connection			dbConn;
@@ -28,13 +38,12 @@ public class AppOracleStoredProc extends jTPCCApplication
     public String			stmtDeliveryBGStoredProc;
 
 
-    public void init(jTPCC gdata, int sut_id, org.apache.log4j.Logger sutLog)
+    public void init(jTPCC gdata, int sut_id)
     	throws Exception
     {
 	Properties	dbProps;
 
     	this.gdata	= gdata;
-	this.log	= sutLog;
 	this.sut_id	= sut_id;
 
 	// Connect to the database

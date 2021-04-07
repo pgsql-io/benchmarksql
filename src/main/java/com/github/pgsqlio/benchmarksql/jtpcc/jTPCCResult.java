@@ -1,11 +1,8 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
+
 /*
  * jTPCCResult - Collecting of statistics and writing results.
- *
  */
-
-import java.io.*;
-
 public class jTPCCResult
 {
     public  Counters	counters[];

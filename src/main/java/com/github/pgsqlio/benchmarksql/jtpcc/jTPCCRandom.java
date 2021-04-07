@@ -1,5 +1,8 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+
+import java.util.Random;
+
+/**
  * jTPCCRandom - Random functions for TPC-C
  *
  * Copyright (C) 2003, Raul Barbosa
@@ -7,13 +10,6 @@ package com.github.pgsqlio.benchmarksql.jtpcc;
  * Copyright (C) 2016, Jan Wieck
  *
  */
-
-
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.text.*;
-
 public class jTPCCRandom
 {
     private static final char[] aStringChars = {

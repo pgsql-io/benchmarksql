@@ -1,11 +1,8 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
+
 /*
  * jTPCCTData - The simulated terminal input/output data.
- *
  */
-
-import java.sql.*;
-
 public class jTPCCTData
 {
     public final static int

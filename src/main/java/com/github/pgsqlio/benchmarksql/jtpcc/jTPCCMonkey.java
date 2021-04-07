@@ -1,16 +1,17 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.Random;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
  * jTPCCMonkey - The terminal input data generator and output consumer.
- *
  */
-import org.apache.log4j.*;
-
-import java.sql.*;
-import java.util.*;
-
 public class jTPCCMonkey
 {
-    private org.apache.log4j.Logger log;
+    private static Logger log = LogManager.getLogger(jTPCCMonkey.class);
 
     private jTPCC		gdata;
     private int			numMonkeys;
@@ -26,7 +27,6 @@ public class jTPCCMonkey
 
     public jTPCCMonkey(jTPCC gdata)
     {
-	this.log = Logger.getLogger(jTPCCMonkey.class);
 	this.gdata	    = gdata;
 	this.numMonkeys	    = jTPCC.numMonkeys;
 	this.monkeys	    = new Monkey[jTPCC.numMonkeys];
@@ -166,7 +166,6 @@ public class jTPCCMonkey
 
     private class Monkey implements Runnable
     {
-	private org.apache.log4j.Logger log;
 
 	private int		    m_id;
 	private jTPCCMonkey    parent;
@@ -176,7 +175,6 @@ public class jTPCCMonkey
 
 	public Monkey(int m_id, jTPCCMonkey parent)
 	{
-	    this.log = Logger.getLogger(jTPCCMonkey.Monkey.class);
 
 	    this.m_id = m_id;
 	    this.parent = parent;

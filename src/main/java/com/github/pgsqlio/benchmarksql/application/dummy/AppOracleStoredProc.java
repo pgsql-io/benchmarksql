@@ -1,23 +1,22 @@
 package com.github.pgsqlio.benchmarksql.application.dummy;
-/*
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCApplication;
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTData;
+
+/**
  * AppOracleStoredProc - TPC-C Transaction Implementation for using
  *			 Stored Procedures on Oracle
- *
  */
-import org.apache.log4j.*;
-
-import java.util.*;
-import java.sql.*;
-import java.math.*;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class AppOracleStoredProc extends jTPCCApplication
 {
     private jTPCC			gdata;
-    private org.apache.log4j.Logger	log;
+    private static Logger	log = LogManager.getLogger(AppOracleStoredProc.class);
     private int				sut_id;
 
-    public void init(jTPCC gdata, int sut_id, org.apache.log4j.Logger sutLog)
+    public void init(jTPCC gdata, int sut_id)
     	throws Exception
     {
     	throw new Exception("Oracle support was not compiled in - please rebuild BenchmarkSQL with -DOracleSupport=true");

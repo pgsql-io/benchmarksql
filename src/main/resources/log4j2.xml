@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<!-- %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n -->
+			<PatternLayout pattern="%d %5p - %m%n" />
+		</Console>
+		<File name="BenchmarkLog" fileName="benchmark.log">
+			<PatternLayout>
+				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+			</PatternLayout>
+		</File>
+	</Appenders>
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="Console" />
+		</Root>
+		<Logger name="com.github.pgsqlio.benchmarksql" level="trace"
+			additivity="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="BenchmarkLog" />
+		</Logger>
+		<!-- Other loggers could be (each of the packages):-->
+		<!-- com.github.pgsqlio.benchmarksql.application -->
+		<!-- com.github.pgsqlio.benchmarksql.jdbc -->
+		<!-- com.github.pgsqlio.benchmarksql.jtpcc -->
+		<!-- com.github.pgsqlio.benchmarksql.loader -->
+		<!-- com.github.pgsqlio.benchmarksql.oscollector -->
+	</Loggers>
+</Configuration>

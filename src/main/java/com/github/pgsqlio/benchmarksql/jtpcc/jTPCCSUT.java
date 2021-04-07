@@ -1,15 +1,15 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+import java.util.Random;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
  * jTPCCSUT - The application/DB-connection-pool side.
- *
  */
-import org.apache.log4j.*;
-
-import java.sql.*;
-import java.util.*;
-
 public class jTPCCSUT
 {
+	private static Logger log = LogManager.getLogger(jTPCCSUT.class);
     private jTPCC		gdata;
     private Thread		sutThreads[];
 
@@ -32,12 +32,9 @@ public class jTPCCSUT
 
     public void launchSUTThread(jTPCCTData tdata)
     {
-	org.apache.log4j.Logger log;
 
 	int t_id = tdata.term_w_id;
 	SUTThread sut;
-
-	log = Logger.getLogger(jTPCCSUT.SUTThread.class);
 
 	try {
 	    sut = new SUTThread(t_id);
@@ -97,7 +94,6 @@ public class jTPCCSUT
 
     private class SUTThread implements Runnable
     {
-	private org.apache.log4j.Logger log;
 	private int			t_id;
 	private Random			random;
 	private jTPCCApplication	application;
@@ -106,7 +102,6 @@ public class jTPCCSUT
 	{
 	    this.t_id = t_id;
 	    this.random = new Random(System.currentTimeMillis());
-	    this.log = Logger.getLogger(jTPCCSUT.SUTThread.class);
 	}
 
 	public void run()
@@ -122,7 +117,7 @@ public class jTPCCSUT
 	    try
 	    {
 		this.application = gdata.getApplication();
-		this.application.init(gdata, t_id, log);
+		this.application.init(gdata, t_id);
 	    }
 	    catch (Exception e)
 	    {
@@ -239,7 +234,7 @@ public class jTPCCSUT
 			try
 			{
 			    this.application.finish();
-			    this.application.init(gdata, t_id, log);
+			    this.application.init(gdata, t_id);
 			}
 			catch (Exception e)
 			{

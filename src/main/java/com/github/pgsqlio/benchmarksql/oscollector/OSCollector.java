@@ -1,26 +1,32 @@
 package com.github.pgsqlio.benchmarksql.oscollector;
-/*
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
  * OSCollector.java
  *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
- *
  */
-
-import org.apache.log4j.*;
-
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-
 public class OSCollector
 {
+	private static Logger		log= LogManager.getLogger(OSCollector.class);
     private String		script;
     private int			interval;
     private String		sshAddress;
     private String		devices;
     private File		outputDir;
-    private Logger		log;
 
     private CollectData		collector = null;
     private Thread		collectorThread = null;
@@ -30,8 +36,7 @@ public class OSCollector
     private BufferedWriter	resultCSVs[];
 
     public OSCollector(String script, int runID, int interval,
-    		       String sshAddress, String devices, File outputDir,
-		       Logger log)
+    		       String sshAddress, String devices, File outputDir)
     {
     	List<String>	cmdLine = new ArrayList<String>();
 	String		deviceNames[];

@@ -1,15 +1,15 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+import java.util.Random;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
  * jTPCCScheduler - Event scheduler for jTPCC
- *
  */
-import org.apache.log4j.*;
-
-import java.sql.*;
-import java.util.*;
-
 public class jTPCCScheduler implements Runnable
 {
+	private static Logger log = LogManager.getLogger(jTPCCScheduler.class);
     public final static int
 	SCHED_TERM_LAUNCH = 0,
 	SCHED_SUT_LAUNCH = 1,
@@ -22,7 +22,6 @@ public class jTPCCScheduler implements Runnable
 	SCHED_SUT_LAUNCH_DONE = 8,
 	SCHED_REPORT = 9;
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(jTPCCScheduler.class);
 
     private jTPCC	gdata;
     private jTPCCTData	avl_root = null;

@@ -1,18 +1,20 @@
 package com.github.pgsqlio.benchmarksql.loader;
-/*
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Formatter;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
+
+/**
  * LoadDataWorker - Class to load one Warehouse (or in a special case
  * the ITEM table).
  *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
- *
  */
-
-import java.sql.*;
-import java.util.*;
-import java.io.*;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class LoadDataWorker implements Runnable
 {
     private int                 worker;

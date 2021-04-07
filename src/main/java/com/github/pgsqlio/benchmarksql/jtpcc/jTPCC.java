@@ -1,26 +1,35 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
- * jTPCC - BenchmarkSQL main class
- *
- */
-import org.apache.log4j.*;
-
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.text.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Formatter;
+import java.util.Properties;
 import java.util.regex.Pattern;
-import java.lang.Integer;
-import java.lang.Double;
-import java.lang.Boolean;
+
+import org.apache.logging.log4j.LogManager;
+/**
+ * jTPCC - BenchmarkSQL main class
+ */
+import org.apache.logging.log4j.Logger;
+
 import com.github.pgsqlio.benchmarksql.application.AppGeneric;
 import com.github.pgsqlio.benchmarksql.application.oracle.AppOracleStoredProc;
 import com.github.pgsqlio.benchmarksql.application.postgres.AppPostgreSQLStoredProc;
-import com.github.pgsqlio.benchmarksql.oscollector.*;
+import com.github.pgsqlio.benchmarksql.oscollector.OSCollector;
 
 public class jTPCC
 {
-    private static org.apache.log4j.Logger log = Logger.getLogger(jTPCC.class);
+    private static Logger log = LogManager.getLogger(jTPCC.class);
 
     private long		now;
 
@@ -81,7 +90,6 @@ public class jTPCC
     public static void main(String args[])
 	throws FileNotFoundException
     {
-	PropertyConfigurator.configure("log4j.properties");
 	new jTPCC();
     }
 
@@ -385,7 +393,7 @@ public class jTPCC
 				Integer.parseInt(getProp(ini, "osCollectorInterval")),
 				getProp(ini, "osCollectorSSHAddr"),
 				getProp(ini, "osCollectorDevices"),
-				resultDataDir, log);
+				resultDataDir);
 	    }
 
 	    log.info("main,");

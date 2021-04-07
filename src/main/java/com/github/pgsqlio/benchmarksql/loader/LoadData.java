@@ -1,19 +1,23 @@
 package com.github.pgsqlio.benchmarksql.loader;
-/*
+
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCRandom;
+
+/**
  * LoadData - Load Sample Data directly into database tables or into
  * CSV files using multiple parallel workers.
  *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
- *
  */
-
-import java.sql.*;
-import java.util.*;
-import java.io.*;
-import java.lang.Integer;
-import com.github.pgsqlio.benchmarksql.jtpcc.*;
-
 public class LoadData
 {
     private static Properties   ini = new Properties();

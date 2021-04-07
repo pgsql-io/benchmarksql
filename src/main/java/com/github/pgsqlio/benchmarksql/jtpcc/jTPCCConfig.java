@@ -1,11 +1,10 @@
 package com.github.pgsqlio.benchmarksql.jtpcc;
-/*
+
+import java.text.SimpleDateFormat;
+
+/**
  * jTPCCConfig - Basic configuration parameters for jTPCC
- *
  */
-
-import java.text.*;
-
 public interface jTPCCConfig
 {
     public final static String JTPCCVERSION = "6.0";
