@@ -379,7 +379,8 @@ public class jTPCC
 	    {
 		resultCSV = new BufferedWriter(new FileWriter(resultCSVName));
 		resultCSV.write("ttype,second,numtrans," +
-				"sumlatencyms,sumdelayms\n");
+				"sumlatencyms,minlatencyms,maxlatencyms," +
+                                "sumdelayms,mindelayms,maxdelayms\n");
 	    }
 	    catch (IOException e)
 	    {
@@ -436,6 +437,10 @@ public class jTPCC
 	 * Create the SUT and schedule the launch of the SUT threads.
 	 */
 	now = System.currentTimeMillis();
+	csv_begin	= now;
+	result_begin	= now + rampupMins * 60000;
+	result_end	= result_begin + runMins * 60000;
+
 	systemUnderTest = new jTPCCSUT(this);
 	for (int t = 0; t < numSUTThreads; t++)
 	{
@@ -487,10 +492,6 @@ public class jTPCC
 	 * rampup time), to shut down the system and to print messages
 	 * when the terminals and SUT threads have all been started.
 	 */
-	csv_begin	= now;
-	result_begin	= now + rampupMins * 60000;
-	result_end	= result_begin + runMins * 60000;
-
 	this.scheduler.at(result_begin,
 			  jTPCCScheduler.SCHED_BEGIN,
 			  new jTPCCTData());

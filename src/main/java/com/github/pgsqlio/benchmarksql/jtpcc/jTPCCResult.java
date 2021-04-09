@@ -86,8 +86,27 @@ public class jTPCCResult
 	rCounter.numTrans++;
 	rCounter.sumLatencyMS += latency;
 	rCounter.sumDelayMS += delay;
+        if (rCounter.numTrans == 1)
+        {
+            rCounter.minLatencyMS = latency;
+            rCounter.maxLatencyMS = latency;
+            rCounter.minDelayMS = delay;
+            rCounter.maxDelayMS = delay;
+        }
+        else
+        {
+            if (latency < rCounter.minLatencyMS)
+                rCounter.minLatencyMS = latency;
+            if (latency > rCounter.maxLatencyMS)
+                rCounter.maxLatencyMS = latency;
+            if (delay < rCounter.minDelayMS)
+                rCounter.minDelayMS = delay;
+            if (delay > rCounter.maxDelayMS)
+                rCounter.maxDelayMS = delay;
+        }
 
-	if (System.currentTimeMillis() >= resultNextDue)
+        long now = System.currentTimeMillis();
+	if (now >= resultNextDue)
 	{
 	    long second = (resultNextDue - resultStartMS) / 1000;
 
@@ -98,14 +117,24 @@ public class jTPCCResult
 		    second + "," +
 		    resCounter[tt].numTrans + "," +
 		    resCounter[tt].sumLatencyMS + "," +
-		    resCounter[tt].sumDelayMS + "\n");
+		    resCounter[tt].minLatencyMS + "," +
+		    resCounter[tt].maxLatencyMS + "," +
+		    resCounter[tt].sumDelayMS + "," +
+		    resCounter[tt].minDelayMS + "," +
+		    resCounter[tt].maxDelayMS + "\n");
 
 		resCounter[tt].numTrans = 0;
 		resCounter[tt].sumLatencyMS = 0;
+		resCounter[tt].minLatencyMS = 0;
+		resCounter[tt].maxLatencyMS = 0;
 		resCounter[tt].sumDelayMS = 0;
+		resCounter[tt].minDelayMS = 0;
+		resCounter[tt].maxDelayMS = 0;
 	    }
 
-	    resultNextDue += (jTPCC.resultIntervalSecs * 1000);
+
+            while (resultNextDue <= now)
+                resultNextDue += (jTPCC.resultIntervalSecs * 1000);
 	}
     }
 
@@ -152,6 +181,10 @@ public class jTPCCResult
     {
 	public long numTrans = 0;
 	public long sumLatencyMS = 0;
+	public long minLatencyMS = 0;
+	public long maxLatencyMS = 0;
 	public long sumDelayMS = 0;
+	public long minDelayMS = 0;
+	public long maxDelayMS = 0;
     }
 }
