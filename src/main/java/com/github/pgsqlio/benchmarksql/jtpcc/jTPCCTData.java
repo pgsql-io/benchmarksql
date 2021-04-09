@@ -16,8 +16,8 @@ public class jTPCCTData
     TT_DONE = 7;
 
     public final static String trans_type_names[] = {
-    "NEW_ORDER", "PAYMENT", "ORDER_STATUS",
-    "STOCK_LEVEL", "DELIVERY", "DELIVERY_BG", "NONE", "DONE"
+	"NEW_ORDER", "PAYMENT", "ORDER_STATUS",
+	"STOCK_LEVEL", "DELIVERY", "DELIVERY_BG", "NONE", "DONE"
     };
 
     public int		sched_code;

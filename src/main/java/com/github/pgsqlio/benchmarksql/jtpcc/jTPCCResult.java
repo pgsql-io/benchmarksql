@@ -5,35 +5,48 @@ package com.github.pgsqlio.benchmarksql.jtpcc;
  */
 public class jTPCCResult
 {
-    public  Counters	counters[];
+    public  HistCounter	histCounter[];
+    public  ResCounter	resCounter[];
     private Object	lock;
     public  double	statsDivider;
+    private long	resultStartMS;
+    private long	resultNextDue;
 
     public  static final int	NUM_BUCKETS = 1000;
-    private static final double STATS_CUTOFF = 600.0;
+    public  static final double STATS_CUTOFF = 600.0;
 
     public jTPCCResult()
     {
-	counters = new Counters[jTPCCTData.TT_DELIVERY_BG + 1];
+	histCounter = new HistCounter[jTPCCTData.TT_DELIVERY_BG + 1];
 	for (int i = 0; i < jTPCCTData.TT_DELIVERY_BG + 1; i++)
-	    counters[i] = new Counters();
+	    histCounter[i] = new HistCounter();
+	resCounter = new ResCounter[jTPCCTData.TT_DELIVERY_BG + 1];
+	for (int i = 0; i < jTPCCTData.TT_DELIVERY_BG + 1; i++)
+	    resCounter[i] = new ResCounter();
 	lock = new Object();
 	statsDivider = Math.log(STATS_CUTOFF * 1000.0) / (double)(NUM_BUCKETS);
+
+	resultStartMS = jTPCC.csv_begin;
+	resultNextDue = resultStartMS + (jTPCC.resultIntervalSecs * 1000);
     }
 
     public void collect(jTPCCTData tdata)
     {
-	Counters    counter;
+	HistCounter hCounter;
+	ResCounter  rCounter;
 	long	    latency;
+	long	    delay;
 	int	    bucket;
 
 	if (tdata.trans_type < 0 ||
 	    tdata.trans_type > jTPCCTData.TT_DELIVERY_BG)
 	    return;
 
-	counter = counters[tdata.trans_type];
+	hCounter = histCounter[tdata.trans_type];
+	rCounter = resCounter[tdata.trans_type];
 
 	latency = tdata.trans_end - tdata.trans_due;
+	delay = tdata.trans_end - tdata.trans_start;
 	if (latency < 1)
 	    bucket = 0;
 	else
@@ -42,49 +55,58 @@ public class jTPCCResult
 	    bucket = NUM_BUCKETS - 1;
 
 	/* Only collect data within the defined measurement window */
-	if (tdata.trans_end >= jTPCC.result_begin && tdata.trans_end < jTPCC.result_end)
+	if (tdata.trans_end >= jTPCC.result_begin &&
+	    tdata.trans_end < jTPCC.result_end)
 	{
 	    synchronized(lock)
 	    {
-		if (counter.numTrans == 0)
+		if (hCounter.numTrans == 0)
 		{
-		    counter.minMS = latency;
-		    counter.maxMS = latency;
+		    hCounter.minMS = latency;
+		    hCounter.maxMS = latency;
 		}
 		else
 		{
-		    if (counter.minMS > latency)
-			counter.minMS = latency;
-		    if (counter.maxMS < latency)
-			counter.maxMS = latency;
+		    if (hCounter.minMS > latency)
+			hCounter.minMS = latency;
+		    if (hCounter.maxMS < latency)
+			hCounter.maxMS = latency;
 		}
-		counter.numTrans++;
-		counter.sumMS += latency;
+		hCounter.numTrans++;
+		hCounter.sumMS += latency;
 		if (tdata.trans_error)
-		    counter.numError++;
+		    hCounter.numError++;
 		if (tdata.trans_rbk)
-		    counter.numRbk++;
+		    hCounter.numRbk++;
 
-		counter.bucket[bucket]++;
+		hCounter.bucket[bucket]++;
 	    }
 	}
 
-	/*
-	 * Send the per transaction CSV entry to the result.csv
-	 * in any case. The report generator will take care of
-	 * filtering the relevant data.
-	 */
-	jTPCC.csv_result_write(
-	    jTPCC.runID + "," +
-	    jTPCCTData.trans_type_names[tdata.trans_type] + "," +
-	    new java.sql.Timestamp(tdata.trans_due) + "," +
-	    new java.sql.Timestamp(tdata.trans_end) + "," +
-	    (tdata.trans_due - jTPCC.csv_begin) + "," +
-	    (tdata.trans_end - jTPCC.csv_begin) + "," +
-	    (tdata.trans_start - tdata.trans_due) + "," +
-	    (tdata.trans_end - tdata.trans_due) + "," +
-	    ((tdata.trans_rbk) ? "1," : "0,") +
-	    ((tdata.trans_error) ? "1\n" : "0\n"));
+	rCounter.numTrans++;
+	rCounter.sumLatencyMS += latency;
+	rCounter.sumDelayMS += delay;
+
+	if (System.currentTimeMillis() >= resultNextDue)
+	{
+	    long second = (resultNextDue - resultStartMS) / 1000;
+
+	    for (int tt = 0; tt <= jTPCCTData.TT_DELIVERY_BG; tt++)
+	    {
+		jTPCC.csv_result_write(
+		    jTPCCTData.trans_type_names[tt] + "," +
+		    second + "," +
+		    resCounter[tt].numTrans + "," +
+		    resCounter[tt].sumLatencyMS + "," +
+		    resCounter[tt].sumDelayMS + "\n");
+
+		resCounter[tt].numTrans = 0;
+		resCounter[tt].sumLatencyMS = 0;
+		resCounter[tt].sumDelayMS = 0;
+	    }
+
+	    resultNextDue += (jTPCC.resultIntervalSecs * 1000);
+	}
     }
 
     public void aggregate(jTPCCResult into)
@@ -93,29 +115,29 @@ public class jTPCCResult
 	{
 	    for (int tt = 0; tt <= jTPCCTData.TT_DELIVERY_BG; tt++)
 	    {
-		if (into.counters[tt].numTrans == 0)
+		if (into.histCounter[tt].numTrans == 0)
 		{
-		    into.counters[tt].minMS = counters[tt].minMS;
-		    into.counters[tt].maxMS = counters[tt].maxMS;
+		    into.histCounter[tt].minMS = histCounter[tt].minMS;
+		    into.histCounter[tt].maxMS = histCounter[tt].maxMS;
 		}
 		else
 		{
-		    if (into.counters[tt].minMS > counters[tt].minMS)
-			into.counters[tt].minMS = counters[tt].minMS;
-		    if (into.counters[tt].maxMS < counters[tt].maxMS)
-			into.counters[tt].maxMS = counters[tt].maxMS;
+		    if (into.histCounter[tt].minMS > histCounter[tt].minMS)
+			into.histCounter[tt].minMS = histCounter[tt].minMS;
+		    if (into.histCounter[tt].maxMS < histCounter[tt].maxMS)
+			into.histCounter[tt].maxMS = histCounter[tt].maxMS;
 		}
-		into.counters[tt].numTrans  += counters[tt].numTrans;
-		into.counters[tt].sumMS	    += counters[tt].sumMS;
-		into.counters[tt].numError  += counters[tt].numError;
-		into.counters[tt].numRbk    += counters[tt].numRbk;
+		into.histCounter[tt].numTrans  += histCounter[tt].numTrans;
+		into.histCounter[tt].sumMS     += histCounter[tt].sumMS;
+		into.histCounter[tt].numError  += histCounter[tt].numError;
+		into.histCounter[tt].numRbk    += histCounter[tt].numRbk;
 		for (int i = 0; i < NUM_BUCKETS; i++)
-		    into.counters[tt].bucket[i] += counters[tt].bucket[i];
+		    into.histCounter[tt].bucket[i] += histCounter[tt].bucket[i];
 	    }
 	}
     }
 
-    public class Counters
+    public class HistCounter
     {
 	public long numTrans = 0;
 	public long sumMS = 0;
@@ -124,5 +146,12 @@ public class jTPCCResult
 	public long numError = 0;
 	public long numRbk = 0;
 	public long bucket[] = new long[NUM_BUCKETS];
+    }
+
+    public class ResCounter
+    {
+	public long numTrans = 0;
+	public long sumLatencyMS = 0;
+	public long sumDelayMS = 0;
     }
 }

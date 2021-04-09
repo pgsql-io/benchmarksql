@@ -55,6 +55,7 @@ public class jTPCCMonkey
 	StringBuilder	    sb = new StringBuilder();
 	Formatter	    fmt = new Formatter(sb, Locale.US);
 	double		    total_count = 0.0;
+	double		    statsDivider;
 
 	for (int m = 0; m < jTPCC.numMonkeys; m++)
 	{
@@ -65,7 +66,7 @@ public class jTPCCMonkey
 	for (int tt = jTPCCTData.TT_NEW_ORDER;
 	     tt <= jTPCCTData.TT_DELIVERY; tt++)
 	{
-	    total_count += (double)(sumStats.counters[tt].numTrans);
+	    total_count += (double)(sumStats.histCounter[tt].numTrans);
 	}
 
 	log.info("result,                                           _____ latency (seconds) _____");
@@ -84,22 +85,22 @@ public class jTPCCMonkey
 	    double		errors;
 	    int			b;
 
-	    count = (double)(sumStats.counters[tt].numTrans);
+	    count = (double)(sumStats.histCounter[tt].numTrans);
 	    percent = count / total_count * 100.0;
 	    if (tt == jTPCCTData.TT_DELIVERY_BG)
 	    	percent = 0.0;
-	    mean = (double)(sumStats.counters[tt].sumMS) / 1000.0 / count;
-	    max = (double)(sumStats.counters[tt].maxMS) / 1000.0;
-	    rbk = (double)(sumStats.counters[tt].numRbk) / count * 100.0;
-	    errors = (double)(sumStats.counters[tt].numError);
+	    mean = (double)(sumStats.histCounter[tt].sumMS) / 1000.0 / count;
+	    max = (double)(sumStats.histCounter[tt].maxMS) / 1000.0;
+	    rbk = (double)(sumStats.histCounter[tt].numRbk) / count * 100.0;
+	    errors = (double)(sumStats.histCounter[tt].numError);
 
-	    nth_needed = (long)((double)(sumStats.counters[tt].numTrans) * 0.9);
+	    nth_needed = (long)((double)(sumStats.histCounter[tt].numTrans) * 0.9);
 	    for (b = 0; b < jTPCCResult.NUM_BUCKETS && nth_have < nth_needed; b++)
 	    {
-		nth_have += sumStats.counters[tt].bucket[b];
+		nth_have += sumStats.histCounter[tt].bucket[b];
 	    }
 	    nth_pct = Math.exp((double)b * sumStats.statsDivider) / 1000.0;
-	    if (sumStats.counters[tt].numTrans == 0)
+	    if (sumStats.histCounter[tt].numTrans == 0)
 	    {
 		count = max = nth_pct = rbk = errors = 0.0 / 0.0;
 	    }
@@ -107,7 +108,7 @@ public class jTPCCMonkey
 
 	    fmt.format("| %-12.12s | %,13d | %7.3f | %7.3f | %7.3f | %7.3f | %7.3f | %,13.0f |",
 		       jTPCCTData.trans_type_names[tt],
-		       sumStats.counters[tt].numTrans, percent, mean,
+		       sumStats.histCounter[tt].numTrans, percent, mean,
 		       max, nth_pct, rbk, errors);
 	    log.info("result, {}", sb.toString());
 	    sb.setLength(0);
@@ -117,9 +118,9 @@ public class jTPCCMonkey
 	log.info("result,");
 
 	fmt.format("Overall NOPM: %,12.0f (%.2f%% of the theoretical maximum)",
-	    (double)(sumStats.counters[jTPCCTData.TT_NEW_ORDER].numTrans) /
+	    (double)(sumStats.histCounter[jTPCCTData.TT_NEW_ORDER].numTrans) /
 	    (double)(jTPCC.runMins),
-	    (double)(sumStats.counters[jTPCCTData.TT_NEW_ORDER].numTrans) /
+	    (double)(sumStats.histCounter[jTPCCTData.TT_NEW_ORDER].numTrans) /
 	    ((double)jTPCC.numWarehouses * 0.1286 * (double)(jTPCC.runMins)));
 	log.info("result, {}", sb.toString());
 	sb.setLength(0);
@@ -127,6 +128,26 @@ public class jTPCCMonkey
 	fmt.format("Overall TPM:  %,12.0f", total_count / (double)(jTPCC.runMins));
 	log.info("result, {}", sb.toString());
 	sb.setLength(0);
+
+	/*
+	 * Write out the transaction latency histogram
+	 */
+	log.info("dumping result histogram");
+	statsDivider = Math.log(jTPCCResult.STATS_CUTOFF * 1000.0)
+				/ (double)(jTPCCResult.NUM_BUCKETS);
+	for (int tt = jTPCCTData.TT_NEW_ORDER; tt <= jTPCCTData.TT_DELIVERY_BG; tt++)
+	{
+	    for (int b = 0; b < jTPCCResult.NUM_BUCKETS; b++)
+	    {
+		double edge = Math.exp((double)(b + 1) * statsDivider)
+				       / jTPCCResult.NUM_BUCKETS;
+
+		jTPCC.csv_histogram_write(
+		    jTPCCTData.trans_type_names[tt] + "," +
+		    edge + "," +
+		    sumStats.histCounter[tt].bucket[b] + "\n");
+	    }
+	}
     }
 
     public void terminate()

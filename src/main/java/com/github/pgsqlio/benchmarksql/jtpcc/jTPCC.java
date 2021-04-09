@@ -56,6 +56,7 @@ public class jTPCC
     public  static int		rampupSUTMins;
     public  static int		rampupTerminalMins;
     public  static int		reportIntervalSecs;
+    public  static int		resultIntervalSecs;
     public  static double	restartSUTThreadProb;
     public  static double	keyingTimeMultiplier;
     public  static double	thinkTimeMultiplier;
@@ -80,12 +81,14 @@ public class jTPCC
     public  static String		resultDirectory = null;
     public  static String		osCollectorScript = null;
     private static String		resultDirName = null;
+    private static BufferedWriter	histogramCSV = null;
     private static BufferedWriter	resultCSV = null;
     private static BufferedWriter	runInfoCSV = null;
     public  static int			runID = 0;
     public  static long			csv_begin;
     public  static long			result_begin;
     public  static long			result_end;
+    private static Object               result_lock;
 
     public static void main(String args[])
 	throws FileNotFoundException
@@ -96,6 +99,15 @@ public class jTPCC
     private String getProp (Properties p, String pName)
     {
 	String prop =  p.getProperty(pName);
+	log.info("main, {}={}", pName, prop);
+	return(prop);
+    }
+
+    private String getProp (Properties p, String pName, String defVal)
+    {
+	String prop =  p.getProperty(pName);
+	if (prop == null)
+	    prop = defVal;
 	log.info("main, {}={}", pName, prop);
 	return(prop);
     }
@@ -144,6 +156,7 @@ public class jTPCC
 	rampupSUTMins		= Integer.parseInt(getProp(ini, "rampupSUTMins"));
 	rampupTerminalMins	= Integer.parseInt(getProp(ini, "rampupTerminalMins"));
 	reportIntervalSecs	= Integer.parseInt(getProp(ini, "reportIntervalSecs"));
+	resultIntervalSecs	= Integer.parseInt(getProp(ini, "resultIntervalSecs", "10"));
 	restartSUTThreadProb	= Double.parseDouble(getProp(ini, "restartSUTThreadProbability"));
 	keyingTimeMultiplier	= Double.parseDouble(getProp(ini, "keyingTimeMultiplier"));
 	thinkTimeMultiplier	= Double.parseDouble(getProp(ini, "thinkTimeMultiplier"));
@@ -263,15 +276,7 @@ public class jTPCC
 
 	String  resultDirectory     = getProp(ini, "resultDirectory");
 	String  osCollectorScript   = getProp(ini, "osCollectorScript");
-	/*
-	if (true)
-	{
-	    String csv_fname = "result.csv";
-	    csv_result = new PrintWriter(new FileOutputStream(csv_fname));
-	    csv_result.println("type,startts,endts,startms,endms," +
-			       "delayms,latencyms,rbk,error,message");
-	}
-	*/
+
 	if (resultDirectory != null)
 	{
 	    StringBuffer        sbRes = new StringBuffer();
@@ -368,21 +373,37 @@ public class jTPCC
 	    log.info("main, created {} for runID {}", runInfoCSVName,
 		     runID);
 
-	    // Open the per transaction result.csv file.
+	    // Open the aggregated transaction result.csv file.
 	    String resultCSVName = new File(resultDataDir, "result.csv").getPath();
 	    try
 	    {
 		resultCSV = new BufferedWriter(new FileWriter(resultCSVName));
-		resultCSV.write("run,ttype,startts,endts,startms,endms,delayms," +
-				"latencyms,rbk,error\n");
+		resultCSV.write("ttype,second,numtrans," +
+				"sumlatencyms,sumdelayms\n");
 	    }
 	    catch (IOException e)
 	    {
 		log.error(e.getMessage());
 		System.exit(1);
 	    }
-	    log.info("main, writing per transaction results to {}",
+	    log.info("main, writing aggregated transaction results to {}",
 		     resultCSVName);
+            result_lock = new Object();
+
+	    // Open the aggregated transaction result.csv file.
+	    String histogramCSVName = new File(resultDataDir, "histogram.csv").getPath();
+	    try
+	    {
+		histogramCSV = new BufferedWriter(new FileWriter(histogramCSVName));
+		histogramCSV.write("ttype,edge,numtrans\n");
+	    }
+	    catch (IOException e)
+	    {
+		log.error(e.getMessage());
+		System.exit(1);
+	    }
+	    log.info("main, writing transaction histogram to " +
+		     histogramCSVName);
 
 	    if (osCollectorScript != null)
 	    {
@@ -519,13 +540,28 @@ public class jTPCC
 	monkeys.reportStatistics();
 
 	/*
-	 * Close the per transaction CSV result
+	 * Close the aggregated transaction CSV result
 	 */
 	if (resultCSV != null)
 	{
 	    try {
-		log.info("main, per transaction result file finished");
+		log.info("aggregated transaction result file finished");
 		resultCSV.close();
+	    }
+	    catch (Exception e)
+	    {
+		log.error(e.getMessage());
+	    }
+	}
+
+	/*
+	 * Close the histogram CSV
+	 */
+	if (histogramCSV != null)
+	{
+	    try {
+		log.info("transaction histogram file finished");
+		histogramCSV.close();
 	    }
 	    catch (Exception e)
 	    {
@@ -560,8 +596,25 @@ public class jTPCC
     {
 	if (resultCSV != null)
 	{
+            synchronized(result_lock)
+            {
+              try {
+                  resultCSV.write(line);
+                  resultCSV.flush();
+              }
+              catch (Exception e)
+              {
+              }
+            }
+	}
+    }
+
+    public static void csv_histogram_write(String line)
+    {
+	if (histogramCSV != null)
+	{
 	    try {
-		resultCSV.write(line);
+		histogramCSV.write(line);
 	    }
 	    catch (Exception e)
 	    {
