@@ -19,6 +19,7 @@ import com.github.pgsqlio.benchmarksql.jtpcc.jTPCCTDataList;
 public class jTPCCMonkey
 {
     private static Logger log = LogManager.getLogger(jTPCCMonkey.class);
+    private static Logger logResult = LogManager.getLogger(jTPCC.class);
 
     private jTPCC		gdata;
     private int			numMonkeys;
@@ -73,9 +74,9 @@ public class jTPCCMonkey
 	    total_count += (double)(sumStats.counters[tt].numTrans);
 	}
 
-	log.info("result,                                           _____ latency (seconds) _____");
-	log.info("result,   TransType              count |   mix % |    mean       max     90th% |    rbk%          errors");
-	log.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
+	logResult.info("result,                                           _____ latency (seconds) _____");
+	logResult.info("result,   TransType              count |   mix % |    mean       max     90th% |    rbk%          errors");
+	logResult.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
 	for (int tt = jTPCCTData.TT_NEW_ORDER; tt <= jTPCCTData.TT_DELIVERY_BG; tt++)
 	{
 	    double		count;
@@ -114,23 +115,23 @@ public class jTPCCMonkey
 		       jTPCCTData.trans_type_names[tt],
 		       sumStats.counters[tt].numTrans, percent, mean,
 		       max, nth_pct, rbk, errors);
-	    log.info("result, {}", sb.toString());
+	    logResult.info("result, {}", sb.toString());
 	    sb.setLength(0);
 	}
-	log.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
+	logResult.info("result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");
 
-	log.info("result,");
+	logResult.info("result,");
 
 	fmt.format("Overall NOPM: %,12.0f (%.2f%% of the theoretical maximum)",
 	    (double)(sumStats.counters[jTPCCTData.TT_NEW_ORDER].numTrans) /
 	    (double)(jTPCC.runMins),
 	    (double)(sumStats.counters[jTPCCTData.TT_NEW_ORDER].numTrans) /
 	    ((double)jTPCC.numWarehouses * 0.1286 * (double)(jTPCC.runMins)));
-	log.info("result, {}", sb.toString());
+	logResult.info("result, {}", sb.toString());
 	sb.setLength(0);
 
 	fmt.format("Overall TPM:  %,12.0f", total_count / (double)(jTPCC.runMins));
-	log.info("result, {}", sb.toString());
+	logResult.info("result, {}", sb.toString());
 	sb.setLength(0);
     }
 
