@@ -19,13 +19,13 @@ RUN pip3 install Flask
 
 COPY ./target/ /benchmarksql
 
-RUN mkdir -p /service_data
-RUN rm -f /benchmarksql/run/.jTPCC_run_seq.dat
-RUN rm -f /benchmarksql/run/benchmarksql-error.log
-RUN rm -f /benchmarksql/run/benchmarksql-trace.log
-RUN ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat
-RUN ln -s /service_data/benchmarksql-error.log /benchmarksql/run/benchmarksql-error.log
-RUN ln -s /service_data/benchmarksql-trace.log /benchmarksql/run/benchmarksql-trace.log
+RUN mkdir -p /service_data && \
+    rm -f /benchmarksql/run/.jTPCC_run_seq.dat && \
+    rm -f /benchmarksql/run/benchmark.log && \
+    rm -f /benchmarksql/run/terminalio.log && \
+    ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat && \
+    ln -s /service_data/benchmark.log /benchmarksql/run/benchmark.log && \
+    ln -s /service_data/terminalio.log /benchmarksql/run/terminalio.log
 
 CMD ["python3", "/benchmarksql/run/FlaskService/main.py"]
 
