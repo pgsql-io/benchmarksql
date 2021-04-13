@@ -1,0 +1,19 @@
+  <h2>
+    NEW_ORDER Transactions per Minute
+  </h2>
+  <p>
+    tpmC is the number of NEW_ORDER Transactions, that where processed
+    per minute. This is often referred to as New Orders Per Minute (NOPM).
+    A good benchmark result is one that achieves a high tpmC without
+    violating any of the TPC-C response time or transaction mix
+    constraints.
+    <br/>
+    <br/>
+    A steady NOPM over the entire measurement period
+    (0 .. {{ runinfo['runMins'] }} minutes in this run) is most desirable. 
+    Any frequent or prolonged drops in tpmC are likely caused by spikes in
+    the transaction latency.
+    <br/>
+    <br/>
+    <img src="data:image/svg+xml;base64,{{ tpmc_svg }}" />
+  </p>

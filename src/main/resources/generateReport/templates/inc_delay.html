@@ -1,0 +1,24 @@
+  <h2>
+    NEW_ORDER Latency and Delay
+  </h2>
+  <p>
+    The total end-user experienced transaction latency is different from
+    the database transaction latency. Since there is a limited number
+    of database connections, a transaction submitted to the "System under Test"
+    may not immediately start processing on the database because all
+    connections are busy.
+    <br/>
+    <br/>
+    BenchmarkSQL measures the total latency, experienced by the end-user,
+    as well as the time, the
+    request had to wait in the SUT for a database connection to become
+    available. It is important to point out that increasing the number
+    of database connections (parameter sutThreads) only helps to a certain
+    point. That point is usually between two and eight times the number of
+    CPU cores of the database server. After that point the concurrency in
+    the database may increase the latency and cause the system to violate
+    the response time constraints.
+    <br/>
+    <br/>
+    <img src="data:image/svg+xml;base64,{{ delay_svg }}" />
+  </p>

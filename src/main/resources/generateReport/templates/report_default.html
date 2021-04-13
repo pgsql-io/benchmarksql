@@ -1,0 +1,27 @@
+<html>
+<head>
+  <title>
+    BenchmarkSQL Run #{{ runinfo['runID'] }}
+  </title>
+
+  {% include "bmsql.css" %}
+
+</head>
+<body bgcolor="#ffffff">
+  <h1>
+    BenchmarkSQL Run #{{ runinfo['runID'] }}
+  </h1>
+
+  <p>
+    This TPC-C style benchmark run was performed using the
+    <b>{{ runinfo['application'] }}</b> Application Module
+    of BenchmarkSQL version
+    <b>{{ runinfo['jTPCCVersion'] }}</b> and the
+    <b>{{ runinfo['dbType'] }}</b> JDBC driver.
+  </p>
+
+  {% include "inc_summary.html" %}
+  {% include "inc_nopm.html" %}
+  {% include "inc_delay.html" %}
+</body>
+</html>
