@@ -9,5 +9,5 @@ podman run --rm \
 	--volume="${HOME}:${HOME}" \
 	--volume="./service_data:/service_data" \
 	-w "$PWD" \
-	localhost/benchmarksql-v6.0
+	localhost/benchmarksql:6.0
 
