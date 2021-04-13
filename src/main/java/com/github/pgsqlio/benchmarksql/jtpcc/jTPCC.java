@@ -81,6 +81,7 @@ public class jTPCC {
   public static String resultDirectory = null;
   public static String osCollectorScript = null;
   private static String resultDirName = null;
+  private static BufferedWriter summaryCSV = null;
   private static BufferedWriter histogramCSV = null;
   private static BufferedWriter resultCSV = null;
   private static BufferedWriter runInfoCSV = null;
@@ -342,7 +343,18 @@ public class jTPCC {
       log.info("main, writing aggregated transaction results to {}", resultCSVName);
       result_lock = new Object();
 
-      // Open the aggregated transaction result.csv file.
+      // Open the aggregated summary.csv file
+      String summaryCSVName = new File(resultDataDir, "summary.csv").getPath();
+      try {
+        summaryCSV = new BufferedWriter(new FileWriter(summaryCSVName));
+        summaryCSV.write("ttype,count,percent,mean,max,rollbacks,errors\n");
+      } catch (IOException e) {
+        log.error(e.getMessage());
+        System.exit(1);
+      }
+      log.info("main, writing transaction summary to " + summaryCSVName);
+
+      // Open the histogram.csv file.
       String histogramCSVName = new File(resultDataDir, "histogram.csv").getPath();
       try {
         histogramCSV = new BufferedWriter(new FileWriter(histogramCSVName));
@@ -474,6 +486,18 @@ public class jTPCC {
     }
 
     /*
+     * Close the summary CSV
+     */
+    if (summaryCSV != null) {
+      try {
+        log.info("transaction summary file finished");
+        summaryCSV.close();
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
+    }
+
+    /*
      * Close the histogram CSV
      */
     if (histogramCSV != null) {
@@ -514,6 +538,15 @@ public class jTPCC {
           resultCSV.flush();
         } catch (Exception e) {
         }
+      }
+    }
+  }
+
+  public static void csv_summary_write(String line) {
+    if (summaryCSV != null) {
+      try {
+        summaryCSV.write(line);
+      } catch (Exception e) {
       }
     }
   }

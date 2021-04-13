@@ -103,6 +103,18 @@ public class jTPCCMonkey {
           nth_pct, rbk, errors);
       log.info("result, {}", sb.toString());
       sb.setLength(0);
+
+      /*
+       * Also collect this data in the summary.csv
+       */
+      jTPCC.csv_summary_write(
+          jTPCCTData.trans_type_names[tt] + ","
+              + sumStats.histCounter[tt].numTrans + ","
+              + percent + ","
+              + mean + ","
+              + max + ","
+              + sumStats.histCounter[tt].numRbk + ","
+              + sumStats.histCounter[tt].numError + "\n");
     }
     log.info(
         "result, +--------------+---------------+---------+---------+---------+---------+---------+---------------+");

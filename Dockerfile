@@ -6,10 +6,12 @@ RUN dnf -y update
 
 RUN dnf -y install epel-release
 RUN dnf -y install java-11-openjdk-headless
-RUN dnf -y install R-core
-RUN dnf -y install bc
+RUN dnf -y install dnf-plugins-core
+RUN dnf config-manager --set-enabled powertools
 RUN dnf -y install python3
-RUN dnf -y install python3-pip
+RUN dnf -y install python3-pip \
+				   python3-numpy \
+				   python3-matplotlib
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 ENV FLASK_ENV=development
