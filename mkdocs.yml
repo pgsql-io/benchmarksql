@@ -1,0 +1,19 @@
+site_name: BenchmarkSQL
+nav:
+    - Home: index.md
+    - 'How to run':
+      - 'How to run in any RDBMS': HOW-TO-RUN.md
+      - Oracle: HOW-TO-RUN-Oracle.md
+      - Postgres: HOW-TO-RUN-Postgres.md
+    - 'Properties file': PROPERTIES.md
+    - 'Docker and Flask': DOCKER.md
+    - Building: BUILDING.md
+    - 'Timed driver': TimedDriver.md
+    - 'TPC-C descripcion': TPCC.md
+    - About:
+      - Contributing: CONTRIBUTING.md
+      - 'Change log': CHANGE-LOG.md
+      - 'Release process': RELEASE.md
+      - Licence: LICENSE.txt
+    
+theme: readthedocs
