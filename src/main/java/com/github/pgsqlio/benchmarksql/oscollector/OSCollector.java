@@ -1,17 +1,21 @@
 package com.github.pgsqlio.benchmarksql.oscollector;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
+import java.lang.ProcessBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tools.ant.types.Commandline;
+
+import com.github.pgsqlio.benchmarksql.jtpcc.jTPCC;
 
 /**
  * OSCollector.java
@@ -20,136 +24,118 @@ import org.apache.logging.log4j.Logger;
  */
 public class OSCollector {
   private static Logger log = LogManager.getLogger(OSCollector.class);
-  private String script;
-  private int interval;
-  private String sshAddress;
-  private String devices;
-  private File outputDir;
 
-  private CollectData collector = null;
-  private Thread collectorThread = null;
-  private boolean endCollection = false;
-  private Process collProc;
+  private Runtime runTime;
+  private Process collector;
+  private OutputStream stdin;
 
-  private BufferedWriter resultCSVs[];
+  private Thread stdoutThread;
+  private Thread stderrThread;
 
-  public OSCollector(String script, int runID, int interval, String sshAddress, String devices,
-      File outputDir) {
-    List<String> cmdLine = new ArrayList<String>();
-    String deviceNames[];
+  public OSCollector(String cmdLine, File outputDir)
+      throws IOException
+  {
+    /*
+     * Assemble the command line for the collector by splitting
+     * the osCollectorScript property into strings (bash style),
+     * then append the --startepoch and --resultdir options.
+     */
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.addAll(Arrays.asList(Commandline.translateCommandline(cmdLine)));
+    cmd.add("--startepoch");
+    cmd.add(String.valueOf(jTPCC.csv_begin / 1000));
+    cmd.add("--resultdir");
+    cmd.add(outputDir.getPath());
 
-    this.script = script;
-    this.interval = interval;
-    this.sshAddress = sshAddress;
-    this.devices = devices;
-    this.outputDir = outputDir;
-    this.log = log;
+    /*
+     * Create a child process executing that command
+     */
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    collector = pb.start();
 
-    if (sshAddress != null) {
-      cmdLine.add("ssh");
-      // cmdLine.add("-t");
-      cmdLine.add(sshAddress);
-    }
-    cmdLine.add("python");
-    cmdLine.add("-");
-    cmdLine.add(Integer.toString(runID));
-    cmdLine.add(Integer.toString(interval));
-    if (devices != null)
-      deviceNames = devices.split("[ \t]+");
-    else
-      deviceNames = new String[0];
-
-    try {
-      resultCSVs = new BufferedWriter[deviceNames.length + 1];
-      resultCSVs[0] = new BufferedWriter(new FileWriter(new File(outputDir, "sys_info.csv")));
-      for (int i = 0; i < deviceNames.length; i++) {
-        cmdLine.add(deviceNames[i]);
-        resultCSVs[i + 1] =
-            new BufferedWriter(new FileWriter(new File(outputDir, deviceNames[i] + ".csv")));
-      }
-    } catch (Exception e) {
-      log.error("OSCollector, {}", e.getMessage());
-      System.exit(1);
-    }
-
-    try {
-      ProcessBuilder pb = new ProcessBuilder(cmdLine);
-      pb.redirectErrorStream(true);
-
-      collProc = pb.start();
-
-      BufferedReader scriptReader = new BufferedReader(new FileReader(script));
-      BufferedWriter scriptWriter =
-          new BufferedWriter(new OutputStreamWriter(collProc.getOutputStream()));
-      String line;
-      while ((line = scriptReader.readLine()) != null) {
-        scriptWriter.write(line);
-        scriptWriter.newLine();
-      }
-      scriptWriter.close();
-      scriptReader.close();
-    } catch (Exception e) {
-      log.error("OSCollector {}", e.getMessage());
-      log.info(e);
-      System.exit(1);
-    }
-
-    collector = new CollectData(this);
-    collectorThread = new Thread(this.collector);
-    collectorThread.start();
+    /*
+     * Create two helpler threads that shovel stdout and stderr of
+     * the child process into our logs.
+     */
+    stdin = collector.getOutputStream();
+    stdoutThread = new Thread(new stdoutLogger(collector.getInputStream()));
+    stderrThread = new Thread(new stderrLogger(collector.getErrorStream()));
+    stdoutThread.start();
+    stderrThread.start();
   }
 
-  public void stop() {
-    endCollection = true;
+  public void stop()
+      throws IOException, InterruptedException
+  {
+    /*
+     * We use closing stdin of the child process to signal it is
+     * time to exit. So just close that stream and wait for it to
+     * exit.
+     */
+    stdin.close();
+    collector.waitFor();
+
+    /*
+     * Now wait until the stdout and stderr logger threads terminate,
+     * which they will when the collector script child process exits.
+     */
     try {
-      collectorThread.join();
+      stdoutThread.join();
     } catch (InterruptedException ie) {
       log.error("OSCollector, {}", ie.getMessage());
-      return;
+    }
+    try {
+      stderrThread.join();
+    } catch (InterruptedException ie) {
+      log.error("OSCollector, {}", ie.getMessage());
     }
   }
 
-  private class CollectData implements Runnable {
-    private OSCollector parent;
+  private class stdoutLogger implements Runnable {
+    private BufferedReader stdout;
 
-    public CollectData(OSCollector parent) {
-      this.parent = parent;
+    public stdoutLogger(InputStream stdout) {
+      this.stdout = new BufferedReader(new InputStreamReader(stdout));
     }
 
     public void run() {
-      BufferedReader osData;
       String line;
-      int resultIdx = 0;
 
-      osData = new BufferedReader(new InputStreamReader(parent.collProc.getInputStream()));
-
-      while (!endCollection || resultIdx != 0) {
+      while (true) {
         try {
-          line = osData.readLine();
-          if (line == null) {
-            log.error("OSCollector, unexpected EOF while reading from external helper process");
-            break;
-          }
-          parent.resultCSVs[resultIdx].write(line);
-          parent.resultCSVs[resultIdx].newLine();
-          parent.resultCSVs[resultIdx].flush();
-          if (++resultIdx >= parent.resultCSVs.length)
-            resultIdx = 0;
-        } catch (Exception e) {
+          line = stdout.readLine();
+        } catch (IOException e) {
           log.error("OSCollector, {}", e.getMessage());
           break;
         }
+        if (line == null)
+          break;
+        log.info(line);
       }
+    }
+  }
 
-      try {
-        osData.close();
-        for (int i = 0; i < parent.resultCSVs.length; i++)
-          parent.resultCSVs[i].close();
-      } catch (Exception e) {
-        log.error("OSCollector, {}", e.getMessage());
+  private class stderrLogger implements Runnable {
+    private BufferedReader stderr;
+
+    public stderrLogger(InputStream stderr) {
+      this.stderr = new BufferedReader(new InputStreamReader(stderr));
+    }
+
+    public void run() {
+      String line;
+
+      while (true) {
+        try {
+          line = stderr.readLine();
+        } catch (IOException e) {
+          log.error("OSCollector, {}", e.getMessage());
+          break;
+        }
+        if (line == null)
+          break;
+        log.error(line);
       }
     }
   }
 }
-
-

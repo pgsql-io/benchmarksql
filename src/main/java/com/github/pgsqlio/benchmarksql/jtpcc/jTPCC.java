@@ -258,6 +258,16 @@ public class jTPCC {
       return;
     }
 
+    /*
+     * We need to have set the start time of the rampup (csv_begin)
+     * from here on.
+     */
+    now = System.currentTimeMillis();
+    csv_begin = now;
+
+    /*
+     * Launch the OS metric collector if configured
+     */
     String resultDirectory = getProp(ini, "resultDirectory");
     String osCollectorScript = getProp(ini, "osCollectorScript");
 
@@ -365,10 +375,15 @@ public class jTPCC {
       }
       log.info("main, writing transaction histogram to " + histogramCSVName);
 
+      // Launch the metric collector script if configured
       if (osCollectorScript != null) {
-        osCollector = new OSCollector(getProp(ini, "osCollectorScript"), runID,
-            Integer.parseInt(getProp(ini, "osCollectorInterval")),
-            getProp(ini, "osCollectorSSHAddr"), getProp(ini, "osCollectorDevices"), resultDataDir);
+        try {
+          osCollector = new OSCollector(getProp(ini, "osCollectorScript"),
+              resultDataDir);
+        } catch (IOException e) {
+          log.error(e.getMessage());
+          System.exit(1);
+        }
       }
 
       log.info("main,");
@@ -391,8 +406,6 @@ public class jTPCC {
     /*
      * Create the SUT and schedule the launch of the SUT threads.
      */
-    now = System.currentTimeMillis();
-    csv_begin = now;
     result_begin = now + rampupMins * 60000;
     result_end = result_begin + runMins * 60000;
 
@@ -513,7 +526,11 @@ public class jTPCC {
      * Stop the OS stats collector
      */
     if (osCollector != null) {
-      osCollector.stop();
+      try {
+        osCollector.stop();
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
       osCollector = null;
       log.info("main, OS Collector stopped");
     }
