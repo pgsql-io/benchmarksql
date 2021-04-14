@@ -2,6 +2,7 @@
 import io
 import numpy
 import matplotlib.pyplot as pyplot
+import base64
 
 from bmsqlResult import *
 
@@ -9,7 +10,7 @@ class bmsqlPlot:
     def __init__(self, result):
         self.result = result
 
-    def tpm_tpmc(self):
+    def tpm_tpmc(self, b64encode = True):
         fig, plt = pyplot.subplots(figsize=[12, 4])
         result = self.result
         runinfo = result.runinfo
@@ -57,9 +58,12 @@ class bmsqlPlot:
 
         buf = io.StringIO()
         pyplot.savefig(buf, format = 'svg')
-        return buf.getvalue()
 
-    def latency_and_delay(self):
+        if not b64encode:
+            return buf.getvalue()
+        return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
+
+    def latency_and_delay(self, b64encode = True):
         fig, plt = pyplot.subplots(figsize=[12, 4])
         result = self.result
         runinfo = result.runinfo
@@ -126,5 +130,7 @@ class bmsqlPlot:
 
         buf = io.StringIO()
         pyplot.savefig(buf, format = 'svg')
-        return buf.getvalue()
 
+        if not b64encode:
+            return buf.getvalue()
+        return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')

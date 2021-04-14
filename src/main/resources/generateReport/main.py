@@ -37,8 +37,6 @@ def generate_html(result):
     )
 
     plot = bmsqlPlot(result)
-    tpmc_svg = plot.tpm_tpmc()
-    delay_svg = plot.latency_and_delay()
 
     # ----
     # Collect all the data the template needs
@@ -53,8 +51,8 @@ def generate_html(result):
         'tpm_total': '{:.2f}'.format(result.tpm_total()),
         'tpm_percent': '{:.2f}'.format((result.tpm_c() * 100)
             / (12.86 * float(result.runinfo['runWarehouses']))),
-        'tpmc_svg': base64.b64encode(tpmc_svg.encode('utf-8')).decode('utf-8'),
-        'delay_svg': base64.b64encode(delay_svg.encode('utf-8')).decode('utf-8'),
+        'tpmc_svg': plot.tpm_tpmc,
+        'delay_svg': plot.latency_and_delay,
     }
 
     # Propagate the mix_warn flag up to the toplevel
