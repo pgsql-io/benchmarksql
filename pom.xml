@@ -151,4 +151,59 @@
 	<scm>
 		<url>https://github.com/pgsql-io/benchmarksql</url>
 	</scm>
+	<developers>
+		<developer>
+			<id>jannicash</id>
+			<name>Jan Wieck</name>
+			<url>https://github.com/wieck</url>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>America/New_York</timezone>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/362674?v=4</picUrl>
+			</properties>
+		</developer>
+		<developer>
+			<id>lussman</id>
+			<name>Denis Lussier</name>
+			<url>https://github.com/luss</url>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/1664798?v=4</picUrl>
+			</properties>
+		</developer>
+		<developer>
+			<id>cadym</id>
+			<name>Cady</name>
+		</developer>
+		<developer>
+			<id>smartin3</id>
+			<name>Scott Martin</name>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Andres Gomez - angoca</name>
+			<url>https://github.com/angoca</url>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>America/Bogota</timezone>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/294317?v=4</picUrl>
+			</properties>
+		</contributor>
+		<contributor>
+			<name>Roman Simakov - romansimakov</name>
+			<url>https://github.com/romansimakov</url>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/1625002?v=4</picUrl>
+			</properties>
+		</contributor>
+	</contributors>
 </project>

@@ -1,13 +1,20 @@
+# Instructions for running BenchmarkSQL on Oracle
 
-The following assumes a default installation of oracle
+Please follow the general instruction for any RDBMS in the
+[How to run section](HOW-TO-RUN.md).
 
-Creating the benchmarksql user run the following commands in sqlplus
-under the sysdba account:
+## Create a user and a database
 
+The following assumes a default installation of Oracle.
+
+Creating the `benchmarksql` user run the following commands in `sqlplus`
+under the `sysdba` account:
+
+```
 <<_EOF_
 
 CREATE USER benchmarksql
-	IDENTIFIED BY "bmsql1"
+	IDENTIFIED BY "password"
 	DEFAULT TABLESPACE users
 	TEMPORARY TABLESPACE temp;
 
@@ -21,4 +28,5 @@ GRANT CREATE TYPE TO benchmarksql;
 GRANT UNLIMITED TABLESPACE TO benchmarksql;
 
 _EOF_
+```
 
