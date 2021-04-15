@@ -86,7 +86,7 @@
 	<!-- When executing mvn, it cleans the target directory, and then creates 
 		the package and copy the resources. -->
 	<build>
-		<defaultGoal>clean package</defaultGoal>
+		<defaultGoal>clean package install</defaultGoal>
 
 		<!-- Name of the target jar (no version in the name). -->
 		<plugins>
@@ -135,6 +135,29 @@
 				</configuration>
 			</plugin>
 
+			<!-- Docker plugin. -->
+			<!-- http://dmp.fabric8.io/ -->
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.35.0</version>
+				<configuration>
+					<images>
+						<image>
+							<name>benchmarksql-service</name>
+						</image>
+					</images>
+				</configuration>
+				<executions>
+					<execution>
+						<id>build</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
