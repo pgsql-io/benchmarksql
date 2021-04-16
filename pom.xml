@@ -137,6 +137,7 @@
 
 			<!-- Docker plugin. -->
 			<!-- http://dmp.fabric8.io/ -->
+			<!-- mvn docker:build -->
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
@@ -148,15 +149,6 @@
 						</image>
 					</images>
 				</configuration>
-				<executions>
-					<execution>
-						<id>build</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
