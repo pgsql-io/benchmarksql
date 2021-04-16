@@ -86,7 +86,7 @@
 	<!-- When executing mvn, it cleans the target directory, and then creates 
 		the package and copy the resources. -->
 	<build>
-		<defaultGoal>clean package install</defaultGoal>
+		<defaultGoal>clean package</defaultGoal>
 
 		<!-- Name of the target jar (no version in the name). -->
 		<plugins>
