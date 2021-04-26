@@ -1,0 +1,21 @@
+  {% if mix_warn %}
+    <p>
+      <b>Warning: The transaction mix did not meet the TPC-C
+      specifications! The minimum percentage for transactions
+      is 43% Payment and 4% for each of OrderStatus,
+      StockLevel and Delivery. You may need to increase
+      the probabilities in the configuration.</b>
+    </p>
+  {% endif %}
+
+  <p>
+    The TPC-C specification has a theoretical maximum of 12.86 NEW_ORDER
+    transactions per minute per warehouse. In reality this value cannot
+    be reached because it would require a perfect mix with 45% of NEW_ORDER
+    transactions and a ZERO response time from the System under Test
+    including the database.
+  </p>
+  <p>
+    The above tpmC of {{ tpm_c }} is {{ tpm_percent }}% of that theoretical
+    maximum for a database with {{ runinfo['runWarehouses'] }} warehouses.
+  </p>

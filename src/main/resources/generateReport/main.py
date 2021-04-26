@@ -4,16 +4,39 @@ import os
 import sys
 import jinja2
 import base64
+import getopt
 
 from bmsqlResult import *
 from bmsqlPlot import *
 
 def main():
-    if len(sys.argv) < 2:
+    opt_template = 'report_simple.html'
+    opt_resultdir = None
+    opt_disks = []
+    opt_interfaces = []
+    opt_help = False
+
+    opts, args = getopt.getopt(sys.argv[1:], 't:r:d:i:h?',
+            ['template=', 'resultdir=', 'disk=', 'interface=',
+             'help'])
+    for opt, val in opts:
+        if opt in ['-t', '--template',]:
+            opt_template = val
+        elif opt in ['-r', '--resultdir',]:
+            opt_resultdir = val
+        elif opt in ['-d', '--disk',]:
+            opt_disks.append(val)
+        elif opt in ['-i', '--interface',]:
+            opt_interfaces.append(val)
+        elif opt in ['-?', '-h', '--help']:
+            opt_help = True
+            break
+
+    if opt_help or opt_resultdir is None:
         usage()
         return 2
 
-    result = bmsqlResult(sys.argv[1])
+    result = bmsqlResult(opt_resultdir)
     for tt in result.ttypes:
         break
         print("count {} = {}".format(tt, result.num_trans(tt)))
@@ -26,12 +49,12 @@ def main():
         print("errors {} = {}".format(tt, result.num_errors(tt)))
         print("")
 
-    reportFname = sys.argv[1].rstrip('/\\') + '.html'
+    reportFname = opt_resultdir.rstrip('/\\') + '.html'
     with open(reportFname, 'w') as fd:
-        fd.write(generate_html(result))
+        fd.write(generate_html(result, opt_template, opt_disks, opt_interfaces))
     print("report generated as {}".format(reportFname))
 
-def generate_html(result):
+def generate_html(result, template, disks, interfaces):
     env = jinja2.Environment(
         loader = jinja2.PackageLoader('bmsqlResult', 'templates')
     )
@@ -51,8 +74,13 @@ def generate_html(result):
         'tpm_total': '{:.2f}'.format(result.tpm_total()),
         'tpm_percent': '{:.2f}'.format((result.tpm_c() * 100)
             / (12.86 * float(result.runinfo['runWarehouses']))),
-        'tpmc_svg': plot.tpm_tpmc,
-        'delay_svg': plot.latency_and_delay,
+        'tpmc_svg': plot.tpmc_svg,
+        'delay_svg': plot.delay_svg,
+        'metric_svg': plot.metric_svg,
+        'cpu_svg': plot.cpu_svg,
+        'memory_svg': plot.memory_svg,
+        'disks': disks,
+        'interfaces': interfaces,
     }
 
     # Propagate the mix_warn flag up to the toplevel
@@ -60,7 +88,7 @@ def generate_html(result):
         if data['summary'][tt]['mix_warn']:
             data['mix_warn'] = True
 
-    template = env.get_template('report_default.html')
+    template = env.get_template(template)
     return template.render(**data)
 
 def summary_data(result):

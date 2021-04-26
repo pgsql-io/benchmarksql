@@ -1,0 +1,20 @@
+<img src="data:image/svg+xml;base64,{{ metric_svg(
+	title = 'Network IO ' + device + ' (packets)',
+	ylabel = 'Packets/s',
+	metrics = [
+	  {
+		'metric': 'if_packets',
+		'device': 'interface-' + device,
+		'index': 1,
+		'color': 'b',
+		'label': 'Read',
+	  },
+	  {
+		'metric': 'if_packets',
+		'device': 'interface-' + device,
+		'index': 2,
+		'color': 'r',
+		'label': 'Write',
+	  },
+	]
+	) }}" />

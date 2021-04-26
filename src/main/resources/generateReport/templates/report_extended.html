@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>
+    BenchmarkSQL Run #{{ runinfo['runID'] }}
+  </title>
+
+  {% include "bmsql.css" %}
+
+</head>
+<body bgcolor="#ffffff">
+  <h1>
+    BenchmarkSQL Run #{{ runinfo['runID'] }}
+  </h1>
+
+  <p>
+    This TPC-C style benchmark run was performed using the
+    <b>{{ runinfo['application'] }}</b> Application Module
+    of BenchmarkSQL version
+    <b>{{ runinfo['jTPCCVersion'] }}</b> and the
+    <b>{{ runinfo['dbType'] }}</b> JDBC driver.
+  </p>
+
+  <h2>
+    Result Summary
+  </h2>
+  {% include "inc_summary_table.html" %}
+  {% include "inc_summary_explain.html" %}
+
+  <h2>
+    NEW_ORDER Transactions per Minute
+  </h2>
+  <p>
+    {% include "img_nopm.html" %}
+  </p>
+  {% include "inc_nopm_explain.html" %}
+
+  <h2>
+    NEW_ORDER Latency and Delay
+  </h2>
+  <p>
+    {% include "img_latency.html" %}
+  </p>
+  {% include "inc_latency_explain.html" %}
+
+  <h2>
+    CPU Usage
+  </h2>
+  <p>
+    {% include "img_cpu.html" %}
+  </p>
+
+  <h2>
+    Memory Usage
+  </h2>
+  <p>
+    {% include "img_memory.html" %}
+  </p>
+
+  {% for device in disks %}
+  <h2>Disk IO {{ device }}</h2>
+  <p>
+	{% include "img_disk_octets.html" %}
+	<br/>
+	{% include "img_disk_ops.html" %}
+  </p>
+  {% endfor %}
+
+  {% for device in interfaces %}
+  <h2>Network IO {{ device }}</h2>
+  <p>
+	{% include "img_interface_octets.html" %}
+	<br/>
+	{% include "img_interface_packets.html" %}
+  </p>
+  {% endfor %}
+</body>
+</html>

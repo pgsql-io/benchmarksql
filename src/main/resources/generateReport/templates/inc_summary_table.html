@@ -1,0 +1,47 @@
+  <p>
+    <table width="100%" border="2">
+    <tr>
+      <th rowspan="2" width="18%"><b>Transaction<br/>Type</b></th>
+      <th colspan="6" width="42%"><b>Latency</b></th>
+      <th rowspan="2" width="10%"><b>Count</b></th>
+      <th rowspan="2" width="10%"><b>Percent</b></th>
+      <th rowspan="2" width="10%"><b>Rollback</b></th>
+      <th rowspan="2" width="10%"><b>Errors</b></th>
+    </tr>
+    <tr>
+      <th width="7%"><b>90th&nbsp;%</b></th>
+      <th width="7%"><b>95th&nbsp;%</b></th>
+      <th width="7%"><b>98th&nbsp;%</b></th>
+      <th width="7%"><b>Avg</b></th>
+      <th width="7%"><b>Max</b></th>
+      <th width="7%"><b>Limit</b></th>
+    </tr>
+    {% for tt in ttypes %}
+	<tr>
+	  <td align="left">{{ tt }}</td>
+	  <td align="right" {{ summary[tt]['style_ninth'] }}>{{ summary[tt]['ninth'] }}s</td>
+	  <td align="right" {{ summary[tt]['style_n5th'] }}>{{ summary[tt]['n5th'] }}s</td>
+	  <td align="right" {{ summary[tt]['style_n8th'] }}>{{ summary[tt]['n8th'] }}s</td>
+	  <td align="right">{{ summary[tt]['avg'] }}s</td>
+	  <td align="right">{{ summary[tt]['max'] }}s</td>
+	  <td align="right" {{ summary[tt]['style_limit'] }}>{{ summary[tt]['limit'] }}s</td>
+	  <td align="right">{{ summary[tt]['count'] }}</td>
+	  <td align="right" {{ summary[tt]['style_mix'] }}>{{ summary[tt]['mix'] }}</td>
+	  <td align="right" {{ summary[tt]['style_rbk'] }}>{{ summary[tt]['rbk'] }}</td>
+	  <td align="right">{{ summary[tt]['errors'] }}</td>
+	</tr>
+    {% endfor %}
+	</table>
+  </p>
+  <p>
+    <table border="0">
+      <tr>
+	<td align="left"><big><b>Overall tpmC:</b></big></td>
+	<td align="right"><big><b>{{ tpm_c }}</b></big></td>
+      </tr>
+      <tr>
+	<td align="left"><big><b>Overall tpmTotal:</b></big></td>
+	<td align="right"><big><b>{{ tpm_total }}</b></big></td>
+      </tr>
+    </table>
+  </p>

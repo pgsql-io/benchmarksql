@@ -1,0 +1,20 @@
+<img src="data:image/svg+xml;base64,{{ metric_svg(
+	title = 'Disk IO ' + device + ' (operations)',
+	ylabel = 'IO Ops/s',
+	metrics = [
+	  {
+		'metric': 'disk_ops',
+		'device': 'disk-' + device,
+		'index': 1,
+		'color': 'b',
+		'label': 'Read',
+	  },
+	  {
+		'metric': 'disk_ops',
+		'device': 'disk-' + device,
+		'index': 2,
+		'color': 'r',
+		'label': 'Write',
+	  },
+	]
+	) }}" />

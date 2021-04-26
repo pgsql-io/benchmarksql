@@ -20,8 +20,26 @@
     <b>{{ runinfo['dbType'] }}</b> JDBC driver.
   </p>
 
-  {% include "inc_summary.html" %}
-  {% include "inc_nopm.html" %}
-  {% include "inc_delay.html" %}
+  <h2>
+    Result Summary
+  </h2>
+  {% include "inc_summary_table.html" %}
+  {% include "inc_summary_explain.html" %}
+
+  <h2>
+    NEW_ORDER Transactions per Minute
+  </h2>
+  <p>
+    {% include "img_nopm.html" %}
+  </p>
+  {% include "inc_nopm_explain.html" %}
+
+  <h2>
+    NEW_ORDER Latency and Delay
+  </h2>
+  <p>
+    {% include "img_latency.html" %}
+  </p>
+  {% include "inc_latency_explain.html" %}
 </body>
 </html>

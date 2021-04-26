@@ -13,6 +13,8 @@ import subprocess
 import threading
 import time
 import csv
+import shlex
+import jproperties
 
 class BenchmarkSQL:
     """
@@ -351,26 +353,40 @@ class RunBenchmark(threading.Thread):
         self.proc = None
 
         if rc != 0:
-            self.bench.add_job_output("\n\nBenchmarkSQL had exit code {0} - attempting report anyway\n".format(rc))
-        else:
-            self.bench.add_job_output("\nBenchmarkSQL run complete - generating report\n")
-        cmd = ['./generateReport.sh', result_dir]
-        self.proc = subprocess.Popen(cmd,
-                                     stdout = subprocess.PIPE,
-                                     stderr = subprocess.STDOUT,
-                                     stdin = None,
-                                     preexec_fn = os.setsid)
-        while True:
-            line = self.proc.stdout.readline().decode('utf-8')
-            if len(line) == 0:
-                break
-            self.bench.add_job_output(line)
-        self.proc.wait()
-        rc = self.proc.returncode
-        self.proc = None
+            self.bench.add_job_output("\n\nBenchmarkSQL had exit code {0}\n".format(rc))
 
-        if rc != 0:
-            self.bench.add_job_output("\n\ngenerateReport.sh had exit code {0} - report may be incomplete\n".format(rc))
+        # ----
+        # Read the current run properties and parse them this time.
+        # We need to get the reportScript= property from that.
+        # ----
+        jprop = jproperties.Properties()
+        with open(run_props, "rb") as fd:
+            jprop.load(fd, 'utf-8')
+        if 'reportScript' in jprop:
+
+            self.bench.add_job_output("\nBenchmarkSQL run complete - generating report\n")
+            cmd = shlex.split(jprop['reportScript'].data)
+            cmd.append('--resultdir')
+            cmd.append(result_dir)
+            self.proc = subprocess.Popen(cmd,
+                                         stdout = subprocess.PIPE,
+                                         stderr = subprocess.STDOUT,
+                                         stdin = None,
+                                         preexec_fn = os.setsid)
+            while True:
+                line = self.proc.stdout.readline().decode('utf-8')
+                if len(line) == 0:
+                    break
+                self.bench.add_job_output(line)
+            self.proc.wait()
+            rc = self.proc.returncode
+            self.proc = None
+
+            if rc != 0:
+                self.bench.add_job_output("\n\nreportScript had exit code {0} - report may be incomplete\n".format(rc))
+
+        else:
+            self.bench.add_job_output("\nBenchmarkSQL run complete\n")
 
         result_log = os.path.join(result_dir, 'console.log')
         with codecs.open(result_log, 'w', encoding='utf8') as fd:

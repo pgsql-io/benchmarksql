@@ -17,7 +17,7 @@ ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 ENV FLASK_ENV=development
 
 RUN pip3 install pip --upgrade
-RUN pip3 install Flask paho-mqtt
+RUN pip3 install Flask paho-mqtt jproperties
 
 COPY ./target/ /benchmarksql
 

@@ -80,6 +80,7 @@ public class jTPCC {
 
   public static String resultDirectory = null;
   public static String osCollectorScript = null;
+  public static String reportScript = null;
   private static String resultDirName = null;
   private static BufferedWriter summaryCSV = null;
   private static BufferedWriter histogramCSV = null;
@@ -388,6 +389,14 @@ public class jTPCC {
 
       log.info("main,");
     }
+
+    /*
+     * Even though we don't deal with the report generator in the main
+     * java code (the Flask UI does that and it is available on the
+     * command line), we consume the property so that it is reported
+     * in the logs.
+     */
+    String reportScript = getProp(ini, "reportScript");
 
     /* Initialize the random number generator and report C values. */
     rnd = new jTPCCRandom(loadNuRandCLast);

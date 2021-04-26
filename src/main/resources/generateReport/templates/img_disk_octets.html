@@ -1,0 +1,22 @@
+<img src="data:image/svg+xml;base64,{{ metric_svg(
+	title = 'Disk IO ' + device + ' (octets)',
+	ylabel = 'MiB/s',
+	metrics = [
+	  {
+		'metric': 'disk_octets',
+		'device': 'disk-' + device,
+		'index': 1,
+		'color': 'b',
+		'label': 'Read',
+		'factor': 1 / 1024 / 1024,
+	  },
+	  {
+		'metric': 'disk_octets',
+		'device': 'disk-' + device,
+		'index': 2,
+		'color': 'r',
+		'label': 'Write',
+		'factor': 1 / 1024 / 1024,
+	  },
+	]
+	) }}" />
