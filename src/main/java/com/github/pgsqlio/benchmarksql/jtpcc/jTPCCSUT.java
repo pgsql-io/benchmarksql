@@ -90,6 +90,7 @@ public class jTPCCSUT {
 
     public void run() {
       jTPCCTData tdata;
+      boolean reconnect = false;
 
       /*
        * Create and initialize the Application class. This connects to the database and creates all
@@ -100,7 +101,13 @@ public class jTPCCSUT {
         this.application.init(gdata, t_id);
       } catch (Exception e) {
         log.error("sut-{} Exception: {}", this.t_id, e.getMessage());
-        log.error("sut-{} Aborting SUT thread", this.t_id);
+        log.info("sut-{} restarting SUT thread in 5 seconds (initial connect)", this.t_id);
+
+        long now = System.currentTimeMillis();
+        jTPCCTData sut_launch_tdata = new jTPCCTData();
+        sut_launch_tdata.term_w_id = this.t_id;
+        jTPCC.scheduler.at(now + 5000, jTPCCScheduler.SCHED_SUT_LAUNCH, sut_launch_tdata);
+
         return;
       }
 
@@ -168,6 +175,7 @@ public class jTPCCSUT {
           log.error("sut-{} Exception: {} ttype={}", this.t_id, e.getMessage(), tdata.trans_type);
           tdata.trans_error = true;
           log.info(e);
+          reconnect = true;
         }
 
         /*
@@ -190,14 +198,22 @@ public class jTPCCSUT {
          * SUTThread causes the Application (for this thread) to disconnect and reconnect to the
          * database.
          */
-        if (jTPCC.restartSUTThreadProb > 0.0) {
-          if (random.nextDouble() <= (jTPCC.restartSUTThreadProb / 100.0)) {
+        if (jTPCC.restartSUTThreadProb > 0.0 || reconnect) {
+          if (random.nextDouble() <= (jTPCC.restartSUTThreadProb / 100.0) || reconnect) {
+            log.info("sut-{} Reconnecting", this.t_id);
+            reconnect = false;
             try {
               this.application.finish();
               this.application.init(gdata, t_id);
             } catch (Exception e) {
               log.error("sut-{} Exception: {}", this.t_id, e.getMessage());
-              log.error("sut-{} Aborting SUT thread", this.t_id);
+              log.info("sut-{} restarting SUT thread in 5 seconds (failed transaction)", this.t_id);
+
+              long now = System.currentTimeMillis();
+              jTPCCTData sut_launch_tdata = new jTPCCTData();
+              sut_launch_tdata.term_w_id = this.t_id;
+              jTPCC.scheduler.at(now + 5000, jTPCCScheduler.SCHED_SUT_LAUNCH, sut_launch_tdata);
+
               return;
             }
           }

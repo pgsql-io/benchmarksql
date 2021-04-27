@@ -74,7 +74,7 @@ public class jTPCC {
   private OSCollector osCollector = null;
   private jTPCCTData terminal_data[];
   private Thread scheduler_thread;
-  public jTPCCScheduler scheduler;
+  static public jTPCCScheduler scheduler;
   public jTPCCSUT systemUnderTest;
   public jTPCCMonkey monkeys;
 
