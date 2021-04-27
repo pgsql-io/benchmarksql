@@ -6,8 +6,7 @@ podman run --rm \
 	--network="host" \
 	--user=`id -u`:`id -g` \
 	--userns=keep-id \
-	--volume="${HOME}:${HOME}" \
 	--volume="./service_data:/service_data" \
-	-w "$PWD" \
+	-w "/benchmarksql" \
 	localhost/benchmarksql:6.0
 

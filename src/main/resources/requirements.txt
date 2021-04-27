@@ -1,0 +1,8 @@
+#
+####### Python3 requirements for BenchmarkSQL
+#
+Flask
+numpy
+matplotlib
+paho-mqtt
+jproperties
