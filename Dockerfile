@@ -11,7 +11,7 @@ RUN dnf -y install epel-release \
 RUN dnf config-manager --set-enabled powertools
 RUN pip3 install pip --upgrade
 
-ENV JAVA_TOOL_OPTIOpython3NS=-Dfile.encoding=UTF8
+ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 ENV FLASK_ENV=development
 
 COPY ./target/BenchmarkSQL.jar /benchmarksql/BenchmarkSQL.jar
