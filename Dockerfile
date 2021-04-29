@@ -22,10 +22,14 @@ RUN mkdir -p /service_data && \
     rm -f /benchmarksql/run/.jTPCC_run_seq.dat && \
     rm -f /benchmarksql/run/benchmark.log && \
     rm -f /benchmarksql/run/terminalio.log && \
+    mkdir -p /benchmarksql/.config/matplotlib && \
+    chmod 777 /benchmarksql/.config/matplotlib && \
+    mkdir -p /benchmarksql/.cache/matplotlib && \
+    chmod 777 /benchmarksql/.cache/matplotlib && \
     ln -s /service_data/run_seq.dat /benchmarksql/run/.jTPCC_run_seq.dat && \
     ln -s /service_data/benchmark.log /benchmarksql/run/benchmark.log && \
     ln -s /service_data/terminalio.log /benchmarksql/run/terminalio.log && \
-	pip3 install -r /benchmarksql/run/requirements.txt
+    pip3 install -r /benchmarksql/run/requirements.txt
 
 CMD ["python3", "/benchmarksql/run/FlaskService/main.py"]
 
