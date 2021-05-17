@@ -6,8 +6,7 @@ import jinja2
 import base64
 import getopt
 
-from bmsqlResult import *
-from bmsqlPlot import *
+from generateReport import *
 
 def main():
     opt_template = 'report_simple.html'
@@ -36,7 +35,7 @@ def main():
         usage()
         return 2
 
-    result = bmsqlResult(opt_resultdir)
+    result = bmsqlResult.bmsqlResult(opt_resultdir)
     for tt in result.ttypes:
         break
         print("count {} = {}".format(tt, result.num_trans(tt)))
@@ -56,10 +55,10 @@ def main():
 
 def generate_html(result, template, disks, interfaces):
     env = jinja2.Environment(
-        loader = jinja2.PackageLoader('bmsqlResult', 'templates')
+        loader = jinja2.PackageLoader('generateReport', 'templates')
     )
 
-    plot = bmsqlPlot(result)
+    plot = bmsqlPlot.bmsqlPlot(result)
 
     # ----
     # Collect all the data the template needs

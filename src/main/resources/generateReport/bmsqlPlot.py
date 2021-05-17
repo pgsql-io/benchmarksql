@@ -9,7 +9,7 @@ import matplotlib.pyplot as pyplot
 from mpl_toolkits.axes_grid1 import Divider, Size
 from mpl_toolkits.axes_grid1.mpl_axes import Axes
 
-from bmsqlResult import *
+from generateReport import *
 
 class bmsqlPlot:
     FIGSIZE = [10, 2.5]

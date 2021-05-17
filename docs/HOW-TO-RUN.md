@@ -147,6 +147,6 @@ The example configuration file defaults to a directory starting with my_result_.
 
 [//]: # (R files should be replaces with Python ones.)
 
-Use the `generateReport.sh` DIRECTORY script to create an HTML file with graphs.
+Use the `generateReport.py` script to create an HTML file with graphs.
 This requires R to be installed, which is beyond the scope of this HOW-TO.
 
