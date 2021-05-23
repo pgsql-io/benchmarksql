@@ -1,1 +1,6 @@
-    <img src="data:image/svg+xml;base64,{{ memory_svg(unit = 'MiB', factor = 1.0 / 1024 / 1024) }}" />
+<img src="data:image/svg+xml;base64,{{ memory_svg(
+	host = metric[1],
+	title = '{} Memory Usage'.format(metric[2]),
+	unit = 'MiB',
+	factor = 1.0 / 1024 / 1024
+	) }}" />

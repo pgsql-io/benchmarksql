@@ -1,19 +1,18 @@
 <img src="data:image/svg+xml;base64,{{ metric_svg(
-	title = 'Disk IO ' + device + ' (octets)',
+	host = metric[1],
+	title = '{} Disk IO {} (octets)'.format(metric[2], metric[3]),
 	ylabel = 'MiB/s',
 	metrics = [
 	  {
-		'metric': 'disk_octets',
-		'device': 'disk-' + device,
-		'index': 1,
+		'host': metric[1],
+		'metric': 'disk-{}.disk_octets.read'.format(metric[3]),
 		'color': 'b',
 		'label': 'Read',
 		'factor': 1 / 1024 / 1024,
 	  },
 	  {
-		'metric': 'disk_octets',
-		'device': 'disk-' + device,
-		'index': 2,
+		'host': metric[1],
+		'metric': 'disk-{}.disk_octets.write'.format(metric[3]),
 		'color': 'r',
 		'label': 'Write',
 		'factor': 1 / 1024 / 1024,

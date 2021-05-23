@@ -42,36 +42,51 @@
   </p>
   {% include "inc_latency_explain.html" %}
 
-  <h2>
-    CPU Usage
-  </h2>
-  <p>
-    {% include "img_cpu.html" %}
-  </p>
+  <!--
+  # Now create H2 headings and include all the host OS metrics
+  # that the user requested via command line options.
+  -->
+  {% for metric in os_metrics %}
+	{% if metric[0] == 'cpu' %}
+	<h2>
+	  {{ metric[2] }} CPU usage
+	</h2>
+	<p>
+	  {% include "img_cpu.html" %}
+	</p>
+	{% endif %}
 
-  <h2>
-    Memory Usage
-  </h2>
-  <p>
-    {% include "img_memory.html" %}
-  </p>
+	{% if metric[0] == 'memory' %}
+	<h2>
+	  {{ metric[2] }} Memory usage
+	</h2>
+	<p>
+	  {% include "img_memory.html" %}
+	</p>
+	{% endif %}
 
-  {% for device in disks %}
-  <h2>Disk IO {{ device }}</h2>
-  <p>
-	{% include "img_disk_octets.html" %}
-	<br/>
-	{% include "img_disk_ops.html" %}
-  </p>
+	{% if metric[0] == 'disk' %}
+	<h2>
+	  {{ metric[2] }} Disk IO {{ metric[3] }}
+	</h2>
+	<p>
+	  {% include "img_disk_octets.html" %}
+	  <br />
+	  {% include "img_disk_ops.html" %}
+	</p>
+	{% endif %}
+
+	{% if metric[0] == 'interface' %}
+	<h2>
+	  {{ metric[2] }} Network IO {{ metric[3] }}
+	</h2>
+	<p>
+	  {% include "img_interface_octets.html" %}
+	  <br />
+	  {% include "img_interface_packets.html" %}
+	</p>
+	{% endif %}
   {% endfor %}
 
-  {% for device in interfaces %}
-  <h2>Network IO {{ device }}</h2>
-  <p>
-	{% include "img_interface_octets.html" %}
-	<br/>
-	{% include "img_interface_packets.html" %}
-  </p>
-  {% endfor %}
 </body>
 </html>

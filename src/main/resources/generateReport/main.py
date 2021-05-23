@@ -11,26 +11,61 @@ from generateReport import *
 def main():
     opt_template = 'report_simple.html'
     opt_resultdir = None
-    opt_disks = []
-    opt_interfaces = []
+    opt_os_metrics = []
     opt_help = False
+    errors = False
 
-    opts, args = getopt.getopt(sys.argv[1:], 't:r:d:i:h?',
-            ['template=', 'resultdir=', 'disk=', 'interface=',
+    opts, args = getopt.getopt(sys.argv[1:], 't:r:c:m:d:i:h?',
+            ['template=', 'resultdir=',
+             'cpu=', 'memory=', 'disk=', 'interface=',
              'help'])
     for opt, val in opts:
         if opt in ['-t', '--template',]:
             opt_template = val
         elif opt in ['-r', '--resultdir',]:
             opt_resultdir = val
+        elif opt in ['-c', '--cpu',]:
+            sval = val.split(':')
+            if len(sval) != 2:
+                print("invalid host specification: {}".format(val),
+                      file = sys.stderr)
+                print("use HOSTNAME:ALIAS".format(val),
+                      file = sys.stderr)
+                errors = True
+            opt_os_metrics.append(('cpu', sval[0], sval[1]))
+        elif opt in ['-m', '--memory',]:
+            sval = val.split(':')
+            if len(sval) != 2:
+                print("invalid specification: {}".format(val),
+                      file = sys.stderr)
+                print("use HOSTNAME:ALIAS".format(val),
+                      file = sys.stderr)
+                errors = True
+            opt_os_metrics.append(('memory', sval[0], sval[1]))
         elif opt in ['-d', '--disk',]:
-            opt_disks.append(val)
+            sval = val.split(':')
+            if len(sval) != 3:
+                print("invalid disk device specification: {}".format(val),
+                      file = sys.stderr)
+                print("use HOSTNAME:ALIAS:DEVICENAME".format(val),
+                      file = sys.stderr)
+                errors = True
+            opt_os_metrics.append(('disk', sval[0], sval[1], sval[2]))
         elif opt in ['-i', '--interface',]:
-            opt_interfaces.append(val)
+            sval = val.split(':')
+            if len(sval) != 3:
+                print("invalid interface device specification: {}".format(val),
+                      file = sys.stderr)
+                print("use HOSTNAME:ALIAS:DEVICENAME".format(val),
+                      file = sys.stderr)
+                errors = True
+            opt_os_metrics.append(('interface', sval[0], sval[1], sval[2]))
         elif opt in ['-?', '-h', '--help']:
             opt_help = True
             break
 
+    if errors:
+        return 2
     if opt_help or opt_resultdir is None:
         usage()
         return 2
@@ -50,10 +85,10 @@ def main():
 
     reportFname = opt_resultdir.rstrip('/\\') + '.html'
     with open(reportFname, 'w') as fd:
-        fd.write(generate_html(result, opt_template, opt_disks, opt_interfaces))
+        fd.write(generate_html(result, opt_template, opt_os_metrics))
     print("report generated as {}".format(reportFname))
 
-def generate_html(result, template, disks, interfaces):
+def generate_html(result, template, os_metrics):
     env = jinja2.Environment(
         loader = jinja2.PackageLoader('generateReport', 'templates')
     )
@@ -78,8 +113,7 @@ def generate_html(result, template, disks, interfaces):
         'metric_svg': plot.metric_svg,
         'cpu_svg': plot.cpu_svg,
         'memory_svg': plot.memory_svg,
-        'disks': disks,
-        'interfaces': interfaces,
+        'os_metrics': os_metrics,
     }
 
     # Propagate the mix_warn flag up to the toplevel

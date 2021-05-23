@@ -1,18 +1,17 @@
 <img src="data:image/svg+xml;base64,{{ metric_svg(
-	title = 'Network IO ' + device + ' (packets)',
+	host = metric[1],
+	title = '{} Network IO {} (packets)'.format(metric[2], metric[3]),
 	ylabel = 'Packets/s',
 	metrics = [
 	  {
-		'metric': 'if_packets',
-		'device': 'interface-' + device,
-		'index': 1,
+		'host': metric[1],
+		'metric': 'interface-{}.if_packets.rx'.format(metric[3]),
 		'color': 'b',
 		'label': 'Read',
 	  },
 	  {
-		'metric': 'if_packets',
-		'device': 'interface-' + device,
-		'index': 2,
+		'host': metric[1],
+		'metric': 'interface-{}.if_packets.tx'.format(metric[3]),
 		'color': 'r',
 		'label': 'Write',
 	  },

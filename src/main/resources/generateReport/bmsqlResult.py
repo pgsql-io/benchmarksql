@@ -1,6 +1,7 @@
 import os.path
 import csv
 import math
+import json
 
 class bmsqlResult:
     def __init__(self, resdir):
@@ -48,7 +49,6 @@ class bmsqlResult:
         try:
             self.summary_ttype = self._load_ttype_csv_single('summary.csv')
         except StopIteration:
-            self.complete = False
             return
         self.hist_ttype = self._load_ttype_csv_multiple('histogram.csv')
         self.hist_bins = len(self.hist_ttype['NEW_ORDER'])
@@ -62,7 +62,16 @@ class bmsqlResult:
         self.total_trans = (sum([self.summary_ttype[tt][0]
                                 for tt in self.ttypes])
                                 - self.summary_ttype['DELIVERY_BG'][0])
-        self.complete = True
+
+        # ----
+        # If an OS metric collector was running, load its data.
+        # ----
+        os_metric_fname = os.path.join(self.datadir, 'os-metric.json')
+        if os.path.exists(os_metric_fname):
+            with open(os_metric_fname) as fd:
+                self.os_metric = json.loads(fd.read())
+        else:
+            self.os_metric = {}
 
     def tpm_c(self):
         num_new_order = self.summary_ttype['NEW_ORDER'][0]

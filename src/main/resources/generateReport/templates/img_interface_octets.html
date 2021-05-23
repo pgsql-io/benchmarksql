@@ -1,22 +1,21 @@
 <img src="data:image/svg+xml;base64,{{ metric_svg(
-	title = 'Network IO ' + device + ' (octets)',
-	ylabel = 'KiB/s',
+	host = metric[1],
+	title = '{} Network IO {} (octets)'.format(metric[2], metric[3]),
+	ylabel = 'MiB/s',
 	metrics = [
 	  {
-		'metric': 'if_octets',
-		'device': 'interface-' + device,
-		'index': 1,
+		'host': metric[1],
+		'metric': 'interface-{}.if_octets.rx'.format(metric[3]),
 		'color': 'b',
 		'label': 'Read',
-		'factor': 1 / 1024,
+		'factor': 1 / 1024 / 1024,
 	  },
 	  {
-		'metric': 'if_octets',
-		'device': 'interface-' + device,
-		'index': 2,
+		'host': metric[1],
+		'metric': 'interface-{}.if_octets.tx'.format(metric[3]),
 		'color': 'r',
 		'label': 'Write',
-		'factor': 1 / 1024,
+		'factor': 1 / 1024 / 1024,
 	  },
 	]
 	) }}" />

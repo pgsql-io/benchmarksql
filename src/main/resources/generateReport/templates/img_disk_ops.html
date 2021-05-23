@@ -1,17 +1,17 @@
 <img src="data:image/svg+xml;base64,{{ metric_svg(
-	title = 'Disk IO ' + device + ' (operations)',
+	host = metric[1],
+	title = '{} Disk IO {} (operations)'.format(metric[2], metric[3]),
 	ylabel = 'IO Ops/s',
 	metrics = [
 	  {
-		'metric': 'disk_ops',
-		'device': 'disk-' + device,
-		'index': 1,
+        'host': metric[1],
+        'metric': 'disk-{}.disk_ops.read'.format(metric[3]),
 		'color': 'b',
 		'label': 'Read',
 	  },
 	  {
-		'metric': 'disk_ops',
-		'device': 'disk-' + device,
+        'host': metric[1],
+        'metric': 'disk-{}.disk_ops.write'.format(metric[3]),
 		'index': 2,
 		'color': 'r',
 		'label': 'Write',
