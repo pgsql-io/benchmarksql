@@ -56,7 +56,7 @@ public class LoadData {
   public static void main(String[] args) {
     int i;
 
-    log.error("Starting BenchmarkSQL LoadData");
+    log.info("Starting BenchmarkSQL LoadData");
     log.info("");
 
     /*
@@ -301,7 +301,7 @@ public class LoadData {
       strVal = ini.getProperty(name);
 
     if (strVal == null) {
-      log.error("{} (not defined - using default '{}')", name, defVal);
+      log.warn("{} (not defined - using default '{}')", name, defVal);
       return defVal;
     } else if (name.equals("password"))
       log.info("{}=***********", name);

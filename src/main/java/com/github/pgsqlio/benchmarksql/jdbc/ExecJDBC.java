@@ -73,7 +73,7 @@ public class ExecJDBC {
 
         if (line.length() != 0) {
           if (line.startsWith("--") && !line.startsWith("-- {")) {
-            log.error(rLine); // print comment line
+            log.info(rLine); // print comment line
           } else {
             if (line.equals("$$")) {
               sql.append(rLine);
@@ -153,7 +153,7 @@ public class ExecJDBC {
 
   static void execJDBC(Statement stmt, String query) {
 
-    log.warn("{};", query);
+    log.info("{};", query);
 
     try {
       stmt.execute(query);

@@ -147,23 +147,23 @@ public class LoadDataWorker implements Runnable {
       while ((job = LoadData.getNextJob()) >= 0) {
         if (job == 0) {
           fmt.format("Worker %03d: Loading ITEM", worker);
-          log.warn(sb.toString());
+          log.info(sb.toString());
           sb.setLength(0);
 
           loadItem();
 
           fmt.format("Worker %03d: Loading ITEM done", worker);
-          log.warn(sb.toString());
+          log.info(sb.toString());
           sb.setLength(0);
         } else {
           fmt.format("Worker %03d: Loading Warehouse %6d", worker, job);
-          log.warn(sb.toString());
+          log.info(sb.toString());
           sb.setLength(0);
 
           loadWarehouse(job);
 
           fmt.format("Worker %03d: Loading Warehouse %6d done", worker, job);
-          log.warn(sb.toString());
+          log.info(sb.toString());
           sb.setLength(0);
         }
       }

@@ -59,7 +59,7 @@ public class jTPCCRandom {
     jTPCCRandom.nURandCI_ID = nextLong(0, 8191);
 
     initialized = true;
-    log.warn("random initialized");
+    log.info("random initialized");
   }
 
   /*
