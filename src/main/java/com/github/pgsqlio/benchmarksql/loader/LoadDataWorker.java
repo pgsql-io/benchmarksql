@@ -141,11 +141,11 @@ public class LoadDataWorker implements Runnable {
    * run()
    */
   public void run() {
-    int job;
+    LoadJob job;
 
     try {
-      while ((job = LoadData.getNextJob()) >= 0) {
-        if (job == 0) {
+      while ((job = LoadData.getNextJob()) != null) {
+        if (job.type == LoadJob.LOAD_ITEM) {
           fmt.format("Worker %03d: Loading ITEM", worker);
           log.info(sb.toString());
           sb.setLength(0);
@@ -155,16 +155,18 @@ public class LoadDataWorker implements Runnable {
           fmt.format("Worker %03d: Loading ITEM done", worker);
           log.info(sb.toString());
           sb.setLength(0);
-        } else {
-          fmt.format("Worker %03d: Loading Warehouse %6d", worker, job);
+        } else if (job.type == LoadJob.LOAD_WAREHOUSE) {
+          fmt.format("Worker %03d: Loading Warehouse %6d", worker, job.w_id);
           log.info(sb.toString());
           sb.setLength(0);
 
           loadWarehouse(job);
 
-          fmt.format("Worker %03d: Loading Warehouse %6d done", worker, job);
+          fmt.format("Worker %03d: Loading Warehouse %6d done", worker, job.w_id);
           log.info(sb.toString());
           sb.setLength(0);
+        } else {
+          loadOrder(job);
         }
       }
 
@@ -283,7 +285,9 @@ public class LoadDataWorker implements Runnable {
    *
    * Load the content of one warehouse. ----
    */
-  private void loadWarehouse(int w_id) throws SQLException, IOException {
+  private void loadWarehouse(LoadJob job) throws SQLException, IOException {
+    int w_id = job.w_id;
+
     /*
      * Load the WAREHOUSE row.
      */
@@ -475,111 +479,108 @@ public class LoadDataWorker implements Runnable {
         stmtHistory.executeBatch();
         stmtHistory.clearBatch();
       }
-
-      /*
-       * For the ORDER rows the TPC-C specification demands that they are generated using a random
-       * permutation of all 3,000 customers. To do that we set up an array with all C_IDs and then
-       * randomly shuffle it.
-       */
-      int randomCID[] = new int[3000];
-      for (int i = 0; i < 3000; i++)
-        randomCID[i] = i + 1;
-      for (int i = 0; i < 3000; i++) {
-        int x = rnd.nextInt(0, 2999);
-        int y = rnd.nextInt(0, 2999);
-        int tmp = randomCID[x];
-        randomCID[x] = randomCID[y];
-        randomCID[y] = tmp;
-      }
-
-      for (int o_id = 1; o_id <= 3000; o_id++) {
-        int o_ol_cnt = rnd.nextInt(5, 15);
-
-        if (writeCSV) {
-          fmtOrder.format("%d,%d,%d,%d,%s,%d,%d,%s\n", o_id, w_id, d_id, randomCID[o_id - 1],
-              (o_id < 2101) ? rnd.nextInt(1, 10) : csvNull, o_ol_cnt, 1,
-              new java.sql.Timestamp(System.currentTimeMillis()).toString());
-        } else {
-          stmtOrder.setInt(1, o_id);
-          stmtOrder.setInt(2, d_id);
-          stmtOrder.setInt(3, w_id);
-          stmtOrder.setInt(4, randomCID[o_id - 1]);
-          stmtOrder.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
-          if (o_id < 2101)
-            stmtOrder.setInt(6, rnd.nextInt(1, 10));
-          else
-            stmtOrder.setNull(6, java.sql.Types.INTEGER);
-          stmtOrder.setInt(7, o_ol_cnt);
-          stmtOrder.setInt(8, 1);
-
-          stmtOrder.addBatch();
-        }
-
-        /*
-         * Create the ORDER_LINE rows for this ORDER.
-         */
-        for (int ol_number = 1; ol_number <= o_ol_cnt; ol_number++) {
-          long now = System.currentTimeMillis();
-
-          if (writeCSV) {
-            fmtOrderLine.format("%d,%d,%d,%d,%d,%s,%.2f,%d,%d,%s\n", w_id, d_id, o_id, ol_number,
-                rnd.nextInt(1, 100000),
-                (o_id < 2101) ? new java.sql.Timestamp(now).toString() : csvNull,
-                (o_id < 2101) ? 0.00 : ((double) rnd.nextLong(1, 999999)) / 100.0, w_id, 5,
-                rnd.getAString_24());
-          } else {
-            stmtOrderLine.setInt(1, o_id);
-            stmtOrderLine.setInt(2, d_id);
-            stmtOrderLine.setInt(3, w_id);
-            stmtOrderLine.setInt(4, ol_number);
-            stmtOrderLine.setInt(5, rnd.nextInt(1, 100000));
-            stmtOrderLine.setInt(6, w_id);
-            if (o_id < 2101)
-              stmtOrderLine.setTimestamp(7, new java.sql.Timestamp(now));
-            else
-              stmtOrderLine.setNull(7, java.sql.Types.TIMESTAMP);
-            stmtOrderLine.setInt(8, 5);
-            if (o_id < 2101)
-              stmtOrderLine.setDouble(9, 0.00);
-            else
-              stmtOrderLine.setDouble(9, ((double) rnd.nextLong(1, 999999)) / 100.0);
-            stmtOrderLine.setString(10, rnd.getAString_24());
-
-            stmtOrderLine.addBatch();
-          }
-        }
-
-        /*
-         * The last 900 ORDERs are not yet delieverd and have a row in NEW_ORDER.
-         */
-        if (o_id >= 2101) {
-          if (writeCSV) {
-            fmtNewOrder.format("%d,%d,%d\n", w_id, d_id, o_id);
-          } else {
-            stmtNewOrder.setInt(1, o_id);
-            stmtNewOrder.setInt(2, d_id);
-            stmtNewOrder.setInt(3, w_id);
-
-            stmtNewOrder.addBatch();
-          }
-        }
-      }
-
-      if (writeCSV) {
-        LoadData.orderAppend(sbOrder);
-        LoadData.orderLineAppend(sbOrderLine);
-        LoadData.newOrderAppend(sbNewOrder);
-      } else {
-        stmtOrder.executeBatch();
-        stmtOrder.clearBatch();
-        stmtOrderLine.executeBatch();
-        stmtOrderLine.clearBatch();
-        stmtNewOrder.executeBatch();
-        stmtNewOrder.clearBatch();
-      }
     }
 
     if (!writeCSV)
       dbConn.commit();
   } // End loadWarehouse()
+
+  /*
+   * ---- loadOrder()
+   *
+   * Load one order, including order lines and new order rows. ----
+   */
+  private void loadOrder(LoadJob job) throws SQLException, IOException {
+    int w_id = job.w_id;
+    int d_id = job.d_id;
+    int c_id = job.c_id;
+    int o_id = job.o_id;
+
+    int o_ol_cnt = rnd.nextInt(5, 15);
+
+    if (writeCSV) {
+      fmtOrder.format("%d,%d,%d,%d,%s,%d,%d,%s\n", o_id, w_id, d_id, c_id,
+          (o_id < 2101) ? rnd.nextInt(1, 10) : csvNull, o_ol_cnt, 1,
+          new java.sql.Timestamp(System.currentTimeMillis()).toString());
+    } else {
+      stmtOrder.setInt(1, o_id);
+      stmtOrder.setInt(2, d_id);
+      stmtOrder.setInt(3, w_id);
+      stmtOrder.setInt(4, c_id);
+      stmtOrder.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
+      if (o_id < 2101)
+        stmtOrder.setInt(6, rnd.nextInt(1, 10));
+      else
+        stmtOrder.setNull(6, java.sql.Types.INTEGER);
+      stmtOrder.setInt(7, o_ol_cnt);
+      stmtOrder.setInt(8, 1);
+
+      stmtOrder.addBatch();
+    }
+
+    /*
+     * Create the ORDER_LINE rows for this ORDER.
+     */
+    for (int ol_number = 1; ol_number <= o_ol_cnt; ol_number++) {
+      long now = System.currentTimeMillis();
+
+      if (writeCSV) {
+        fmtOrderLine.format("%d,%d,%d,%d,%d,%s,%.2f,%d,%d,%s\n", w_id, d_id, o_id, ol_number,
+            rnd.nextInt(1, 100000),
+            (o_id < 2101) ? new java.sql.Timestamp(now).toString() : csvNull,
+            (o_id < 2101) ? 0.00 : ((double) rnd.nextLong(1, 999999)) / 100.0, w_id, 5,
+            rnd.getAString_24());
+      } else {
+        stmtOrderLine.setInt(1, o_id);
+        stmtOrderLine.setInt(2, d_id);
+        stmtOrderLine.setInt(3, w_id);
+        stmtOrderLine.setInt(4, ol_number);
+        stmtOrderLine.setInt(5, rnd.nextInt(1, 100000));
+        stmtOrderLine.setInt(6, w_id);
+        if (o_id < 2101)
+          stmtOrderLine.setTimestamp(7, new java.sql.Timestamp(now));
+        else
+          stmtOrderLine.setNull(7, java.sql.Types.TIMESTAMP);
+        stmtOrderLine.setInt(8, 5);
+        if (o_id < 2101)
+          stmtOrderLine.setDouble(9, 0.00);
+        else
+          stmtOrderLine.setDouble(9, ((double) rnd.nextLong(1, 999999)) / 100.0);
+        stmtOrderLine.setString(10, rnd.getAString_24());
+
+        stmtOrderLine.addBatch();
+      }
+    }
+
+    /*
+     * The last 900 ORDERs are not yet delieverd and have a row in NEW_ORDER.
+     */
+    if (o_id >= 2101) {
+      if (writeCSV) {
+        fmtNewOrder.format("%d,%d,%d\n", w_id, d_id, o_id);
+      } else {
+        stmtNewOrder.setInt(1, o_id);
+        stmtNewOrder.setInt(2, d_id);
+        stmtNewOrder.setInt(3, w_id);
+
+        stmtNewOrder.addBatch();
+      }
+    }
+
+    if (writeCSV) {
+      LoadData.orderAppend(sbOrder);
+      LoadData.orderLineAppend(sbOrderLine);
+      LoadData.newOrderAppend(sbNewOrder);
+    } else {
+      stmtOrder.executeBatch();
+      stmtOrder.clearBatch();
+      stmtOrderLine.executeBatch();
+      stmtOrderLine.clearBatch();
+      stmtNewOrder.executeBatch();
+      stmtNewOrder.clearBatch();
+    }
+
+    if (!writeCSV)
+      dbConn.commit();
+  } // End loadOrder()
 }
