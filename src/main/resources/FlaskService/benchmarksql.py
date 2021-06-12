@@ -75,6 +75,7 @@ class BenchmarkSQL:
             return {
                 'run_count':    0,
                 'results':      [],
+                'filename':     'default.properties',
             }
 
     def save_status(self):

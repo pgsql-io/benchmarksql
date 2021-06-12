@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import flask
+import werkzeug
 import benchmarksql
 import os
 import json
+import sys
 
 app = flask.Flask(__name__)
 bench = benchmarksql.BenchmarkSQL()
@@ -11,13 +13,28 @@ bench = benchmarksql.BenchmarkSQL()
 @app.route('/', methods = ['POST', 'GET'])
 def index():
     form = flask.request.form
+
+    if 'action' not in form:
+        if 'file' in flask.request.files:
+            propf = flask.request.files['file']
+            propf.seek(0)
+            props = propf.read().decode('utf-8')
+            if props != "":
+                bench.save_properties(props)
+                bench.status_data['filename'] = propf.filename
+                bench.save_status()
+                return flask.redirect(flask.url_for("index"))
+
     if 'action' in form:
         state = bench.get_job_type()
 
-        if form['action'] == 'Load Oracle Sample':
-            load_sample_properties('oracle')
-        elif form['action'] == 'Load PostgreSQL Sample':
-            load_sample_properties('postgresql')
+        if form['action'] == 'SAVE':
+            bench.save_properties(form['properties'])
+            headers = werkzeug.datastructures.Headers()
+            headers.add('Content-Disposition', 'attachment', filename=bench.status_data['filename'])
+            return flask.Response(form['properties'],
+                                  headers = headers,
+                                  mimetype = 'application/octet-stream')
 
         elif form['action'] == 'RUN' and state == 'IDLE':
             bench.save_properties(form['properties'])
@@ -159,11 +176,9 @@ def result_delete():
     bench.delete_result(args['run_id'])
     return flask.redirect(flask.url_for("index"))
 
-def load_sample_properties(db_type):
-    prop_file = os.path.join(bench.run_dir, "sample.{0}.properties".format(db_type))
-    with open(prop_file, 'r') as fd:
-        bench.save_properties(fd.read())
-    print("loaded", prop_file)
+def upload_properties():
+    print("files:", flask.request.files, file=sys.stderr)
+    pass
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

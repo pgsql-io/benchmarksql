@@ -42,12 +42,17 @@
   <body onLoad="setInterval(update_log, 1000)" bgcolor="#d0d0d0">
     <h1>BenchmarkSQL Status is <span id="job_type">{{ current_job_type }}</span></h1>
     <h2>Current job is running for <span id="job_runtime">{{ current_job_runtime }}</span></h2>
-    <form action="{{ url_for('index') }}" method="post">
+    <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
       <h2>Properties</h2>
       <table border=0>
 	<tr>
 	  <td colspan="5">
 	    <textarea name="properties" cols="100" rows="15">{{ properties }}</textarea>
+	  </td>
+	  <td>
+	    <input type="file" id="file" name="file" onchange="form.submit()" />
+	    <br>
+	    <input type="submit" name="action" style="width:100px" value="SAVE" formtarget="_blank" />
 	  </td>
 	</tr>
 	<tr>
