@@ -89,10 +89,10 @@
 
 	</dependencies>
 
-	<!-- When executing mvn, it cleans the target directory, and then creates 
-		the package and copy the resources. -->
+	<!-- When executing mvn it creates the package and copies the resources. -->
+	<!-- Execute "mvn clean package" to force a full, clean rebuild. -->
 	<build>
-		<defaultGoal>clean package</defaultGoal>
+		<defaultGoal>package</defaultGoal>
 
 		<!-- Name of the target jar (no version in the name). -->
 		<plugins>
