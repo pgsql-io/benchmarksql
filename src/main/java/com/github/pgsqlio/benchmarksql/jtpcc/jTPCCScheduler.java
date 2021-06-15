@@ -16,6 +16,8 @@ public class jTPCCScheduler implements Runnable {
 
 
   private jTPCC gdata;
+  private long start_ms;
+  private long duration_ms;
   private jTPCCTData avl_root = null;
   private Object avl_lock;
   private int avl_num_nodes = 0;
@@ -28,6 +30,8 @@ public class jTPCCScheduler implements Runnable {
 
   public jTPCCScheduler(jTPCC gdata) {
     this.gdata = gdata;
+    this.start_ms = gdata.csv_begin;
+    this.duration_ms = (gdata.rampupMins + gdata.runMins) * 60000;
     this.random = new Random(System.currentTimeMillis());
     this.avl_lock = new Object();
   }
@@ -138,9 +142,11 @@ public class jTPCCScheduler implements Runnable {
           break;
 
         case SCHED_REPORT:
-          log.info("Scheduler, Current TPM={}, NOPM={}",
+          long elapsed_ms = System.currentTimeMillis() - start_ms;
+          log.info("Scheduler, Current TPM={}, NOPM={}, Progress={}%",
               (current_trans_count * 60) / jTPCC.reportIntervalSecs,
-              (current_neword_count * 60) / jTPCC.reportIntervalSecs);
+              (current_neword_count * 60) / jTPCC.reportIntervalSecs,
+              elapsed_ms * 100 / duration_ms);
           current_trans_count = 0;
           current_neword_count = 0;
           this.at(tdata.trans_due + jTPCC.reportIntervalSecs * 1000, SCHED_REPORT, tdata);
