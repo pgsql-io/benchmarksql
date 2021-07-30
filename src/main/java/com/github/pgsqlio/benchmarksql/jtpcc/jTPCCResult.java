@@ -42,7 +42,7 @@ public class jTPCCResult {
     rCounter = resCounter[tdata.trans_type];
 
     latency = tdata.trans_end - tdata.trans_due;
-    delay = tdata.trans_end - tdata.trans_start;
+    delay = tdata.trans_start - tdata.trans_due;
     if (latency < 1)
       bucket = 0;
     else

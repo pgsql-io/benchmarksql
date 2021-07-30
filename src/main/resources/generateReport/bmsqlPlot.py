@@ -8,6 +8,7 @@ import warnings
 import matplotlib.pyplot as pyplot
 from mpl_toolkits.axes_grid1 import Divider, Size
 from mpl_toolkits.axes_grid1.mpl_axes import Axes
+import json
 
 from generateReport import *
 
@@ -83,7 +84,7 @@ class bmsqlPlot:
             return buf.getvalue()
         return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
 
-    def delay_svg(self, b64encode = True):
+    def delay_svg(self, ttype, b64encode = True):
         fig = pyplot.figure(figsize = self.FIGSIZE)
 
         h = [Size.Fixed(1.2), Size.Scaled(1.), Size.Fixed(.2)]
@@ -114,7 +115,7 @@ class bmsqlPlot:
         offset = (int(runinfo['rampupMins'])) * 60.0
 
         # ----
-        # NEW_ORDER transaction delay. First get the timestamp
+        # ttype transaction delay. First get the timestamp
         # and delay numbers from the result data.
         # The X vector then is the sorted unique timestamps rounded
         # to an interval.
@@ -122,7 +123,7 @@ class bmsqlPlot:
         interval = 10
         data = numpy.array([[(int(tup[0] / interval) * interval - offset) / 60,
                            tup[1], tup[5]]
-                           for tup in result.result_ttype['NEW_ORDER']])
+                           for tup in result.result_ttype[ttype]])
         x = sorted(numpy.unique(data[:,0]))
 
         # ----
@@ -135,7 +136,7 @@ class bmsqlPlot:
             y.append(numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001))
 
         # ----
-        # Plot the NEW_ORDER delay and add all the decorations
+        # Plot the ttype delay and add all the decorations
         # ----
         plt.plot(x, y, 'r', label = 'Delay')
 
@@ -144,7 +145,7 @@ class bmsqlPlot:
         # ----
         data = numpy.array([[(int(tup[0] / interval) * interval - offset) / 60,
                            tup[1], tup[2]]
-                           for tup in result.result_ttype['NEW_ORDER']])
+                           for tup in result.result_ttype[ttype]])
 
         # ----
         # The Y vector is similar by based on latency
@@ -155,7 +156,7 @@ class bmsqlPlot:
             y.append(numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001))
         plt.plot(x, y, 'b', label = 'Latency')
 
-        plt.set_title("NEW_ORDER Latency and Delay")
+        plt.set_title("{} Latency and Delay".format(ttype))
         plt.set_xlabel("Elapsed Minutes")
         plt.set_ylabel("Latency/Delay in ms")
         plt.legend(loc = 'upper left')

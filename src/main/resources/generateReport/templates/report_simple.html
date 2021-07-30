@@ -38,8 +38,36 @@
     NEW_ORDER Latency and Delay
   </h2>
   <p>
-    {% include "img_latency.html" %}
+	<img src="data:image/svg+xml;base64,{{ delay_svg('NEW_ORDER') }}" />
   </p>
   {% include "inc_latency_explain.html" %}
+
+  <h2>
+    PAYMENT Latency and Delay
+  </h2>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_svg('PAYMENT') }}" />
+  </p>
+
+  <h2>
+    ORDER_STATUS Latency and Delay
+  </h2>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_svg('ORDER_STATUS') }}" />
+  </p>
+
+  <h2>
+    STOCK_LEVEL Latency and Delay
+  </h2>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_svg('STOCK_LEVEL') }}" />
+  </p>
+
+  <h2>
+    DELIVERY (background part) Latency and Delay
+  </h2>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_svg('DELIVERY_BG') }}" />
+  </p>
 </body>
 </html>
