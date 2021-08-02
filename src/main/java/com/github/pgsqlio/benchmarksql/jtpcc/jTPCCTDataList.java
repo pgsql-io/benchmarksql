@@ -26,6 +26,19 @@ public class jTPCCTDataList {
     }
   }
 
+  public void prepend(jTPCCTData tdata) {
+    if (head == null) {
+      head = tail = tdata;
+      tdata.term_left = null;
+      tdata.term_right = null;
+    } else {
+      head.term_left = tdata;
+      tdata.term_left = null;
+      tdata.term_right = head;
+      head = tdata;
+    }
+  }
+
   public void remove(jTPCCTData tdata) {
     if (head == tdata)
       head = tdata.term_right;

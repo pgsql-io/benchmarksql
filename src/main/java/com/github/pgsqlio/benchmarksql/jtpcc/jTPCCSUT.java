@@ -78,6 +78,13 @@ public class jTPCCSUT {
     }
   }
 
+  public void queuePrepend(jTPCCTData tdata) {
+    synchronized (queue) {
+      queue.prepend(tdata);
+      queue.notify();
+    }
+  }
+
   private class SUTThread implements Runnable {
     private int t_id;
     private Random random;
@@ -287,13 +294,17 @@ public class jTPCCSUT {
           for (ent = queueHead; ent != null; ent = next) {
             /*
              * Bail out of here if the maximum allowed SUT theads are busy with deliviries.
+             * But only do that if we actually reserve some SUT threads for foreground
+             * transactions.
              */
-            if (deliveriesBusy >= jTPCC.maxDeliveryBGThreads)
+            if (jTPCC.maxDeliveryBGThreads < jTPCC.numSUTThreads &&
+                deliveriesBusy >= jTPCC.maxDeliveryBGThreads)
               break;
 
             next = ent.next;
 
-            if (warehouseBusy[ent.w_id - 1] < jTPCC.maxDeliveryBGPerWH) {
+            if (jTPCC.maxDeliveryBGPerWH <= 0 ||
+                warehouseBusy[ent.w_id - 1] < jTPCC.maxDeliveryBGPerWH) {
               /*
                * This warehouse does not currently have the maximum allowed delivery transactions in
                * progress. Create a terminal data instance and fill it with the delivery background
@@ -317,7 +328,7 @@ public class jTPCCSUT {
               tdata.delivery_bg.o_carrier_id = ent.o_carrier_id;
               tdata.delivery_bg.ol_delivery_d = ent.ol_delivery_d;
 
-              gdata.systemUnderTest.queueAppend(tdata);
+              gdata.systemUnderTest.queuePrepend(tdata);
 
               /* Remove this queue entry. */
               if (ent.prev == null)
