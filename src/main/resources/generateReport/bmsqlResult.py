@@ -2,6 +2,7 @@ import os.path
 import csv
 import math
 import json
+import re
 
 class bmsqlResult:
     def __init__(self, resdir):
@@ -72,6 +73,15 @@ class bmsqlResult:
                 self.os_metric = json.loads(fd.read())
         else:
             self.os_metric = {}
+
+        # ----
+        # Load the run.properties but remove the password
+        # ----
+        prop_fname = os.path.join(resdir, 'run.properties')
+        with open(prop_fname, 'r') as fd:
+            props = fd.read()
+        self.properties = re.sub(r'(password\s*=\s*).*$', r'\1********',
+                                 props, flags = re.M)
 
     def tpm_c(self):
         num_new_order = self.summary_ttype['NEW_ORDER'][0]

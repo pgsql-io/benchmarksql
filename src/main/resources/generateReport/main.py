@@ -102,6 +102,7 @@ def generate_html(result, template, os_metrics):
         'ttypes': result.ttypes,
         'runinfo': result.runinfo,
         'summary': summary_data(result),
+        'properties': result.properties,
         'mix_warn': False,
         'rbk_warn': False,
         'tpm_c': '{:.2f}'.format(result.tpm_c()),
