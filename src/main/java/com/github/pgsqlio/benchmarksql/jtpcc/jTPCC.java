@@ -70,6 +70,7 @@ public class jTPCC {
   public static double orderStatusWeight;
   public static double deliveryWeight;
   public static double stockLevelWeight;
+  public static double rollbackPercent;
 
   private OSCollector osCollector = null;
   private jTPCCTData terminal_data[];
@@ -169,6 +170,9 @@ public class jTPCC {
     }
     fmt.format("newOrderWeight=%.3f", newOrderWeight);
     log.info("main, {}", sb.toString());
+    log.info("main, ");
+
+    rollbackPercent = Double.parseDouble(getProp(ini, "rollbackPercent", "1.01"));
     log.info("main, ");
 
     sutThreadDelay = (rampupSUTMins * 60000) / numSUTThreads;

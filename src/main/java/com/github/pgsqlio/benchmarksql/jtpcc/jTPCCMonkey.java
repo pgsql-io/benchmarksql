@@ -374,7 +374,7 @@ public class jTPCCMonkey {
 
       // 2.4.1.4 - 1% of orders must use an invalid ol_o_id in the last
       // order line generated.
-      if (rnd.nextInt(1, 100) == 1) {
+      if (rnd.nextDouble(0.0, 100.0) <= jTPCC.rollbackPercent) {
         screen.ol_i_id[ol_idx - 1] = 999999;
         tdata.trans_rbk = true;
       }
