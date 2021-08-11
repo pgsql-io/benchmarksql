@@ -4,6 +4,25 @@
 	ylabel = 'MiB/s',
 	metrics = [
 	  {
+	    'op': 'ADD',
+		'lval': {
+			'op': 'VAL',
+			'host': metric[1],
+			'metric': 'disk-{}.disk_octets.read'.format(metric[3]),
+			'factor': 1 / 1024 / 1024,
+		},
+		'rval': {
+			'op': 'VAL',
+			'host': metric[1],
+			'metric': 'disk-{}.disk_octets.write'.format(metric[3]),
+			'factor': 1 / 1024 / 1024,
+		},
+		'index': 3,
+		'color': 'black',
+		'label': 'Total',
+	  },
+	  {
+		'op': 'VAL',
 		'host': metric[1],
 		'metric': 'disk-{}.disk_octets.read'.format(metric[3]),
 		'color': 'b',
@@ -11,6 +30,7 @@
 		'factor': 1 / 1024 / 1024,
 	  },
 	  {
+		'op': 'VAL',
 		'host': metric[1],
 		'metric': 'disk-{}.disk_octets.write'.format(metric[3]),
 		'color': 'r',

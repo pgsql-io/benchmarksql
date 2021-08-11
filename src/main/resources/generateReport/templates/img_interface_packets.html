@@ -4,12 +4,30 @@
 	ylabel = 'Packets/s',
 	metrics = [
 	  {
+	    'op': 'ADD',
+		'lval': {
+			'op': 'VAL',
+			'host': metric[1],
+			'metric': 'interface-{}.if_packets.rx'.format(metric[3]),
+		},
+		'rval': {
+			'op': 'VAL',
+			'host': metric[1],
+			'metric': 'interface-{}.if_packets.tx'.format(metric[3]),
+		},
+		'index': 3,
+		'color': 'black',
+		'label': 'Total',
+	  },
+	  {
+		'op': 'VAL',
 		'host': metric[1],
 		'metric': 'interface-{}.if_packets.rx'.format(metric[3]),
 		'color': 'b',
 		'label': 'Read',
 	  },
 	  {
+		'op': 'VAL',
 		'host': metric[1],
 		'metric': 'interface-{}.if_packets.tx'.format(metric[3]),
 		'color': 'r',

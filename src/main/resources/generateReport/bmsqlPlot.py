@@ -198,9 +198,9 @@ class bmsqlPlot:
         x = None
         for m in metrics:
             if x is None:
-                x, y = self._get_metric_xy(m)
+                x, y = self._get_metric_tree(m)
             else:
-                _, y = self._get_metric_xy(m, x)
+                _, y = self._get_metric_tree(m, x)
 
             plt.plot(x, y, m['color'], label = m['label'])
 
@@ -403,6 +403,17 @@ class bmsqlPlot:
         if not b64encode:
             return buf.getvalue()
         return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
+
+    def _get_metric_tree(self, m, x = None):
+        if m['op'] == 'VAL':
+            return self._get_metric_xy(m, x)
+
+        elif m['op'] == 'ADD':
+            x, y1 = self._get_metric_tree(m['lval'], x)
+            _, y2 = self._get_metric_tree(m['rval'], x)
+            return x, [l + r for l, r in zip(y1, y2)]
+        else:
+            raise Exception("Unknown operand '{}'".format(m['op']))
 
     def _get_metric_xy(self, m, x = None):
         # ----
