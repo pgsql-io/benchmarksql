@@ -207,9 +207,10 @@ OS name: "linux", version: "4.14.243-185.433.amzn2.x86_64", arch: "amd64", famil
 ## Cloning and Building BenchmarkSQL
 
 Back in the ec2-user's $HOME directory clone the BenchmarkSQL
-github repository:
+github repository and checkout the latest stable release tag:
 ```
 git clone https://github.com/pgsql-io/benchmarksql.git
+git checkout REL6_0
 ```
 Example:
 ```
@@ -221,6 +222,8 @@ remote: Compressing objects: 100% (971/971), done.
 remote: Total 2371 (delta 1374), reused 2254 (delta 1260), pack-reused 0
 Receiving objects: 100% (2371/2371), 5.55 MiB | 26.69 MiB/s, done.
 Resolving deltas: 100% (1374/1374), done.
+[ec2-user@ip-172-31-70-6 benchmarksql]$ git checkout REL6_0
+HEAD is now at 5dc7881 Add change log for version 6.0
 ```
 
 Change into the local repository copy and build the project:
