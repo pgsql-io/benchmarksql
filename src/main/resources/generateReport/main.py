@@ -143,7 +143,7 @@ def summary_data(result):
             limit = 5.0
         ninth = result.percentile(tt, 0.9)
         n5th = result.percentile(tt, 0.95)
-        n8th = result.percentile(tt, 0.98)
+        n9th = result.percentile(tt, 0.99)
 
         # ----
         # From that numbers we derive the color for the percentile numbers
@@ -151,7 +151,7 @@ def summary_data(result):
         color_limit = color_ok
         color_ninth = color_ok
         color_n5th = color_ok
-        color_n8th = color_ok
+        color_n9th = color_ok
         if ninth > limit:
             color_limit = color_error
             color_ninth = color_error
@@ -159,10 +159,10 @@ def summary_data(result):
             if ninth <= limit:
                 color_limit = color_warn
             color_n5th = color_warn
-        if n8th > limit:
+        if n9th > limit:
             if ninth <= limit:
                 color_limit = color_warn
-            color_n8th = color_warn
+            color_n9th = color_warn
 
         # ----
         # Indicate if the transaction mix percentage is too low
@@ -207,11 +207,11 @@ def summary_data(result):
             'max': "{:.3f}".format(result.max_latency(tt)),
             'ninth': "{:.3f}".format(ninth),
             'n5th': "{:.3f}".format(n5th),
-            'n8th': "{:.3f}".format(n8th),
+            'n9th': "{:.3f}".format(n9th),
             'limit': "{:.3f}".format(limit),
             'style_ninth': 'style="color:{};"'.format(color_ninth),
             'style_n5th': 'style="color:{};"'.format(color_n5th),
-            'style_n8th': 'style="color:{};"'.format(color_n8th),
+            'style_n9th': 'style="color:{};"'.format(color_n9th),
             'style_limit': 'style="color:{};"'.format(color_limit),
             'rbk': rbk,
             'style_rbk': 'style="color:{};"'.format(color_rbk),
