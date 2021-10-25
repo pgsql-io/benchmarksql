@@ -84,7 +84,7 @@ class bmsqlPlot:
             return buf.getvalue()
         return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
 
-    def delay_svg(self, ttype, b64encode = True):
+    def delay_avg_svg(self, ttype, b64encode = True):
         fig = pyplot.figure(figsize = self.FIGSIZE)
 
         h = [Size.Fixed(1.2), Size.Scaled(1.), Size.Fixed(.2)]
@@ -156,7 +156,83 @@ class bmsqlPlot:
             y.append(numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001))
         plt.plot(x, y, 'b', label = 'Latency')
 
-        plt.set_title("{} Latency and Delay".format(ttype))
+        plt.set_title("{} Average Latency and Delay".format(ttype))
+        plt.set_xlabel("Elapsed Minutes")
+        plt.set_ylabel("Latency/Delay in ms")
+        plt.legend(loc = 'upper left')
+        plt.grid()
+
+        buf = io.StringIO()
+        pyplot.savefig(buf, format = 'svg')
+
+        if not b64encode:
+            return buf.getvalue()
+        return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
+
+    def delay_max_svg(self, ttype, b64encode = True):
+        fig = pyplot.figure(figsize = self.FIGSIZE)
+
+        h = [Size.Fixed(1.2), Size.Scaled(1.), Size.Fixed(.2)]
+        v = [Size.Fixed(0.7), Size.Scaled(1.), Size.Fixed(.5)]
+
+        divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+        plt = Axes(fig, divider.get_position())
+        plt.set_axes_locator(divider.new_locator(nx=1, ny=1))
+
+
+        fig.add_axes(plt)
+
+        result = self.result
+        runinfo = result.runinfo
+
+        # ----
+        # The X limits are -rampupMins, runMins
+        # ----
+        plt.set_xlim(-int(runinfo['rampupMins']), int(runinfo['runMins']))
+        plt.axvspan(-int(runinfo['rampupMins']), 0,
+                    facecolor = '0.2', alpha = 0.1)
+
+        # ----
+        # offset the timestamps by -rampupMins so that the graph
+        # starts with negative minutes elapsed and switches to
+        # positive when the measurement begins.
+        # ----
+        offset = (int(runinfo['rampupMins'])) * 60.0
+
+        # ----
+        # ttype transaction max delay and latency
+        # The X vector is the sorted unique timestamps rounded
+        # to an interval.
+        # ----
+        interval = 10
+        data = numpy.array([[(int(tup[0] / interval) * interval - offset) / 60,
+                           tup[4], tup[7]]
+                           for tup in result.result_ttype[ttype]])
+        x = sorted(numpy.unique(data[:,0]))
+
+        # ----
+        # The Y vector for delay is the max of data[2]
+        # ----
+        y = []
+        for ts in x:
+            tmp = data[numpy.where(data[:,0] == ts)]
+            y.append(numpy.max(tmp[:,2]))
+
+        # ----
+        # Plot the ttype delay and add all the decorations
+        # ----
+        plt.plot(x, y, 'r', label = 'Delay')
+
+        # ----
+        # The Y vector for latency is the same on data[1]
+        # ----
+        y = []
+        for ts in x:
+            tmp = data[numpy.where(data[:,0] == ts)]
+            y.append(numpy.max(tmp[:,1]))
+        plt.plot(x, y, 'b', label = 'Latency')
+
+        plt.set_title("{} Maximum Latency and Delay".format(ttype))
         plt.set_xlabel("Elapsed Minutes")
         plt.set_ylabel("Latency/Delay in ms")
         plt.legend(loc = 'upper left')

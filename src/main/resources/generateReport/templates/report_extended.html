@@ -38,36 +38,52 @@
     NEW_ORDER Latency and Delay
   </h2>
   <p>
-	<img src="data:image/svg+xml;base64,{{ delay_svg('NEW_ORDER') }}" />
+	<img src="data:image/svg+xml;base64,{{ delay_avg_svg('NEW_ORDER') }}" />
   </p>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_max_svg('NEW_ORDER') }}" />
+  </p>
+
   {% include "inc_latency_explain.html" %}
 
   <h2>
     PAYMENT Latency and Delay
   </h2>
   <p>
-	<img src="data:image/svg+xml;base64,{{ delay_svg('PAYMENT') }}" />
+	<img src="data:image/svg+xml;base64,{{ delay_avg_svg('PAYMENT') }}" />
+  </p>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_max_svg('PAYMENT') }}" />
   </p>
 
   <h2>
     ORDER_STATUS Latency and Delay
   </h2>
   <p>
-	<img src="data:image/svg+xml;base64,{{ delay_svg('ORDER_STATUS') }}" />
+	<img src="data:image/svg+xml;base64,{{ delay_avg_svg('ORDER_STATUS') }}" />
+  </p>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_max_svg('ORDER_STATUS') }}" />
   </p>
 
   <h2>
     STOCK_LEVEL Latency and Delay
   </h2>
   <p>
-	<img src="data:image/svg+xml;base64,{{ delay_svg('STOCK_LEVEL') }}" />
+	<img src="data:image/svg+xml;base64,{{ delay_avg_svg('STOCK_LEVEL') }}" />
+  </p>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_max_svg('STOCK_LEVEL') }}" />
   </p>
 
   <h2>
     DELIVERY (background part) Latency and Delay
   </h2>
   <p>
-	<img src="data:image/svg+xml;base64,{{ delay_svg('DELIVERY_BG') }}" />
+	<img src="data:image/svg+xml;base64,{{ delay_avg_svg('DELIVERY_BG') }}" />
+  </p>
+  <p>
+	<img src="data:image/svg+xml;base64,{{ delay_max_svg('DELIVERY_BG') }}" />
   </p>
 
   <!--
