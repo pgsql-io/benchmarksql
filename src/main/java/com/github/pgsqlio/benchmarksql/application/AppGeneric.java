@@ -114,6 +114,13 @@ public class AppGeneric extends jTPCCApplication {
             "SELECT d_tax, d_next_o_id "
           + "    FROM bmsql_district WITH (UPDLOCK) "
           + "    WHERE d_w_id = ? AND d_id = ? ");
+    } else if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+      stmtNewOrderSelectDist = dbConn.prepareStatement(
+            "UPDATE bmsql_district SET d_w_id = d_w_id "
+          + "    WHERE d_w_id = ? AND d_id = ?; "
+          + "SELECT d_tax, d_next_o_id "
+          + "    FROM bmsql_district WITH (UPDLOCK) "
+          + "    WHERE d_w_id = ? AND d_id = ? ");
     } else {
       stmtNewOrderSelectDist = dbConn.prepareStatement(
             "SELECT d_tax, d_next_o_id "
@@ -137,6 +144,16 @@ public class AppGeneric extends jTPCCApplication {
     if (jTPCC.dbType == jTPCCConfig.DB_TSQL) {
       stmtNewOrderSelectStock = dbConn.prepareStatement(
             "SELECT s_quantity, s_data, "
+          + "       s_dist_01, s_dist_02, s_dist_03, s_dist_04, "
+          + "       s_dist_05, s_dist_06, s_dist_07, s_dist_08, "
+          + "       s_dist_09, s_dist_10 "
+          + "    FROM bmsql_stock WITH (UPDLOCK) "
+          + "    WHERE s_w_id = ? AND s_i_id = ? ");
+    } else if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+      stmtNewOrderSelectStock = dbConn.prepareStatement(
+            "UPDATE bmsql_stock SET s_w_id = s_w_id "
+          + "    WHERE s_w_id = ? AND s_i_id = ?; "
+          + "SELECT s_quantity, s_data, "
           + "       s_dist_01, s_dist_02, s_dist_03, s_dist_04, "
           + "       s_dist_05, s_dist_06, s_dist_07, s_dist_08, "
           + "       s_dist_09, s_dist_10 "
@@ -188,6 +205,15 @@ public class AppGeneric extends jTPCCApplication {
     if (jTPCC.dbType == jTPCCConfig.DB_TSQL) {
       stmtPaymentSelectCustomer = dbConn.prepareStatement(
             "SELECT c_first, c_middle, c_last, c_street_1, c_street_2, "
+          + "       c_city, c_state, c_zip, c_phone, c_since, c_credit, "
+          + "       c_credit_lim, c_discount, c_balance "
+          + "    FROM bmsql_customer WITH (UPDLOCK) "
+          + "    WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? ");
+    } else if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+      stmtPaymentSelectCustomer = dbConn.prepareStatement(
+            "UPDATE bmsql_customer SET c_w_id = c_w_id "
+          + "WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?; "
+          + "SELECT c_first, c_middle, c_last, c_street_1, c_street_2, "
           + "       c_city, c_state, c_zip, c_phone, c_since, c_credit, "
           + "       c_credit_lim, c_discount, c_balance "
           + "    FROM bmsql_customer WITH (UPDLOCK) "
@@ -263,6 +289,7 @@ public class AppGeneric extends jTPCCApplication {
       case jTPCCConfig.DB_POSTGRES:
       case jTPCCConfig.DB_MARIADB:
       case jTPCCConfig.DB_TSQL:
+      case jTPCCConfig.DB_BABELFISH:
         stmtStockLevelSelectLow = dbConn.prepareStatement(
               "SELECT count(*) AS low_stock FROM ("
             + "    SELECT s_w_id, s_i_id, s_quantity "
@@ -396,8 +423,15 @@ public class AppGeneric extends jTPCCApplication {
       // Retrieve the required data from DISTRICT
       last_stmt = "stmtNewOrderSelectDist";
       stmt = stmtNewOrderSelectDist;
-      stmt.setInt(1, newOrder.w_id);
-      stmt.setInt(2, newOrder.d_id);
+      if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+        stmt.setInt(1, newOrder.w_id);
+        stmt.setInt(2, newOrder.d_id);
+        stmt.setInt(3, newOrder.w_id);
+        stmt.setInt(4, newOrder.d_id);
+      } else {
+        stmt.setInt(1, newOrder.w_id);
+        stmt.setInt(2, newOrder.d_id);
+      }
       rs = stmt.executeQuery();
       if (!rs.next()) {
         rs.close();
@@ -507,8 +541,15 @@ public class AppGeneric extends jTPCCApplication {
         // Select STOCK for update.
         last_stmt = "stmtNewOrderSelectStock";
         stmt = stmtNewOrderSelectStock;
-        stmt.setInt(1, newOrder.ol_supply_w_id[seq]);
-        stmt.setInt(2, newOrder.ol_i_id[seq]);
+        if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+          stmt.setInt(1, newOrder.ol_supply_w_id[seq]);
+          stmt.setInt(2, newOrder.ol_i_id[seq]);
+          stmt.setInt(3, newOrder.ol_supply_w_id[seq]);
+          stmt.setInt(4, newOrder.ol_i_id[seq]);
+        } else {
+          stmt.setInt(1, newOrder.ol_supply_w_id[seq]);
+          stmt.setInt(2, newOrder.ol_i_id[seq]);
+        }
         rs = stmt.executeQuery();
         if (!rs.next()) {
           throw new Exception("STOCK with" + " S_W_ID=" + newOrder.ol_supply_w_id[seq] + " S_I_ID="
@@ -709,9 +750,18 @@ public class AppGeneric extends jTPCCApplication {
       // Select the CUSTOMER.
       last_stmt = "stmtPaymentSelectCustomer";
       stmt = stmtPaymentSelectCustomer;
-      stmt.setInt(1, payment.c_w_id);
-      stmt.setInt(2, payment.c_d_id);
-      stmt.setInt(3, payment.c_id);
+      if (jTPCC.dbType == jTPCCConfig.DB_BABELFISH) {
+        stmt.setInt(1, payment.c_w_id);
+        stmt.setInt(2, payment.c_d_id);
+        stmt.setInt(3, payment.c_id);
+        stmt.setInt(4, payment.c_w_id);
+        stmt.setInt(5, payment.c_d_id);
+        stmt.setInt(6, payment.c_id);
+      } else {
+        stmt.setInt(1, payment.c_w_id);
+        stmt.setInt(2, payment.c_d_id);
+        stmt.setInt(3, payment.c_id);
+      }
       rs = stmt.executeQuery();
       if (!rs.next()) {
         throw new Exception("Customer for" + " C_W_ID=" + payment.c_w_id + " C_D_ID="

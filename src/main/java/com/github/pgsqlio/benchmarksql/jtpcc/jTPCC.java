@@ -188,6 +188,8 @@ public class jTPCC {
       dbType = jTPCCConfig.DB_MARIADB;
     else if (iDBType.equals("transact-sql"))
       dbType = jTPCCConfig.DB_TSQL;
+    else if (iDBType.equals("babelfish"))
+      dbType = jTPCCConfig.DB_BABELFISH;
     else {
       log.error("Unknown database type '{}'", iDBType);
       return;

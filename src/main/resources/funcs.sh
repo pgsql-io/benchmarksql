@@ -45,6 +45,9 @@ function setCP()
 	transact-sql)
 	    cp="../lib/*"
 	    ;;
+	babelfish)
+	    cp="../lib/*"
+	    ;;
     esac
     myCP="./:../BenchmarkSQL.jar:${cp}"
     export myCP
@@ -56,7 +59,7 @@ function setCP()
 # ----
 db=$(getProp db)
 case "${db}" in
-    oracle|postgres|firebird|mariadb|transact-sql)
+    oracle|postgres|firebird|mariadb|transact-sql|babelfish)
 	;;
     "")	echo "ERROR: missing db= config option in ${PROPS}" >&2
 	exit 1

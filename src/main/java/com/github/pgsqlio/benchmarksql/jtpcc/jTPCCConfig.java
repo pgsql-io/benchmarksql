@@ -9,7 +9,7 @@ public interface jTPCCConfig {
   public final static String JTPCCVERSION = "6.0";
 
   public final static int DB_UNKNOWN = 0, DB_ORACLE = 1, DB_POSTGRES = 2, DB_FIREBIRD = 3,
-      DB_MARIADB = 4, DB_TSQL = 5;
+      DB_MARIADB = 4, DB_TSQL = 5, DB_BABELFISH = 6;
 
   public final static int NEW_ORDER = 1, PAYMENT = 2, ORDER_STATUS = 3, DELIVERY = 4,
       STOCK_LEVEL = 5;
