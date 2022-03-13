@@ -390,8 +390,11 @@ public class AppGeneric extends jTPCCApplication {
     // The above also provided the output value for o_ol_cnt;
     newOrder.o_ol_cnt = ol_cnt;
 
+    String last_stmt = "unknown";
+
     try {
       // Retrieve the required data from DISTRICT
+      last_stmt = "stmtNewOrderSelectDist";
       stmt = stmtNewOrderSelectDist;
       stmt.setInt(1, newOrder.w_id);
       stmt.setInt(2, newOrder.d_id);
@@ -407,6 +410,7 @@ public class AppGeneric extends jTPCCApplication {
       rs.close();
 
       // Retrieve the required data from CUSTOMER and WAREHOUSE
+      last_stmt = "stmtNewOrderSelectWhseCust";
       stmt = stmtNewOrderSelectWhseCust;
       stmt.setInt(1, newOrder.w_id);
       stmt.setInt(2, newOrder.d_id);
@@ -424,12 +428,14 @@ public class AppGeneric extends jTPCCApplication {
       rs.close();
 
       // Update the DISTRICT bumping the D_NEXT_O_ID
+      last_stmt = "stmtNewOrderUpdateDist";
       stmt = stmtNewOrderUpdateDist;
       stmt.setInt(1, newOrder.w_id);
       stmt.setInt(2, newOrder.d_id);
       stmt.executeUpdate();
 
       // Insert the ORDER row
+      last_stmt = "stmtNewOrderInsertOrder";
       stmt = stmtNewOrderInsertOrder;
       stmt.setInt(1, o_id);
       stmt.setInt(2, newOrder.d_id);
@@ -441,6 +447,7 @@ public class AppGeneric extends jTPCCApplication {
       stmt.executeUpdate();
 
       // Insert the NEW_ORDER row
+      last_stmt = "stmtNewOrderInsertNewOrder";
       stmt = stmtNewOrderInsertNewOrder;
       stmt.setInt(1, o_id);
       stmt.setInt(2, newOrder.d_id);
@@ -455,6 +462,7 @@ public class AppGeneric extends jTPCCApplication {
         int seq = ol_seq[i];
         String i_data;
 
+        last_stmt = "stmtNewOrderSelectItem";
         stmt = stmtNewOrderSelectItem;
         stmt.setInt(1, newOrder.ol_i_id[seq]);
         rs = stmt.executeQuery();
@@ -473,8 +481,10 @@ public class AppGeneric extends jTPCCApplication {
              * any ORDER_LINE rows so far, we only batched them up. So we must do that now in order
              * to satisfy 2.4.2.3.
              */
+            last_stmt = "insertOrderLineBatch.executeBatch";
             insertOrderLineBatch.executeBatch();
             insertOrderLineBatch.clearBatch();
+            last_stmt = "updateStockBatch.executeBatch";
             updateStockBatch.executeBatch();
             updateStockBatch.clearBatch();
 
@@ -495,6 +505,7 @@ public class AppGeneric extends jTPCCApplication {
         rs.close();
 
         // Select STOCK for update.
+        last_stmt = "stmtNewOrderSelectStock";
         stmt = stmtNewOrderSelectStock;
         stmt.setInt(1, newOrder.ol_supply_w_id[seq]);
         stmt.setInt(2, newOrder.ol_i_id[seq]);
@@ -575,8 +586,10 @@ public class AppGeneric extends jTPCCApplication {
       rs.close();
 
       // All done ... execute the batches.
+      last_stmt = "updateStockBatch.executeBatch";
       updateStockBatch.executeBatch();
       updateStockBatch.clearBatch();
+      last_stmt = "insertOrderLineBatch.executeBatch";
       insertOrderLineBatch.executeBatch();
       insertOrderLineBatch.clearBatch();
 
@@ -586,7 +599,8 @@ public class AppGeneric extends jTPCCApplication {
       dbConn.commit();
 
     } catch (SQLException se) {
-      log.error("Unexpected SQLException in NEW_ORDER");
+      log.error("Unexpected SQLException in NEW_ORDER - stmt = '" +
+                last_stmt + "'");
       for (SQLException x = se; x != null; x = x.getNextException())
         log.error(x.getMessage());
       log.info(se);
@@ -618,8 +632,11 @@ public class AppGeneric extends jTPCCApplication {
 
     long h_date = System.currentTimeMillis();
 
+    String last_stmt = "unknown";
+
     try {
       // Update the DISTRICT.
+      last_stmt = "stmtPaymentUpdateDistrict";
       stmt = stmtPaymentUpdateDistrict;
       stmt.setDouble(1, payment.h_amount);
       stmt.setInt(2, payment.w_id);
@@ -627,6 +644,7 @@ public class AppGeneric extends jTPCCApplication {
       stmt.executeUpdate();
 
       // Select the DISTRICT.
+      last_stmt = "stmtPaymentSelectDistrict";
       stmt = stmtPaymentSelectDistrict;
       stmt.setInt(1, payment.w_id);
       stmt.setInt(2, payment.d_id);
@@ -645,12 +663,14 @@ public class AppGeneric extends jTPCCApplication {
       rs.close();
 
       // Update the WAREHOUSE.
+      last_stmt = "stmtPaymentUpdateWarehouse";
       stmt = stmtPaymentUpdateWarehouse;
       stmt.setDouble(1, payment.h_amount);
       stmt.setInt(2, payment.w_id);
       stmt.executeUpdate();
 
       // Select the WAREHOUSE.
+      last_stmt = "stmtPaymentSelectWarehouse";
       stmt = stmtPaymentSelectWarehouse;
       stmt.setInt(1, payment.w_id);
       rs = stmt.executeQuery();
@@ -668,6 +688,7 @@ public class AppGeneric extends jTPCCApplication {
 
       // If C_LAST is given instead of C_ID (60%), determine the C_ID.
       if (payment.c_last != null) {
+        last_stmt = "stmtPaymentSelectCustomerListByLast";
         stmt = stmtPaymentSelectCustomerListByLast;
         stmt.setInt(1, payment.c_w_id);
         stmt.setInt(2, payment.c_d_id);
@@ -686,6 +707,7 @@ public class AppGeneric extends jTPCCApplication {
       }
 
       // Select the CUSTOMER.
+      last_stmt = "stmtPaymentSelectCustomer";
       stmt = stmtPaymentSelectCustomer;
       stmt.setInt(1, payment.c_w_id);
       stmt.setInt(2, payment.c_d_id);
@@ -717,6 +739,7 @@ public class AppGeneric extends jTPCCApplication {
       payment.c_balance -= payment.h_amount;
       if (payment.c_credit.equals("GC")) {
         // Customer with good credit, don't update C_DATA.
+        last_stmt = "stmtPaymentUpdateCustomer";
         stmt = stmtPaymentUpdateCustomer;
         stmt.setDouble(1, payment.h_amount);
         stmt.setDouble(2, payment.h_amount);
@@ -726,6 +749,7 @@ public class AppGeneric extends jTPCCApplication {
         stmt.executeUpdate();
       } else {
         // Customer with bad credit, need to do the C_DATA work.
+        last_stmt = "stmtPaymentSelectCustomerData";
         stmt = stmtPaymentSelectCustomerData;
         stmt.setInt(1, payment.c_w_id);
         stmt.setInt(2, payment.c_d_id);
@@ -738,6 +762,7 @@ public class AppGeneric extends jTPCCApplication {
         payment.c_data = rs.getString("c_data");
         rs.close();
 
+        last_stmt = "stmtPaymentUpdateCustomerWithData";
         stmt = stmtPaymentUpdateCustomerWithData;
         stmt.setDouble(1, payment.h_amount);
         stmt.setDouble(2, payment.h_amount);
@@ -760,6 +785,7 @@ public class AppGeneric extends jTPCCApplication {
       }
 
       // Insert the HISORY row.
+      last_stmt = "stmtPaymentInsertHistory";
       stmt = stmtPaymentInsertHistory;
       stmt.setInt(1, payment.c_id);
       stmt.setInt(2, payment.c_d_id);
@@ -775,7 +801,8 @@ public class AppGeneric extends jTPCCApplication {
 
       dbConn.commit();
     } catch (SQLException se) {
-      log.error("Unexpected SQLException in PAYMENT");
+      log.error("Unexpected SQLException in PAYMENT - stmt = '" +
+                last_stmt + "'");
       for (SQLException x = se; x != null; x = x.getNextException())
         log.error(x.getMessage());
       log.info(se);
@@ -802,9 +829,12 @@ public class AppGeneric extends jTPCCApplication {
     Vector<Integer> c_id_list = new Vector<Integer>();
     int ol_idx = 0;
 
+    String last_stmt = "unknown";
+
     try {
       // If C_LAST is given instead of C_ID (60%), determine the C_ID.
       if (orderStatus.c_last != null) {
+        last_stmt = "stmtOrderStatusSelectCustomerListByLast";
         stmt = stmtOrderStatusSelectCustomerListByLast;
         stmt.setInt(1, orderStatus.w_id);
         stmt.setInt(2, orderStatus.d_id);
@@ -823,6 +853,7 @@ public class AppGeneric extends jTPCCApplication {
       }
 
       // Select the CUSTOMER.
+      last_stmt = "stmtOrderStatusSelectCustomer";
       stmt = stmtOrderStatusSelectCustomer;
       stmt.setInt(1, orderStatus.w_id);
       stmt.setInt(2, orderStatus.d_id);
@@ -840,6 +871,7 @@ public class AppGeneric extends jTPCCApplication {
       rs.close();
 
       // Select the last ORDER for this customer.
+      last_stmt = "stmtOrderStatusSelectLastOrder";
       stmt = stmtOrderStatusSelectLastOrder;
       stmt.setInt(1, orderStatus.w_id);
       stmt.setInt(2, orderStatus.d_id);
@@ -859,6 +891,7 @@ public class AppGeneric extends jTPCCApplication {
         orderStatus.o_carrier_id = -1;
       rs.close();
 
+      last_stmt = "stmtOrderStatusSelectOrderLine";
       stmt = stmtOrderStatusSelectOrderLine;
       stmt.setInt(1, orderStatus.w_id);
       stmt.setInt(2, orderStatus.d_id);
@@ -891,7 +924,8 @@ public class AppGeneric extends jTPCCApplication {
 
       dbConn.commit();
     } catch (SQLException se) {
-      log.error("Unexpected SQLException in ORDER_STATUS");
+      log.error("Unexpected SQLException in ORDER_STATUS - stmt = '" +
+                last_stmt + "'");
       for (SQLException x = se; x != null; x = x.getNextException())
         log.error(x.getMessage());
       log.info(se);
@@ -916,7 +950,10 @@ public class AppGeneric extends jTPCCApplication {
     PreparedStatement stmt;
     ResultSet rs;
 
+    String last_stmt = "unknown";
+
     try {
+      last_stmt = "stmtStockLevelSelectLow";
       stmt = stmtStockLevelSelectLow;
       stmt.setInt(1, stockLevel.w_id);
       stmt.setInt(2, stockLevel.threshold);
@@ -932,7 +969,8 @@ public class AppGeneric extends jTPCCApplication {
 
       dbConn.commit();
     } catch (SQLException se) {
-      log.error("Unexpected SQLException in STOCK_LEVEL");
+      log.error("Unexpected SQLException in STOCK_LEVEL - stmt = '" +
+                last_stmt + "'");
       for (SQLException x = se; x != null; x = x.getNextException())
         log.error(x.getMessage());
       log.info(se);
@@ -966,6 +1004,8 @@ public class AppGeneric extends jTPCCApplication {
 
     deliveryBG.delivered_o_id = new int[15];
 
+    String last_stmt = "unknown";
+
     try {
       for (d_id = 1; d_id <= 10; d_id++) {
         o_id = -1;
@@ -978,6 +1018,7 @@ public class AppGeneric extends jTPCCApplication {
          * is a case that needs to be reportd.
          */
         while (o_id < 0) {
+          last_stmt = "stmtDeliveryBGSelectOldestNewOrder";
           stmt1.setInt(1, deliveryBG.w_id);
           stmt1.setInt(2, d_id);
           rs = stmt1.executeQuery();
@@ -988,6 +1029,7 @@ public class AppGeneric extends jTPCCApplication {
           o_id = rs.getInt("no_o_id");
           rs.close();
 
+          last_stmt = "stmtDeliveryBGDeleteOldestNewOrder";
           stmt2.setInt(1, deliveryBG.w_id);
           stmt2.setInt(2, d_id);
           stmt2.setInt(3, o_id);
@@ -1015,6 +1057,7 @@ public class AppGeneric extends jTPCCApplication {
          */
 
         // Update the ORDER setting the o_carrier_id.
+        last_stmt = "stmtDeliveryBGUpdateOrder";
         stmt1 = stmtDeliveryBGUpdateOrder;
         stmt1.setInt(1, deliveryBG.o_carrier_id);
         stmt1.setInt(2, deliveryBG.w_id);
@@ -1023,6 +1066,7 @@ public class AppGeneric extends jTPCCApplication {
         stmt1.executeUpdate();
 
         // Get the o_c_id from the ORDER.
+        last_stmt = "stmtDeliveryBGSelectOrder";
         stmt1 = stmtDeliveryBGSelectOrder;
         stmt1.setInt(1, deliveryBG.w_id);
         stmt1.setInt(2, d_id);
@@ -1037,6 +1081,7 @@ public class AppGeneric extends jTPCCApplication {
         rs.close();
 
         // Update ORDER_LINE setting the ol_delivery_d.
+        last_stmt = "stmtDeliveryBGUpdateOrderLine";
         stmt1 = stmtDeliveryBGUpdateOrderLine;
         stmt1.setTimestamp(1, new java.sql.Timestamp(now));
         stmt1.setInt(2, deliveryBG.w_id);
@@ -1045,6 +1090,7 @@ public class AppGeneric extends jTPCCApplication {
         stmt1.executeUpdate();
 
         // Select the sum(ol_amount) from ORDER_LINE.
+        last_stmt = "stmtDeliveryBGSelectSumOLAmount";
         stmt1 = stmtDeliveryBGSelectSumOLAmount;
         stmt1.setInt(1, deliveryBG.w_id);
         stmt1.setInt(2, d_id);
@@ -1059,6 +1105,7 @@ public class AppGeneric extends jTPCCApplication {
         rs.close();
 
         // Update the CUSTOMER.
+        last_stmt = "stmtDeliveryBGUpdateCustomer";
         stmt1 = stmtDeliveryBGUpdateCustomer;
         stmt1.setDouble(1, sum_ol_amount);
         stmt1.setInt(2, deliveryBG.w_id);
@@ -1072,7 +1119,8 @@ public class AppGeneric extends jTPCCApplication {
 
       dbConn.commit();
     } catch (SQLException se) {
-      log.error("Unexpected SQLException in DELIVERY_BG");
+      log.error("Unexpected SQLException in DELIVERY_BG - stmt = '" +
+                last_stmt + "'");
       for (SQLException x = se; x != null; x = x.getNextException())
         log.error(x.getMessage());
       log.info(se);
