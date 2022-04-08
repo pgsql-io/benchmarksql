@@ -233,6 +233,10 @@ class BenchmarkSQL:
         html_path = os.path.join(self.data_dir, "result_{0:06d}.html".format(run_id))
         data_path = os.path.join(self.data_dir, "result_{0:06d}".format(run_id))
         new_results = [x for x in self.status_data['results'] if x['run_id'] != run_id]
+        if len(new_results) > 0:
+            new_count = max([x['run_id'] for x in new_results])
+        else:
+            new_count = 0
 
         try:
             shutil.rmtree(data_path)
@@ -242,8 +246,13 @@ class BenchmarkSQL:
             os.remove(html_path)
         except Exception as e:
             print(str(e))
+        self.status_data['run_count'] = new_count
         self.status_data['results'] = new_results
+
         self.save_status()
+        with open(os.path.join(self.data_dir, 'run_seq.dat'), 'w') as fd:
+            fd.write(str(new_count) + '\n')
+
         self.lock.release()
 
     def run_benchmark(self):
