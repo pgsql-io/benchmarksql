@@ -12,11 +12,19 @@ def main():
     opt_template = 'report_simple.html'
     opt_resultdir = None
     opt_os_metrics = []
+    opt_tt_limit = {
+        'NEW_ORDER':    5.0,
+        'PAYMENT':      5.0,
+        'ORDER_STATUS': 5.0,
+        'STOCK_LEVEL': 20.0,
+        'DELIVERY':     5.0,
+        'DELIVERY_BG': 80.0
+    }
     opt_help = False
     errors = False
 
-    opts, args = getopt.getopt(sys.argv[1:], 't:r:c:m:d:i:h?',
-            ['template=', 'resultdir=',
+    opts, args = getopt.getopt(sys.argv[1:], 't:r:l:c:m:d:i:h?',
+            ['template=', 'resultdir=', 'limit=',
              'cpu=', 'memory=', 'disk=', 'interface=',
              'help'])
     for opt, val in opts:
@@ -24,6 +32,26 @@ def main():
             opt_template = val
         elif opt in ['-r', '--resultdir',]:
             opt_resultdir = val
+        elif opt in ['-l', '--limit',]:
+            sval = val.split('=')
+            if len(sval) != 2:
+                print("invalid limit specification: {}".format(val),
+                      file = sys.stderr)
+                errors = True
+                continue
+            tt = sval[0].upper()
+            if tt not in opt_tt_limit:
+                print("unknown transaction type: {}".format(tt),
+                      file = sys.stderr)
+                errors = True
+                continue
+            try:
+                opt_tt_limit[tt] = float(sval[1])
+            except Exception as e:
+                print("invalid limit specification: {}".format(str(e)),
+                      file = sys.stderr)
+                errors = True
+                continue
         elif opt in ['-c', '--cpu',]:
             sval = val.split(':')
             if len(sval) != 2:
@@ -32,6 +60,7 @@ def main():
                 print("use HOSTNAME:ALIAS".format(val),
                       file = sys.stderr)
                 errors = True
+                continue
             opt_os_metrics.append(('cpu', sval[0], sval[1]))
         elif opt in ['-m', '--memory',]:
             sval = val.split(':')
@@ -41,6 +70,7 @@ def main():
                 print("use HOSTNAME:ALIAS".format(val),
                       file = sys.stderr)
                 errors = True
+                continue
             opt_os_metrics.append(('memory', sval[0], sval[1]))
         elif opt in ['-d', '--disk',]:
             sval = val.split(':')
@@ -50,6 +80,8 @@ def main():
                 print("use HOSTNAME:ALIAS:DEVICENAME".format(val),
                       file = sys.stderr)
                 errors = True
+                print("invalid host specification: {}".format(val),
+                      file = sys.stderr)
             opt_os_metrics.append(('disk', sval[0], sval[1], sval[2]))
         elif opt in ['-i', '--interface',]:
             sval = val.split(':')
@@ -59,6 +91,7 @@ def main():
                 print("use HOSTNAME:ALIAS:DEVICENAME".format(val),
                       file = sys.stderr)
                 errors = True
+                continue
             opt_os_metrics.append(('interface', sval[0], sval[1], sval[2]))
         elif opt in ['-?', '-h', '--help']:
             opt_help = True
@@ -71,6 +104,7 @@ def main():
         return 2
 
     result = bmsqlResult.bmsqlResult(opt_resultdir)
+    result.tt_limit = opt_tt_limit
     for tt in result.ttypes:
         break
         print("count {} = {}".format(tt, result.num_trans(tt)))
@@ -136,15 +170,10 @@ def summary_data(result):
         # ----
         # Determine the percentiles and the latency limit
         # ----
-        if tt == 'DELIVERY_BG':
-            limit = 80.0
-        elif tt == 'STOCK_LEVEL':
-            limit = 20.0
-        else:
-            limit = 5.0
         ninth = result.percentile(tt, 0.9)
         n5th = result.percentile(tt, 0.95)
         n9th = result.percentile(tt, 0.99)
+        limit = result.tt_limit[tt]
 
         # ----
         # From that numbers we derive the color for the percentile numbers
