@@ -94,28 +94,31 @@ public class jTPCCResult {
 
     long now = System.currentTimeMillis();
     if (now >= resultNextDue) {
-      long second = (resultNextDue - resultStartMS) / 1000;
-
-      for (int tt = 0; tt <= jTPCCTData.TT_DELIVERY_BG; tt++) {
-        jTPCC.csv_result_write(
-            jTPCCTData.trans_type_names[tt] + "," + second + "," + resCounter[tt].numTrans + ","
-                + resCounter[tt].sumLatencyMS + "," + resCounter[tt].minLatencyMS + ","
-                + resCounter[tt].maxLatencyMS + "," + resCounter[tt].sumDelayMS + ","
-                + resCounter[tt].minDelayMS + "," + resCounter[tt].maxDelayMS + "\n");
-
-        resCounter[tt].numTrans = 0;
-        resCounter[tt].sumLatencyMS = 0;
-        resCounter[tt].minLatencyMS = 0;
-        resCounter[tt].maxLatencyMS = 0;
-        resCounter[tt].sumDelayMS = 0;
-        resCounter[tt].minDelayMS = 0;
-        resCounter[tt].maxDelayMS = 0;
-      }
-
-
-      while (resultNextDue <= now)
-        resultNextDue += (jTPCC.resultIntervalSecs * 1000);
+      this.emit(now);
     }
+  }
+
+  public void emit(long now) {
+    long second = (resultNextDue - resultStartMS) / 1000;
+
+    for (int tt = 0; tt <= jTPCCTData.TT_DELIVERY_BG; tt++) {
+      jTPCC.csv_result_write(
+          jTPCCTData.trans_type_names[tt] + "," + second + "," + resCounter[tt].numTrans + ","
+              + resCounter[tt].sumLatencyMS + "," + resCounter[tt].minLatencyMS + ","
+              + resCounter[tt].maxLatencyMS + "," + resCounter[tt].sumDelayMS + ","
+              + resCounter[tt].minDelayMS + "," + resCounter[tt].maxDelayMS + "\n");
+
+      resCounter[tt].numTrans = 0;
+      resCounter[tt].sumLatencyMS = 0;
+      resCounter[tt].minLatencyMS = 0;
+      resCounter[tt].maxLatencyMS = 0;
+      resCounter[tt].sumDelayMS = 0;
+      resCounter[tt].minDelayMS = 0;
+      resCounter[tt].maxDelayMS = 0;
+    }
+
+    while (resultNextDue <= now)
+      resultNextDue += (jTPCC.resultIntervalSecs * 1000);
   }
 
   public void aggregate(jTPCCResult into) {

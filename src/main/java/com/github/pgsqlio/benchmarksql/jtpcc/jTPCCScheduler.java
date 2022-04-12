@@ -12,7 +12,8 @@ public class jTPCCScheduler implements Runnable {
   private static Logger log = LogManager.getLogger(jTPCCScheduler.class);
   public final static int SCHED_TERM_LAUNCH = 0, SCHED_SUT_LAUNCH = 1, SCHED_BEGIN = 2,
       SCHED_TERMINAL_DATA = 3, SCHED_DELIVERY_DATA = 4, SCHED_END = 5, SCHED_DONE = 6,
-      SCHED_TERM_LAUNCH_DONE = 7, SCHED_SUT_LAUNCH_DONE = 8, SCHED_REPORT = 9;
+      SCHED_TERM_LAUNCH_DONE = 7, SCHED_SUT_LAUNCH_DONE = 8, SCHED_REPORT = 9,
+      SCHED_DUMMY_RESULT = 10;
 
 
   private jTPCC gdata;
@@ -24,6 +25,7 @@ public class jTPCCScheduler implements Runnable {
   private int avl_max_nodes = 0;
   private int avl_max_height = 0;
   private Random random;
+  private jTPCCResult dummy_result;
 
   private long current_trans_count = 0;
   private long current_neword_count = 0;
@@ -34,6 +36,7 @@ public class jTPCCScheduler implements Runnable {
     this.duration_ms = (gdata.rampupMins + gdata.runMins) * 60000;
     this.random = new Random(System.currentTimeMillis());
     this.avl_lock = new Object();
+    this.dummy_result = new jTPCCResult();
   }
 
   public void run() {
@@ -150,6 +153,11 @@ public class jTPCCScheduler implements Runnable {
           current_trans_count = 0;
           current_neword_count = 0;
           this.at(tdata.trans_due + jTPCC.reportIntervalSecs * 1000, SCHED_REPORT, tdata);
+          break;
+
+        case SCHED_DUMMY_RESULT:
+          dummy_result.emit(tdata.trans_due);
+          this.at(tdata.trans_due + jTPCC.resultIntervalSecs * 1000, SCHED_DUMMY_RESULT, tdata);
           break;
 
         default:

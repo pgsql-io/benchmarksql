@@ -476,6 +476,7 @@ public class jTPCC {
       this.scheduler.at(now + reportIntervalSecs * 1000, jTPCCScheduler.SCHED_REPORT,
           new jTPCCTData());
     }
+    this.scheduler.at(now + resultIntervalSecs * 1000, jTPCCScheduler.SCHED_DUMMY_RESULT, new jTPCCTData());
 
     try {
       scheduler_thread.join();
