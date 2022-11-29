@@ -1,6 +1,6 @@
 # Note: This should be run, once Maven has build correctly the target directory.
 
-FROM rockylinux:8
+FROM rockylinux:8.6
 
 RUN dnf -y update
 
