@@ -47,6 +47,9 @@ public class jTPCC {
 
   public static int dbType;
   public static int numWarehouses;
+  public static int useWarehouses;
+  public static int useWarehouseFrom;
+  public static int useWarehouseTo;
   public static int numMonkeys;
   public static int numSUTThreads;
   public static int maxDeliveryBGThreads;
@@ -144,6 +147,16 @@ public class jTPCC {
 
     log.info("main, ");
     numWarehouses = Integer.parseInt(getProp(ini, "warehouses"));
+    useWarehouseFrom = Integer.parseInt(getProp(ini, "useWarehouseFrom", "-1"));
+    useWarehouseTo = Integer.parseInt(getProp(ini, "useWarehouseTo", "-1"));
+    useWarehouses = numWarehouses;
+    if (useWarehouseFrom > 0 && useWarehouseTo > 0) {
+      useWarehouses = useWarehouseTo - useWarehouseFrom + 1;
+    } else {
+      useWarehouseFrom = 1;
+      useWarehouseTo = useWarehouses;
+    }
+
     numMonkeys = Integer.parseInt(getProp(ini, "monkeys"));
     numSUTThreads = Integer.parseInt(getProp(ini, "sutThreads"));
     maxDeliveryBGThreads = Integer.parseInt(getProp(ini, "maxDeliveryBGThreads"));
@@ -176,7 +189,7 @@ public class jTPCC {
     log.info("main, ");
 
     sutThreadDelay = (rampupSUTMins * 60000) / numSUTThreads;
-    terminalDelay = (rampupTerminalMins * 60000) / (numWarehouses * 10);
+    terminalDelay = (rampupTerminalMins * 60000) / (useWarehouses * 10);
 
     if (iDBType.equals("oracle"))
       dbType = jTPCCConfig.DB_ORACLE;
@@ -411,7 +424,7 @@ public class jTPCC {
     log.info("main, C value for nURandCLast this run: {}", rnd.getNURandCLast());
     log.info("main, ");
 
-    terminal_data = new jTPCCTData[numWarehouses * 10];
+    terminal_data = new jTPCCTData[useWarehouses * 10];
 
     /* Create the scheduler. */
     scheduler = new jTPCCScheduler(this);
@@ -448,9 +461,9 @@ public class jTPCC {
      * them back into the scheduler queue to the flow to the client threads performing the real DB
      * work.
      */
-    for (int t = 0; t < numWarehouses * 10; t++) {
+    for (int t = 0; t < useWarehouses * 10; t++) {
       terminal_data[t] = new jTPCCTData();
-      terminal_data[t].term_w_id = (t / 10) + 1;
+      terminal_data[t].term_w_id = (t / 10) + useWarehouseFrom;
       terminal_data[t].term_d_id = (t % 10) + 1;
       terminal_data[t].trans_type = jTPCCTData.TT_NONE;
       terminal_data[t].trans_due = now + t * terminalDelay;
@@ -468,7 +481,7 @@ public class jTPCC {
     this.scheduler.at(result_begin, jTPCCScheduler.SCHED_BEGIN, new jTPCCTData());
     this.scheduler.at(result_end, jTPCCScheduler.SCHED_END, new jTPCCTData());
     this.scheduler.at(result_end + 10000, jTPCCScheduler.SCHED_DONE, new jTPCCTData());
-    this.scheduler.at(now + (numWarehouses * 10) * terminalDelay,
+    this.scheduler.at(now + (useWarehouses * 10) * terminalDelay,
         jTPCCScheduler.SCHED_TERM_LAUNCH_DONE, new jTPCCTData());
     this.scheduler.at(now + numSUTThreads * sutThreadDelay, jTPCCScheduler.SCHED_SUT_LAUNCH_DONE,
         new jTPCCTData());
