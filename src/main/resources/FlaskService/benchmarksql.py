@@ -145,12 +145,12 @@ class BenchmarkSQL:
     def get_job_txsummary(self, run_id):
         self.lock.acquire()
         try:
-            fname = os.path.join(self.data_dir, "result_{0:06d}".format(run_id), "data", "tx_summary.csv")
+            fname = os.path.join(self.data_dir, "result_{0:06d}".format(run_id), "data", "summary.csv")
             result = {}
             with open(fname, 'r') as fd:
                 csv_reader = csv.DictReader(fd)
                 for row in csv_reader:
-                    result[row['tx_name']] = {key: row[key].rstrip('s%') for key in row.keys() if key != 'tx_name'}
+                    result[row['ttype']] = {key: row[key].rstrip('s%') for key in row.keys() if key != 'ttype'}
         except Exception as e:
             self.lock.release()
             raise e

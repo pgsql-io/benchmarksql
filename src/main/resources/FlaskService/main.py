@@ -119,6 +119,9 @@ def api_call():
                 bench.save_properties(req['properties'])
             bench.run_destroy()
             result = api_call_status()
+        elif req['command'].lower() == 'cancel':
+            bench.cancel_job()
+            result = api_call_status()
         elif req['command'].lower() == 'txsummary':
             if 'run_id' not in req:
                 raise Exception("command txsummary requires run_id")
@@ -157,6 +160,13 @@ def job_status():
             bench.get_job_type(),
             bench.get_job_runtime(),
             bench.get_job_output(),
+        ]
+    return json.dumps(result)
+
+@app.route('/cancel_job')
+def cancel_job():
+    result = [
+            bench.cancel_job(),
         ]
     return json.dumps(result)
 
