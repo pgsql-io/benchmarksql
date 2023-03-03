@@ -85,6 +85,7 @@ class bmsqlPlot:
         return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
 
     def delay_avg_svg(self, ttype, b64encode = True):
+        max_ms = self.result.percentile(ttype, 0.99) * 1100.0
         fig = pyplot.figure(figsize = self.FIGSIZE)
 
         h = [Size.Fixed(1.2), Size.Scaled(1.), Size.Fixed(.2)]
@@ -133,7 +134,11 @@ class bmsqlPlot:
         y = []
         for ts in x:
             tmp = data[numpy.where(data[:,0] == ts)]
-            y.append(numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001))
+            ms = numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001)
+            if ms <= max_ms:
+                y.append(ms)
+            else:
+                y.append(max_ms)
 
         # ----
         # Plot the ttype delay and add all the decorations
@@ -153,7 +158,11 @@ class bmsqlPlot:
         y = []
         for ts in x:
             tmp = data[numpy.where(data[:,0] == ts)]
-            y.append(numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001))
+            ms = numpy.sum(tmp[:,2]) / (numpy.sum(tmp[:,1]) + 0.000001)
+            if ms <= max_ms:
+                y.append(ms)
+            else:
+                y.append(max_ms)
         plt.plot(x, y, 'b', label = 'Latency')
 
         plt.set_title("{} Average Latency and Delay".format(ttype))
@@ -170,6 +179,7 @@ class bmsqlPlot:
         return base64.b64encode(buf.getvalue().encode('utf-8')).decode('utf-8')
 
     def delay_max_svg(self, ttype, b64encode = True):
+        max_ms = self.result.percentile(ttype, 0.99) * 1500.0
         fig = pyplot.figure(figsize = self.FIGSIZE)
 
         h = [Size.Fixed(1.2), Size.Scaled(1.), Size.Fixed(.2)]
@@ -216,7 +226,11 @@ class bmsqlPlot:
         y = []
         for ts in x:
             tmp = data[numpy.where(data[:,0] == ts)]
-            y.append(numpy.max(tmp[:,2]))
+            ms = numpy.max(tmp[:,2])
+            if ms <= max_ms:
+                y.append(ms)
+            else:
+                y.append(max_ms)
 
         # ----
         # Plot the ttype delay and add all the decorations
@@ -229,7 +243,11 @@ class bmsqlPlot:
         y = []
         for ts in x:
             tmp = data[numpy.where(data[:,0] == ts)]
-            y.append(numpy.max(tmp[:,1]))
+            ms = numpy.max(tmp[:,1])
+            if ms <= max_ms:
+                y.append(ms)
+            else:
+                y.append(max_ms)
         plt.plot(x, y, 'b', label = 'Latency')
 
         plt.set_title("{} Maximum Latency and Delay".format(ttype))
