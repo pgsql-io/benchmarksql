@@ -36,6 +36,14 @@
 			<version>42.2.19</version>
 		</dependency>
 
+		<!-- Scram hash support -->
+		<!-- Needed for the new PostgreSQL password encryption. -->
+		<dependency>
+			<groupId>com.ongres.scram</groupId>
+			<artifactId>client</artifactId>
+			<version>2.0</version>
+		</dependency>
+
 		<!-- Oracle db driver -->
 		<!-- Depending the Java version, it could use a different version. -->
 		<dependency>
