@@ -1,6 +1,6 @@
 # Note: This should be run, once Maven has build correctly the target directory.
 
-FROM rockylinux:8.6
+FROM rockylinux:9.3
 
 RUN dnf -y update
 
@@ -8,7 +8,8 @@ RUN dnf -y install epel-release \
 				   java-11-openjdk-headless \
 				   dnf-plugins-core \
 				   python3
-RUN dnf config-manager --set-enabled powertools
+RUN dnf config-manager --set-enabled crb
+RUN dnf install python3 python3-pip -y
 RUN pip3 install pip --upgrade
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
