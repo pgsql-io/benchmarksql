@@ -17,7 +17,6 @@ ENV FLASK_ENV=development
 COPY ./target/BenchmarkSQL.jar /benchmarksql/BenchmarkSQL.jar
 COPY ./target/lib/ /benchmarksql/lib
 COPY ./target/run/ /benchmarksql/run
-COPY ./postgresql-42.2.19-SNAPSHOT.jar /benchmarksql/lib/postgresql-42.2.19.jar
 
 RUN mkdir -p /service_data && \
     rm -f /benchmarksql/run/.jTPCC_run_seq.dat && \
