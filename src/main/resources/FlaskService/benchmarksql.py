@@ -89,6 +89,7 @@ class BenchmarkSQL:
             fd.write(json.dumps(self.status_data, indent = 4))
 
     def get_status(self):
+        self.get_job_type()
         self.lock.acquire()
         result = {
                 'current_job_type': self.current_job_type,
