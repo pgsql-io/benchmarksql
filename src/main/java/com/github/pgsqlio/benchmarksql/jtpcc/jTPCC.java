@@ -136,8 +136,8 @@ public class jTPCC {
     log.warn("main,      BenchmarkSQL v{}", jTPCCConfig.JTPCCVERSION);
     log.info("main, +-------------------------------------------------------------+");
     log.info("main,  (c) 2003, Raul Barbosa");
-    log.info("main,  (c) 2004-2014, Denis Lussier");
-    log.info("main,  (c) 2016-2019, Jan Wieck");
+    log.info("main,  (c) 2004-2023, Denis Lussier");
+    log.info("main,  (c) 2016-2023, Jan Wieck");
     log.info("main, +-------------------------------------------------------------+");
     log.info("main, ");
     String iDBType = getProp(ini, "db");

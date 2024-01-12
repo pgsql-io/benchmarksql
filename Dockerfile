@@ -1,11 +1,11 @@
 # Note: This should be run, once Maven has build correctly the target directory.
 
-FROM rockylinux:9.3
+FROM rockylinux:9
 
 RUN dnf -y update
 
 RUN dnf -y install epel-release \
-				   java-11-openjdk-headless \
+				   java-17-openjdk-headless \
 				   dnf-plugins-core \
 				   python3
 RUN dnf config-manager --set-enabled crb

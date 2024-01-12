@@ -8,5 +8,5 @@ podman run --rm \
 	--userns=keep-id \
 	--volume="./service_data:/service_data" \
 	-w "/benchmarksql" \
-	localhost/benchmarksql:6.0-dev
+	localhost/benchmarksql:6.0-rc1
 
