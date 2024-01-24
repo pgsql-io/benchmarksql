@@ -149,6 +149,21 @@
 				</configuration>
 			</plugin>
 
+			<!-- Docker plugin. -->
+			<!-- http://dmp.fabric8.io/ -->
+			<!-- mvn docker:build -->
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.35.0</version>
+				<configuration>
+					<images>
+						<image>
+							<name>benchmarksql-service</name>
+						</image>
+					</images>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
